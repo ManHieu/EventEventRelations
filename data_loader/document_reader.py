@@ -53,11 +53,12 @@ def RoBERTa_list(content, token_list = None, token_span_SENT = None):
     roberta_subwords_no_space = []
     for index, i in enumerate(encoded):
         r_token = tokenizer.decode([i])
-        roberta_subwords.append(r_token)
-        if r_token[0] == " ":
-            roberta_subwords_no_space.append(r_token[1:])
-        else:
-            roberta_subwords_no_space.append(r_token)
+        if r_token != " ":
+            roberta_subwords.append(r_token)
+            if r_token[0] == " ":
+                roberta_subwords_no_space.append(r_token[1:])
+            else:
+                roberta_subwords_no_space.append(r_token)
 
     roberta_subword_span = tokenized_to_origin_span(content, roberta_subwords_no_space[1:-1]) # w/o <s> and </s>
     roberta_subword_map = []
@@ -364,7 +365,11 @@ def tml_reader(dir_name, file_name):
         if MY_TEXT[start + 1] == "E":
             event_description = MY_TEXT[start:end].split(" ")
             # print(event_description)
-            eID = (event_description[1].split("="))[1].replace("\"", "")
+            # eID = (event_description[1].split("="))[1].replace("\"", "")
+            # print(eID)
+            for item in event_description:
+                if item.startswith("eid"):
+                    eID = (item.split("="))[1].replace("\"", "")
             MY_TEXT = MY_TEXT[:start] + MY_TEXT[(end + 1):]
             if eID in my_dict["eID_dict"].keys():
                 eiid = my_dict['eID_dict'][eID]['eiid']
@@ -428,7 +433,8 @@ def tml_reader(dir_name, file_name):
         id_lookup(my_dict["sentences"][sent_id]["token_span_DOC"], event_dict["start_char"])
         my_dict["event_dict"][event_id]["roberta_subword_id"] = \
         id_lookup(my_dict["sentences"][sent_id]["roberta_subword_span_DOC"], event_dict["start_char"])
-    
+    if eiid_pair_to_label.get(my_dict['doc_id']) == None:
+        return None
     relation_dict = eiid_pair_to_label[my_dict['doc_id']]
     my_dict['relation_dict'] = relation_dict
     return my_dict
@@ -436,7 +442,7 @@ def tml_reader(dir_name, file_name):
 # =========================
 #       I2B2 Labels
 # =========================
-i2b2_label_dict = {'BEFORE': 0, 'AFTER': 1, 'SIMULTANEOUS': 2, 'OVERLAP': 2, 
+i2b2_label_dict = {'BEFORE': 0, 'AFTER': 1, 'SIMULTANEOUS': 2, 'OVERLAP': 2, 'simultaneous': 2, 
                     'BEGUN_BY': 1, 'ENDED_BY': 0, 'DURING': 2,'BEFORE_OVERLAP': 0}
 
 # =========================
@@ -526,22 +532,22 @@ def i2b2_xml_reader(dir_name, file_name):
 if __name__=='__main__':
     import json
     
-    i2b2_dir_name = "/home/resident/Documents/projects/EventEventRelation/datasets/i2b2_2012/2012-06-18.release/2012-06-18.release-fix/"
-    i2b2_file_name = "1.xml"
-    i2b2 = i2b2_xml_reader(i2b2_dir_name, i2b2_file_name)
-    print("------------------i2b2-----------------")
-    print(i2b2)
+    # i2b2_dir_name = "/home/resident/Documents/projects/EventEventRelation/datasets/i2b2_2012/2012-06-18.release/2012-06-18.release-fix/"
+    # i2b2_file_name = "1.xml"
+    # i2b2 = i2b2_xml_reader(i2b2_dir_name, i2b2_file_name)
+    # print("------------------i2b2-----------------")
+    # print(i2b2)
 
     matres_dir_name = "/home/resident/Documents/projects/EventEventRelation/datasets/MATRES/TBAQ-cleaned/AQUAINT/"
-    matres_file_name = "APW19980809.0700.tml"
+    matres_file_name = "APW20000216.0193.tml"
     matres = tml_reader(matres_dir_name, matres_file_name)
     print("------------------matres-----------------")
     print(matres)
 
-    hieve_dir_name = "/home/resident/Documents/projects/EventEventRelation/datasets/hievents_v2/processed/"
-    hieve_file_name = "article-1126.tsvx"
-    hieve = tsvx_reader(hieve_dir_name, hieve_file_name)
-    print("------------------hieve-----------------")
-    print(hieve)
+    # hieve_dir_name = "/home/resident/Documents/projects/EventEventRelation/datasets/hievents_v2/processed/"
+    # hieve_file_name = "article-1126.tsvx"
+    # hieve = tsvx_reader(hieve_dir_name, hieve_file_name)
+    # print("------------------hieve-----------------")
+    # print(hieve)
 
     

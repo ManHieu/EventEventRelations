@@ -11,7 +11,7 @@ from Exp import EXP
 torch.manual_seed(42)
 cuda = torch.device('cuda')
 # Read parameters
-
+rst_file_name = "00001.rst"
 # Restore model
 model_params_dir = "./model_params/"
 HiEve_best_PATH = model_params_dir + "HiEve_best/" + rst_file_name.replace(".rst", ".pt")
@@ -21,17 +21,19 @@ I2B2_best_PATH = model_params_dir + "I2B2_best/" + rst_file_name.replace(".rst",
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-dataset = ""
-add_loss = ""
-epochs = ""
+dataset = "Joint"
+add_loss = 1
+epochs = 32
+batch_size = 16
 
 # Use Optuna to select the best hyperparameters
 import optuna
 from timeit import default_timer as timer
+interaction = 0
 def objective(trial):    
-    space ={
-        "downsample": trial.suggest_float("downsample", 0.01, 0.2)
-        "learning_rate": trial.suggest_float("learning_rate", 1e-6, 1e-2, log=True)
+    params ={
+        "downsample": trial.suggest_float("downsample", 0.01, 0.2),
+        "learning_rate": trial.suggest_float("learning_rate", 1e-6, 1e-2, log=True),
         'lambda_annoT': trial.suggest_float('lambda_annoT', 0.0, 1.0),
         'lambda_annoH': trial.suggest_float('lambda_annoH', 0.0, 1.0),
         'lambda_transT': trial.suggest_float('lambda_transT', 0.0, 1.0),
@@ -47,7 +49,7 @@ def objective(trial):
     global interaction
     interaction += 1
     start = timer()
-    train_dataloader, valid_dataloader_MATRES, test_dataloader_MATRES, valid_dataloader_HIEVE, test_dataloader_HIEVE, valid_dataloader_I2B2, test_dataloader_I2B2, num_classes = joint_constrained_loader(dataset, debugging, params['downsample'], batch_size)
+    train_dataloader, valid_dataloader_MATRES, test_dataloader_MATRES, valid_dataloader_HIEVE, test_dataloader_HIEVE, valid_dataloader_I2B2, test_dataloader_I2B2, num_classes = joint_constrained_loader(dataset, params['downsample'], batch_size)
     
     model = roberta_mlp(num_classes, dataset, add_loss, space)
     model.to(cuda)
@@ -100,7 +102,7 @@ def objective(trial):
 
     return T_F1, H_F1, I_F1
 
-study = optuna.create_study(direction=["maximine", "maximine", "maximine"])
+study = optuna.create_study(direction='maximize')
 study.optimize(objective, n_trials=30)
 trial = study.best_trial
 

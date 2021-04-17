@@ -1,6 +1,6 @@
 from os import listdir
 from os.path import isfile, join
-from EventDataset import EventDataset
+from data_loader.EventDataset import EventDataset
 from sklearn.model_selection import train_test_split
 from data_loader.document_reader import tsvx_reader, tml_reader, i2b2_xml_reader
 from utils.tools import *
@@ -123,11 +123,38 @@ def joint_constrained_loader(dataset, downsample, batch_size):
                     candidates.remove(candidate)
             test_data.extend(candidates)
         return test_data
+    
+    if dataset in ["I2B2", "Joint"]:
+        # ========================
+        #       I2B2 Dataset
+        # ========================
+        print("I2B2 Loading .....")
+        dir_name = "./datasets/i2b2_2012/2012-07-15.original-annotation.release/"
+        train, test, validate = loader(dir_name, 'i2b2_xml')
+        
+        for my_dict in train:
+            train_data = get_data_train(my_dict)
+            for item in train_data:
+                item.append(2) # 2 is I2B2
+                train_set_I2B2.append(item)
+
+        for my_dict in test:
+            test_data = get_data_test(my_dict)
+            for item in test_data:
+                item.append(2) # 2 is I2B2
+                test_set_I2B2.append(item)
+        
+        for my_dict in validate:
+            validate_data = get_data_train(my_dict)
+            for item in validate_data:
+                item.append(2) # 2 is I2B2
+                valid_set_I2B2.append(item)
 
     if dataset in ["HiEve", "Joint"]:
         # ========================
         #       HiEve Dataset
         # ========================
+        print("HiEve Loading .....")
         dir_name = "./datasets/hievents_v2/processed/"
         train, test, validate = loader(dir_name, 'tsvx')
         undersmp_ratio = 0.4
@@ -170,6 +197,7 @@ def joint_constrained_loader(dataset, downsample, batch_size):
         # ========================
         #       MATRES Dataset
         # ========================
+        print("MATRES Loading .....")
         aquaint_dir_name = "./datasets/MATRES/TBAQ-cleaned/AQUAINT/"
         timebank_dir_name = "./datasets/MATRES/TBAQ-cleaned/TimeBank/"
         platinum_dir_name = "./datasets/MATRES/te3-platinum/"
@@ -187,47 +215,27 @@ def joint_constrained_loader(dataset, downsample, batch_size):
             test.extend(subset)
         
         for my_dict in train:
-            train_data = get_data_train(my_dict)
-            for item in train_data:
-                item.append(1) # 1 is MATRES
-                train_set_MATRES.append(item)
+            if my_dict != None:
+                train_data = get_data_train(my_dict)
+                if train_data != None:
+                    for item in train_data:
+                        item.append(1) # 1 is MATRES
+                        train_set_MATRES.append(item)
 
         for my_dict in test:
-            test_data = get_data_test(my_dict)
-            for item in test_data:
-                item.append(1) # 1 is MATRES
-                test_set_MATRES.append(item)
-        
+            if my_dict != None:
+                test_data = get_data_test(my_dict)
+                for item in test_data:
+                    item.append(1) # 1 is MATRES
+                    test_set_MATRES.append(item)
+            
         for my_dict in validate:
-            validate_data = get_data_train(my_dict)
-            for item in validate_data:
-                item.append(1) # 1 is MATRES
+            if my_dict != None:
+                validate_data = get_data_train(my_dict)
+                for item in validate_data:
+                    item.append(1) # 1 is MATRES
                 valid_set_MATRES.append(item)
 
-    if dataset in ["I2B2", "Joint"]:
-        # ========================
-        #       I2B2 Dataset
-        # ========================
-        dir_name = "datasets/i2b2_2012/2012-07-15.original-annotation.release"
-        train, test, validate = loader(dir_name, 'i2b2_xml')
-        
-        for my_dict in train:
-            train_data = get_data_train(my_dict)
-            for item in train_data:
-                item.append(2) # 2 is I2B2
-                train_set_I2B2.append(item)
-
-        for my_dict in test:
-            test_data = get_data_test(my_dict)
-            for item in test_data:
-                item.append(2) # 2 is I2B2
-                test_set_I2B2.append(item)
-        
-        for my_dict in validate:
-            validate_data = get_data_train(my_dict)
-            for item in validate_data:
-                item.append(2) # 2 is I2B2
-                valid_set_I2B2.append(item)
         
     # ==============================================================
     #      Use DataLoader to convert to Pytorch acceptable form
@@ -249,7 +257,7 @@ def joint_constrained_loader(dataset, downsample, batch_size):
         train_dataloader_I2B2 = DataLoader(EventDataset(train_set_I2B2), batch_size=batch_size, shuffle = True)
         valid_dataloader_I2B2 = DataLoader(EventDataset(valid_set_I2B2), batch_size=batch_size, shuffle = True)    
         test_dataloader_I2B2 = DataLoader(EventDataset(test_set_I2B2), batch_size=batch_size, shuffle = True) 
-        return train_dataloader_I2B2, , None, None, None, None, valid_dataloader_I2B2, test_dataloader_I2B2, num_classes 
+        return train_dataloader_I2B2, None, None, None, None, valid_dataloader_I2B2, test_dataloader_I2B2, num_classes 
     elif dataset == "Joint":
         num_classes = 8
         train_set_HIEVE.extend(train_set_MATRES)

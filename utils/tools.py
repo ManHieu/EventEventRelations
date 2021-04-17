@@ -1,3 +1,6 @@
+import torch
+
+
 # Padding function
 def padding(sent, pos = False, max_sent_len = 120):
     if pos == False:
