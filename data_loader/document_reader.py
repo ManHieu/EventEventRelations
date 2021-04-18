@@ -119,7 +119,7 @@ def id_lookup(span_SENT, start_char):
         token_id += 1
         if token_span[0] <= start_char and token_span[1] >= start_char:
             return token_id
-    raise ValueError("Nothing is found.")
+    raise ValueError("Nothing is found. \n span sentence: {} \n start_char: {}".format(span_SENT, start_char))
     return token_id
 
 # =========================
@@ -198,7 +198,7 @@ def tsvx_reader(dir_name, file_name):
     my_dict["relation_dict"] = {}
     
     # Read tsvx file
-    for line in open(dir_name + file_name):
+    for line in open(dir_name + file_name, encoding='UTF-8'):
         line = line.split('\t')
         if line[0] == 'Text':
             my_dict["doc_content"] = line[1]
@@ -254,12 +254,14 @@ def tsvx_reader(dir_name, file_name):
     
     # Add sent_id as an attribute of event
     for event_id, event_dict in my_dict["event_dict"].items():
-        my_dict["event_dict"][event_id]["sent_id"] = sent_id = \
-        sent_id_lookup(my_dict, event_dict["start_char"], event_dict["end_char"])
-        my_dict["event_dict"][event_id]["token_id"] = \
-        id_lookup(my_dict["sentences"][sent_id]["token_span_DOC"], event_dict["start_char"])
-        my_dict["event_dict"][event_id]["roberta_subword_id"] = \
-        id_lookup(my_dict["sentences"][sent_id]["roberta_subword_span_DOC"], event_dict["start_char"])
+        my_dict["event_dict"][event_id]["sent_id"] = sent_id = sent_id_lookup(my_dict, event_dict["start_char"], event_dict["end_char"])
+        # print(my_dict["sentences"][sent_id]["token_span_DOC"])
+        # print(my_dict["sentences"][sent_id]["tokens"])
+        # print(my_dict["sentences"][sent_id]["content"])
+        # print(event_dict["start_char"])
+        # print(event_dict)
+        my_dict["event_dict"][event_id]["token_id"] = id_lookup(my_dict["sentences"][sent_id]["token_span_DOC"], event_dict["start_char"])
+        my_dict["event_dict"][event_id]["roberta_subword_id"] = id_lookup(my_dict["sentences"][sent_id]["roberta_subword_span_DOC"], event_dict["start_char"])
     return my_dict
 
 # ========================================
@@ -453,8 +455,12 @@ def i2b2_xml_reader(dir_name, file_name):
     my_dict = {}
     my_dict["event_dict"] = {}
     my_dict["doc_id"] = file_name.replace(".xml", "") 
-
-    tree = ET.parse(dir_name + file_name)
+    
+    try:
+        tree = ET.parse(dir_name + file_name)
+    except:
+        print("Can't load this file: {} '_'!". format(dir_name + file_name))
+        return None
     root = tree.getroot()
     for event_instance in tree.findall('.//EVENT'):
         eid = event_instance.attrib['id']
@@ -523,9 +529,11 @@ def i2b2_xml_reader(dir_name, file_name):
         e1_id = rel_instance.attrib['fromID']
         e2_id = rel_instance.attrib['toID']
         rel = rel_instance.attrib['type']
-        if e1_id.startswith('E') and e2_id.startswith('E'):
-            my_dict['relation_dict'][rid] = {}
-            my_dict['relation_dict'][rid][(e1_id, e2_id)] = i2b2_label_dict[rel]
+        rel_id = i2b2_label_dict.get(rel)
+        if  rel_id != None:
+            if e1_id.startswith('E') and e2_id.startswith('E'):
+                my_dict['relation_dict'][rid] = {}
+                my_dict['relation_dict'][rid][(e1_id, e2_id)] = rel_id
     
     return my_dict
 

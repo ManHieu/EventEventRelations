@@ -5,9 +5,7 @@ from sklearn.model_selection import train_test_split
 from data_loader.document_reader import tsvx_reader, tml_reader, i2b2_xml_reader
 from utils.tools import *
 from itertools import combinations
-import sys
-import torch
-import numpy as np
+from torch.utils.data import DataLoader
 import tqdm
 import random
 
@@ -32,12 +30,14 @@ def loader(dir_name, typ):
         if typ == 'i2b2_xml':
             if file_name.endswith('.xml'):
                 my_dict = reader.format_reader(dir_name, file_name)
-                corpus.append(my_dict)
+                if my_dict != None:
+                    corpus.append(my_dict)
             else:
                 pass
         else:
             my_dict = reader.format_reader(dir_name, file_name)
-            corpus.append(my_dict)
+            if my_dict != None:
+                corpus.append(my_dict)
 
     train_set, test_set = train_test_split(corpus, train_size=0.8, test_size=0.2)
     train_set, validate_set = train_test_split(train_set, train_size=0.75, test_size=0.25)
@@ -124,32 +124,6 @@ def joint_constrained_loader(dataset, downsample, batch_size):
             test_data.extend(candidates)
         return test_data
     
-    if dataset in ["I2B2", "Joint"]:
-        # ========================
-        #       I2B2 Dataset
-        # ========================
-        print("I2B2 Loading .....")
-        dir_name = "./datasets/i2b2_2012/2012-07-15.original-annotation.release/"
-        train, test, validate = loader(dir_name, 'i2b2_xml')
-        
-        for my_dict in train:
-            train_data = get_data_train(my_dict)
-            for item in train_data:
-                item.append(2) # 2 is I2B2
-                train_set_I2B2.append(item)
-
-        for my_dict in test:
-            test_data = get_data_test(my_dict)
-            for item in test_data:
-                item.append(2) # 2 is I2B2
-                test_set_I2B2.append(item)
-        
-        for my_dict in validate:
-            validate_data = get_data_train(my_dict)
-            for item in validate_data:
-                item.append(2) # 2 is I2B2
-                valid_set_I2B2.append(item)
-
     if dataset in ["HiEve", "Joint"]:
         # ========================
         #       HiEve Dataset
@@ -236,7 +210,32 @@ def joint_constrained_loader(dataset, downsample, batch_size):
                     item.append(1) # 1 is MATRES
                 valid_set_MATRES.append(item)
 
+    if dataset in ["I2B2", "Joint"]:
+        # ========================
+        #       I2B2 Dataset
+        # ========================
+        print("I2B2 Loading .....")
+        dir_name = "./datasets/i2b2_2012/2012-07-15.original-annotation.release/"
+        train, test, validate = loader(dir_name, 'i2b2_xml')
         
+        for my_dict in train:
+            train_data = get_data_train(my_dict)
+            for item in train_data:
+                item.append(2) # 2 is I2B2
+                train_set_I2B2.append(item)
+
+        for my_dict in test:
+            test_data = get_data_test(my_dict)
+            for item in test_data:
+                item.append(2) # 2 is I2B2
+                test_set_I2B2.append(item)
+        
+        for my_dict in validate:
+            validate_data = get_data_train(my_dict)
+            for item in validate_data:
+                item.append(2) # 2 is I2B2
+                valid_set_I2B2.append(item)
+ 
     # ==============================================================
     #      Use DataLoader to convert to Pytorch acceptable form
     # ==============================================================

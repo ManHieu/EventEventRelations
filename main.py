@@ -51,7 +51,7 @@ def objective(trial):
     start = timer()
     train_dataloader, valid_dataloader_MATRES, test_dataloader_MATRES, valid_dataloader_HIEVE, test_dataloader_HIEVE, valid_dataloader_I2B2, test_dataloader_I2B2, num_classes = joint_constrained_loader(dataset, params['downsample'], batch_size)
     
-    model = roberta_mlp(num_classes, dataset, add_loss, space)
+    model = roberta_mlp(num_classes, dataset, add_loss, params)
     model.to(cuda)
     model.zero_grad()
     print("# of parameters:", count_parameters(model))
