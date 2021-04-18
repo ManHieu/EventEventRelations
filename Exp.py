@@ -5,11 +5,15 @@ import time
 import torch.optim as optim
 from transformers import RobertaModel
 from sklearn.metrics import precision_recall_fscore_support, classification_report, accuracy_score, f1_score, confusion_matrix
-
+from utils.tools import CUDA, format_time, metric
+from os import path
 
 class EXP():
-    def __init__(self, cuda, model, epochs, lr, train_dataloader, valid_dataloader_MATRES, test_dataloader_MATRES, valid_dataloader_I2B2, test_dataloader_I2B2, valid_dataloader_HIEVE, test_dataloader_HIEVE, finetune, dataset, MATRES_best_PATH, I2B2_best_PATH, HiEve_best_PATH, load_model_path, model_name = None, roberta_size = "roberta-base"):
-        self.cuda = cuda
+    def __init__(self, model, epochs, lr, train_dataloader, valid_dataloader_MATRES, test_dataloader_MATRES, valid_dataloader_I2B2, test_dataloader_I2B2, valid_dataloader_HIEVE, test_dataloader_HIEVE, finetune, dataset, MATRES_best_PATH, I2B2_best_PATH, HiEve_best_PATH, load_model_path, model_name = None, roberta_size = "roberta-base"):
+        if CUDA:
+            self.cuda = torch.device('cuda')
+        else:
+            self.cuda = torch.device('cpu')
         self.model = model
         self.dataset = dataset
         self.epochs = epochs
@@ -26,7 +30,9 @@ class EXP():
         # if finetne is False, we use fixed roberta embeddings before bilstm and mlp
         self.roberta_size = roberta_size
         if not self.finetune:
-            self.RoBERTaModel = RobertaModel.from_pretrained(self.roberta_size).to(self.cuda)
+            self.RoBERTaModel = RobertaModel.from_pretrained(self.roberta_size)
+            if CUDA:
+                self.RoBERTaModel = self.RoBERTaModel.cuda()
         if self.roberta_size=='roberta-base':
             self.roberta_dim = 768
         else:

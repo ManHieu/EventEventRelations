@@ -7,10 +7,11 @@ from models.joint_constrain_model import *
 from data_loader.data_loaders import joint_constrained_loader
 from Exp import EXP
 import csv
-from utils.tools import format_time
+from utils.tools import format_time, CUDA
+
+
 torch.manual_seed(42)
 finetune = True
-cuda = torch.device('cuda')
 # Read parameters
 rst_file_name = "00001.rst"
 # Restore model
@@ -22,7 +23,7 @@ I2B2_best_PATH = model_params_dir + "I2B2_best/" + rst_file_name.replace(".rst",
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-dataset = "Joint"
+dataset = "I2B2"
 add_loss = 1
 epochs = 32
 batch_size = 16
@@ -53,7 +54,8 @@ def objective(trial):
     train_dataloader, valid_dataloader_MATRES, test_dataloader_MATRES, valid_dataloader_HIEVE, test_dataloader_HIEVE, valid_dataloader_I2B2, test_dataloader_I2B2, num_classes = joint_constrained_loader(dataset, params['downsample'], batch_size)
     
     model = roberta_mlp(num_classes, dataset, add_loss, params)
-    model.to(cuda)
+    if CUDA:
+        model.cuda()
     model.zero_grad()
     print("# of parameters:", count_parameters(model))
     model_name = rst_file_name.replace(".rst", "") # to be designated after finding the best parameters
@@ -65,7 +67,7 @@ def objective(trial):
     if dataset == "MATRES":
         total_steps = len(train_dataloader) * epochs
         print("Total steps: [number of batches] x [number of epochs] =", total_steps)
-        matres_exp = EXP(cuda, model, epochs, params['learning_rate'], 
+        matres_exp = EXP(model, epochs, params['learning_rate'], 
                         train_dataloader, valid_dataloader_MATRES, test_dataloader_MATRES,
                         None, None,
                         None, None, 
@@ -75,7 +77,7 @@ def objective(trial):
     if dataset == "I2B2":
         total_steps = len(train_dataloader) * epochs
         print("Total steps: [number of batches] x [number of epochs] =", total_steps)
-        i2b2_exp = EXP(cuda, model, epochs, params['learning_rate'], 
+        i2b2_exp = EXP(model, epochs, params['learning_rate'], 
                         train_dataloader, None, None,
                         valid_dataloader_I2B2, test_dataloader_I2B2,
                         valid_dataloader_HIEVE, test_dataloader_HIEVE, 
@@ -85,7 +87,7 @@ def objective(trial):
     elif dataset == "HiEve":
         total_steps = len(train_dataloader) * epochs
         print("Total steps: [number of batches] x [number of epochs] =", total_steps)
-        hieve_exp = EXP(cuda, model, epochs, params['learning_rate'], 
+        hieve_exp = EXP(model, epochs, params['learning_rate'], 
                         train_dataloader, None, None,
                         None, None,
                         valid_dataloader_HIEVE, test_dataloader_HIEVE, 
@@ -95,7 +97,7 @@ def objective(trial):
     elif dataset == "Joint":
         total_steps = len(train_dataloader) * epochs
         print("Total steps: [number of batches] x [number of epochs] =", total_steps)
-        joint_exp = EXP(cuda, model, epochs, params['learning_rate'], 
+        joint_exp = EXP(model, epochs, params['learning_rate'], 
                         train_dataloader, valid_dataloader_MATRES, test_dataloader_MATRES,
                         valid_dataloader_I2B2, test_dataloader_I2B2,
                         valid_dataloader_HIEVE, test_dataloader_HIEVE, 

@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 from transformers import RobertaModel
 from models.losses.all_loss_aug import transitivity_loss_H_, transitivity_loss_T_, cross_category_loss_
+from utils.tools import CUDA
+
 
 HierPC = 1802.0
 HierCP = 1846.0
@@ -24,8 +26,12 @@ class roberta_mlp(nn.Module):
         self.MLP_size = int(lambdas['MLP_size'])
         self.num_classes = num_classes
         self.model = RobertaModel.from_pretrained('roberta-large')
-        self.hier_class_weights = torch.FloatTensor(hier_weights).cuda()
-        self.temp_class_weights = torch.FloatTensor(temp_weights).cuda()
+        if CUDA:
+            self.hier_class_weights = torch.FloatTensor(hier_weights).cuda()
+            self.temp_class_weights = torch.FloatTensor(temp_weights).cuda()
+        else:
+            self.hier_class_weights = torch.FloatTensor(hier_weights)
+            self.temp_class_weights = torch.FloatTensor(temp_weights)
         self.HiEve_anno_loss = nn.CrossEntropyLoss(weight=self.hier_class_weights)
         self.MATRES_anno_loss = nn.CrossEntropyLoss(weight=self.temp_class_weights)
         self.transitivity_loss_H = transitivity_loss_H_()

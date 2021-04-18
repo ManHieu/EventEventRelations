@@ -90,7 +90,7 @@ def joint_constrained_loader(dataset, downsample, batch_size):
                         [str(x), str(z), str(y), x_sent, z_sent, y_sent, x_position, z_position, y_position, x_sent_pos, z_sent_pos, y_sent_pos, xz, zy, xy],
                         [str(z), str(x), str(y), z_sent, x_sent, y_sent, z_position, x_position, y_position, z_sent_pos, x_sent_pos, y_sent_pos, zx, xy, zy]]
             for candidate in candidates:
-                if None in candidate[-3:]:
+                if None in candidate:
                     candidates.remove(candidate)
             train_data.extend(candidates)
             return train_data
@@ -119,7 +119,7 @@ def joint_constrained_loader(dataset, downsample, batch_size):
             candidates = [[str(x), str(y), str(x), x_sent, y_sent, x_sent, x_position, y_position, x_position, x_sent_pos, y_sent_pos, x_sent_pos, xy, xy, xy],
                         [str(y), str(x), str(y), y_sent, x_sent, y_sent, y_position, x_position, y_position, y_sent_pos, x_sent_pos, y_sent_pos, yx, yx, yx]]
             for candidate in candidates:
-                if None in candidate[-3:]:
+                if None in candidate:
                     candidates.remove(candidate)
             test_data.extend(candidates)
         return test_data
@@ -261,10 +261,11 @@ def joint_constrained_loader(dataset, downsample, batch_size):
         num_classes = 8
         train_set_HIEVE.extend(train_set_MATRES)
         train_set_HIEVE.extend(train_set_I2B2)
+        print("Train size: {}".format(len(train_set_HIEVE)))
         train_dataloader = DataLoader(EventDataset(train_set_HIEVE), batch_size=batch_size, shuffle = True)
         valid_dataloader_MATRES = DataLoader(EventDataset(valid_set_MATRES), batch_size=batch_size, shuffle = True)    
         test_dataloader_MATRES = DataLoader(EventDataset(test_set_MATRES), batch_size=batch_size, shuffle = True)
-        valid_dataloader_HIEVE = DataLoader(EventDataset(valid_set_HIEVE), batch_size=batch_size, shuffle = True)    
+        valid_dataloader_HIEVE = DataLoader(EventDataset(valid_set_HIEVE), batch_size=batch_size, shuffle=True)    
         test_dataloader_HIEVE = DataLoader(EventDataset(test_set_HIEVE), batch_size=batch_size, shuffle = True)
         valid_dataloader_I2B2 = DataLoader(EventDataset(valid_set_I2B2), batch_size=batch_size, shuffle = True)    
         test_dataloader_I2B2 = DataLoader(EventDataset(test_set_I2B2), batch_size=batch_size, shuffle = True) 
@@ -272,6 +273,10 @@ def joint_constrained_loader(dataset, downsample, batch_size):
     else:
         raise ValueError("Currently not supporting this dataset! -_-'")
     
+if __name__=="__main__":
+    train_dataloader, valid_dataloader_MATRES, test_dataloader_MATRES, valid_dataloader_HIEVE, test_dataloader_HIEVE, valid_dataloader_I2B2, test_dataloader_I2B2, num_classes  = joint_constrained_loader('I2B2', 0.2, 10)
+    for step, batch in enumerate(train_dataloader):
+        print(batch)
 
     
 
