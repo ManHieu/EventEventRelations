@@ -6,9 +6,10 @@ import sys
 from models.joint_constrain_model import *
 from data_loader.data_loaders import joint_constrained_loader
 from Exp import EXP
-
-
+import csv
+from utils.tools import format_time
 torch.manual_seed(42)
+finetune = True
 cuda = torch.device('cuda')
 # Read parameters
 rst_file_name = "00001.rst"
@@ -64,25 +65,41 @@ def objective(trial):
     if dataset == "MATRES":
         total_steps = len(train_dataloader) * epochs
         print("Total steps: [number of batches] x [number of epochs] =", total_steps)
-        matres_exp = EXP(cuda, model, epochs, params['learning_rate'], train_dataloader, valid_dataloader_MATRES, test_dataloader_MATRES, None, None, None, None, finetune, dataset, MATRES_best_PATH, None, None, None, model_name)
+        matres_exp = EXP(cuda, model, epochs, params['learning_rate'], 
+                        train_dataloader, valid_dataloader_MATRES, test_dataloader_MATRES,
+                        None, None,
+                        None, None, 
+                        finetune, dataset, MATRES_best_PATH, None, None, None, model_name)
         T_F1, H_F1, I_F1 = matres_exp.train()
         matres_exp.evaluate(eval_data = "MATRES", test = True)
     if dataset == "I2B2":
         total_steps = len(train_dataloader) * epochs
         print("Total steps: [number of batches] x [number of epochs] =", total_steps)
-        i2b2_exp = EXP(cuda, model, epochs, params['learning_rate'], train_dataloader, valid_dataloader_I2B2, test_dataloader_I2B2, None, None, finetune, dataset, None, I2B2_best_PATH, None, None, model_name)
+        i2b2_exp = EXP(cuda, model, epochs, params['learning_rate'], 
+                        train_dataloader, None, None,
+                        valid_dataloader_I2B2, test_dataloader_I2B2,
+                        valid_dataloader_HIEVE, test_dataloader_HIEVE, 
+                        finetune, dataset, None, I2B2_best_PATH, None, None, model_name)
         T_F1, H_F1, I_F1 = i2b2_exp.train()
         i2b2_exp.evaluate(eval_data = "I2B2", test = True)
     elif dataset == "HiEve":
         total_steps = len(train_dataloader) * epochs
         print("Total steps: [number of batches] x [number of epochs] =", total_steps)
-        hieve_exp = EXP(cuda, model, epochs, params['learning_rate'], train_dataloader, None, None, valid_dataloader_HIEVE, test_dataloader_HIEVE, finetune, dataset, None, None, HiEve_best_PATH, None, model_name)
+        hieve_exp = EXP(cuda, model, epochs, params['learning_rate'], 
+                        train_dataloader, None, None,
+                        None, None,
+                        valid_dataloader_HIEVE, test_dataloader_HIEVE, 
+                        finetune, dataset, None, None, HiEve_best_PATH, None, model_name)
         T_F1, H_F1, I_F1 = hieve_exp.train()
         hieve_exp.evaluate(eval_data = "HiEve", test = True)
     elif dataset == "Joint":
         total_steps = len(train_dataloader) * epochs
         print("Total steps: [number of batches] x [number of epochs] =", total_steps)
-        joint_exp = EXP(cuda, model, epochs, params['learning_rate'], train_dataloader, valid_dataloader_MATRES, test_dataloader_MATRES, valid_dataloader_HIEVE, test_dataloader_HIEVE, finetune, dataset, MATRES_best_PATH, HiEve_best_PATH, None, model_name)
+        joint_exp = EXP(cuda, model, epochs, params['learning_rate'], 
+                        train_dataloader, valid_dataloader_MATRES, test_dataloader_MATRES,
+                        valid_dataloader_I2B2, test_dataloader_I2B2,
+                        valid_dataloader_HIEVE, test_dataloader_HIEVE, 
+                        finetune, dataset, MATRES_best_PATH, I2B2_best_PATH, HiEve_best_PATH, None, model_name)
         T_F1, H_F1, I_F1 = joint_exp.train()
         joint_exp.evaluate(eval_data = "HiEve", test = True)
         joint_exp.evaluate(eval_data = "MATRES", test = True)
@@ -90,16 +107,11 @@ def objective(trial):
     else:
         raise ValueError("Currently not supporting this dataset! -_-'")
     
-    print(f'Iteration {ITERATION} result: MATRES F1: {T_F1}; HiEve F1: {H_F1}; I2B2 F1: {I_F1}')
+    print(f'Iteration {interaction} result: MATRES F1: {T_F1}; HiEve F1: {H_F1}; I2B2 F1: {I_F1}')
     
     run_time = format_time(timer() - start)
     
     # Write to the csv file ('a' means append)
-    print("########################## Append a row to out_file ##########################")
-    of_connection = open(out_file, 'a')
-    writer = csv.writer(of_connection)
-    writer.writerow([loss, T_F1, H_F1, params, ITERATION, run_time])
-
     return T_F1, H_F1, I_F1
 
 study = optuna.create_study(direction='maximize')
