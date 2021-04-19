@@ -148,6 +148,7 @@ def joint_constrained_loader(dataset, downsample, batch_size):
                 else:
                     item.append(0)
                     train_set_HIEVE.append(item)
+        print("Number data points: {}".format(len(train_set_HIEVE)))
         
         print("Loading test data.....")
         for my_dict in tqdm.tqdm(test):
@@ -160,6 +161,7 @@ def joint_constrained_loader(dataset, downsample, batch_size):
                 else:
                     item.append(0)
                     test_set_HIEVE.append(item)
+        print("Number data points: {}".format(len(test_set_HIEVE)))
         
         print("Loading validate data ....")
         for my_dict in tqdm.tqdm(validate):
@@ -172,6 +174,7 @@ def joint_constrained_loader(dataset, downsample, batch_size):
                 else:
                     item.append(0)
                     valid_set_HIEVE.append(item)
+        print("Number data points: {}".format(len(valid_set_HIEVE)))
 
     if dataset in ["MATRES", "Joint"]:
         # ========================
@@ -201,6 +204,7 @@ def joint_constrained_loader(dataset, downsample, batch_size):
                 for item in train_data:
                     item.append(1) # 1 is MATRES
                     train_set_MATRES.append(item)
+        print("Number data points: {}".format(len(train_set_MATRES)))
 
         print("Loading test data.....")
         for my_dict in tqdm.tqdm(test):
@@ -209,6 +213,7 @@ def joint_constrained_loader(dataset, downsample, batch_size):
                 for item in test_data:
                     item.append(1) # 1 is MATRES
                     test_set_MATRES.append(item)
+        print("Number data points: {}".format(len(test_set_MATRES)))
 
         print("Loading validate data ....")
         for my_dict in tqdm.tqdm(validate):
@@ -217,6 +222,7 @@ def joint_constrained_loader(dataset, downsample, batch_size):
                 for item in validate_data:
                     item.append(1) # 1 is MATRES
                 valid_set_MATRES.append(item)
+        print("Number data points: {}".format(len(valid_set_MATRES)))
 
     if dataset in ["I2B2", "Joint"]:
         # ========================
@@ -232,7 +238,7 @@ def joint_constrained_loader(dataset, downsample, batch_size):
             for item in test_data:
                 item.append(2) # 2 is I2B2
                 test_set_I2B2.append(item)
-        print("Number data points: {}".format(len(test_data)))
+        print("Number data points: {}".format(len(test_set_I2B2)))
         
         print("Loading validate data ....")
         for my_dict in tqdm.tqdm(validate):
@@ -240,7 +246,7 @@ def joint_constrained_loader(dataset, downsample, batch_size):
             for item in validate_data:
                 item.append(2) # 2 is I2B2
                 valid_set_I2B2.append(item)
-        print("Number data points: {}".format(len(validate_data)))
+        print("Number data points: {}".format(len(valid_set_I2B2)))
         
         print("Loading train data.....")
         for my_dict in tqdm.tqdm(train):
