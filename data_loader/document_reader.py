@@ -255,7 +255,7 @@ def i2b2_xml_reader(dir_name, file_name):
     try:
         tree = ET.parse(dir_name + file_name)
     except:
-        print("Can't load this file: {} '_'!". format(dir_name + file_name))
+        print("Can't load this file: {} T_T". format(dir_name + file_name))
         return None
     root = tree.getroot()
     for event_instance in tree.findall('.//EVENT'):

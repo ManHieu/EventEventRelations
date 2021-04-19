@@ -24,8 +24,10 @@ class roberta_mlp(nn.Module):
         self.add_loss = add_loss
         self.hidden_size = int(lambdas['roberta_hidden_size'])
         self.MLP_size = int(lambdas['MLP_size'])
+        print("hidden_size: {}".format(self.hidden_size))
+        print("MLP_size: {}".format(self.MLP_size))
         self.num_classes = num_classes
-        self.model = RobertaModel.from_pretrained('roberta-large')
+        self.model = RobertaModel.from_pretrained('roberta-base')
         if CUDA:
             self.hier_class_weights = torch.FloatTensor(hier_weights).cuda()
             self.temp_class_weights = torch.FloatTensor(temp_weights).cuda()
@@ -61,6 +63,7 @@ class roberta_mlp(nn.Module):
         output_A = torch.cat([output_x[i, x_position[i].long(), :].unsqueeze(0) for i in range(0, batch_size)], 0)
         output_B = torch.cat([output_y[i, y_position[i].long(), :].unsqueeze(0) for i in range(0, batch_size)], 0)
         output_C = torch.cat([output_z[i, z_position[i].long(), :].unsqueeze(0) for i in range(0, batch_size)], 0)
+        print(output_A.size())
         
         if self.Sub is None and self.Mul is None:
             alpha_representation = torch.cat((output_A, output_B), 1)
@@ -90,7 +93,8 @@ class roberta_mlp(nn.Module):
             alpha_representation = torch.cat((output_A, output_B, mulAB), 1)
             beta_representation = torch.cat((output_B, output_C, mulBC), 1)
             gamma_representation = torch.cat((output_A, output_C, mulAC), 1)
-            
+        
+        print(alpha_representation.size())
         alpha_logits = self.fc2(self.relu(self.fc1(alpha_representation)))
         beta_logits = self.fc2(self.relu(self.fc1(beta_representation)))
         gamma_logits = self.fc2(self.relu(self.fc1(gamma_representation)))
