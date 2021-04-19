@@ -6,3 +6,6 @@ results/*
 EER_dl_env/*
 .vscode/*
 *.pyc
+models/__pycache__/*
+data_loader/__pycache__/*
+__pycache__/*

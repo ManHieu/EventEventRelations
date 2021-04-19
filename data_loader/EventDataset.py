@@ -1,21 +1,13 @@
-from numpy.core.records import array
-from torch.utils import data
+from torch.utils.data import Dataset
+from torch.utils.data.sampler import T_co
 
-class EventDataset(data.Dataset):
-    'Characterizes a dataset for PyTorch'
-    def __init__(self, train_instances):
-        'Initialization'
-        # load data
-        self.data = train_instances
-        for sample in self.data:
-            if sample == None:
-                self.data.remove(sample)
+
+class EventDataset(Dataset):
+    def __init__(self, data_instance) -> None:
+        self.data = data_instance
 
     def __len__(self):
-        'Denotes the total number of samples'
         return len(self.data)
 
-    def __getitem__(self, idx):
-        'Generates one sample of data'
-        sample = self.data[idx]
-        return sample
+    def __getitem__(self, index) -> T_co:
+        return self.data[index]
