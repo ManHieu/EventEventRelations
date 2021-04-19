@@ -30,7 +30,7 @@ def load_dataset(dir_name, type):
     onlyfiles = [f for f in os.listdir(dir_name) if os.path.isfile(os.path.join(dir_name, f))]
     corpus = []
 
-    for file_name in tqdm(onlyfiles):
+    for file_name in tqdm.tqdm(onlyfiles):
         if type == 'i2b2_xml':
             if file_name.endswith('.xml'):
                 my_dict = reader.read(dir_name, file_name)
