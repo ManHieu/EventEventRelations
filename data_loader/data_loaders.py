@@ -43,6 +43,9 @@ def load_dataset(dir_name, type):
         
     train_set, test_set = train_test_split(corpus, train_size=0.8, test_size=0.2)
     train_set, validate_set = train_test_split(train_set, train_size=0.75, test_size=0.25)
+    print("Train size {}".format(len(train_set)))
+    print("Test size {}".format(len(test_set)))
+    print("Validate size {}".format(len(validate_set)))
     return train_set, test_set, validate_set
 
 def joint_constrained_loader(dataset, downsample, batch_size):
