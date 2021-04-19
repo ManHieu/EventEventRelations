@@ -86,8 +86,6 @@ def joint_constrained_loader(dataset, downsample, batch_size):
             for item in candidates:
                 if None not in item:
                     train_data.append(item)
-                else:
-                    print(item)
         return train_data
 
     def get_data_test(my_dict):
@@ -115,8 +113,6 @@ def joint_constrained_loader(dataset, downsample, batch_size):
             for item in candidates:
                 if None not in item:
                     test_data.append(item)
-                else:
-                    print(item)
         return test_data
 
     train_set_HIEVE = []
