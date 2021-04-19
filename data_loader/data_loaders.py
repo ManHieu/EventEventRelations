@@ -84,7 +84,7 @@ def joint_constrained_loader(dataset, downsample, batch_size):
                         [str(z), str(x), str(y), z_sent, x_sent, y_sent, z_position, x_position, y_position, z_sent_pos, x_sent_pos, y_sent_pos, zx, xy, zy]]
             
             for item in candidates:
-                if None not in item:
+                if None not in item[-3:]:
                     train_data.append(item)
         return train_data
 
@@ -111,7 +111,7 @@ def joint_constrained_loader(dataset, downsample, batch_size):
             candidates = [[str(x), str(y), str(x), x_sent, y_sent, x_sent, x_position, y_position, x_position, x_sent_pos, y_sent_pos, x_sent_pos, xy, xy, xy],
                         [str(y), str(x), str(y), y_sent, x_sent, y_sent, y_position, x_position, y_position, y_sent_pos, x_sent_pos, y_sent_pos, yx, yx, yx]]
             for item in candidates:
-                if None not in item:
+                if None not in item[-3:]:
                     test_data.append(item)
         return test_data
 
@@ -132,7 +132,8 @@ def joint_constrained_loader(dataset, downsample, batch_size):
         dir_name = "./datasets/hievents_v2/processed/"
         train, test, validate = load_dataset(dir_name, 'tsvx')
         undersmp_ratio = 0.4
-        for my_dict in train:
+        print("Loading train data.....")
+        for my_dict in tqdm.tqdm(train):
             train_data = get_data_train(my_dict)
             for item in train_data:
                 if item[-3]==3 and item[-2]==3:
@@ -145,9 +146,10 @@ def joint_constrained_loader(dataset, downsample, batch_size):
                     item.append(0)
                     train_set_HIEVE.append(item)
         
+        print("Loading test data.....")
         for my_dict in test:
             test_data = get_data_test(my_dict)
-            for item in test_data:
+            for item in tqdm.tqdm(test_data):
                 if item[-3]==3:
                     if random.uniform(0, 1) < undersmp_ratio:
                         item.append(0)
@@ -156,7 +158,8 @@ def joint_constrained_loader(dataset, downsample, batch_size):
                     item.append(0)
                     test_set_HIEVE.append(item)
         
-        for my_dict in validate:
+        print("Loading validate data ....")
+        for my_dict in tqdm.tqdm(validate):
             valid_data = get_data_test(my_dict)
             for item in valid_data:
                 if item[-3]==3:
@@ -188,22 +191,24 @@ def joint_constrained_loader(dataset, downsample, batch_size):
         for subset in platinum:
             test.extend(subset)
         
-        for my_dict in train:
+        print("Loading train data.....")
+        for my_dict in tqdm.tqdm(train):
             if my_dict != None:
                 train_data = get_data_train(my_dict)
-                if train_data != None:
-                    for item in train_data:
-                        item.append(1) # 1 is MATRES
-                        train_set_MATRES.append(item)
+                for item in train_data:
+                    item.append(1) # 1 is MATRES
+                    train_set_MATRES.append(item)
 
-        for my_dict in test:
+        print("Loading test data.....")
+        for my_dict in tqdm.tqdm(test):
             if my_dict != None:
                 test_data = get_data_test(my_dict)
                 for item in test_data:
                     item.append(1) # 1 is MATRES
                     test_set_MATRES.append(item)
-            
-        for my_dict in validate:
+
+        print("Loading validate data ....")
+        for my_dict in tqdm.tqdm(validate):
             if my_dict != None:
                 validate_data = get_data_train(my_dict)
                 for item in validate_data:
@@ -218,19 +223,22 @@ def joint_constrained_loader(dataset, downsample, batch_size):
         dir_name = "./datasets/i2b2_2012/2012-07-15.original-annotation.release/"
         train, test, validate = load_dataset(dir_name, 'i2b2_xml')
         
-        for my_dict in train:
+        print("Loading train data.....")
+        for my_dict in tqdm.tqdm(train):
             train_data = get_data_train(my_dict)
             for item in train_data:
                 item.append(2) # 2 is I2B2
                 train_set_I2B2.append(item)
 
-        for my_dict in test:
+        print("Loading test data.....")
+        for my_dict in tqdm.tqdm(test):
             test_data = get_data_test(my_dict)
             for item in test_data:
                 item.append(2) # 2 is I2B2
                 test_set_I2B2.append(item)
         
-        for my_dict in validate:
+        print("Loading validate data ....")
+        for my_dict in tqdm.tqdm(validate):
             validate_data = get_data_train(my_dict)
             for item in validate_data:
                 item.append(2) # 2 is I2B2
