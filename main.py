@@ -23,7 +23,7 @@ I2B2_best_PATH = model_params_dir + "I2B2_best/" + rst_file_name.replace(".rst",
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-dataset = "Joint"
+dataset = "I2B2"
 add_loss = 1
 epochs = 32
 batch_size = 16

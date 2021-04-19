@@ -150,9 +150,9 @@ def joint_constrained_loader(dataset, downsample, batch_size):
                     train_set_HIEVE.append(item)
         
         print("Loading test data.....")
-        for my_dict in test:
+        for my_dict in tqdm.tqdm(test):
             test_data = get_data_test(my_dict)
-            for item in tqdm.tqdm(test_data):
+            for item in test_data:
                 if item[-3]==3:
                     if random.uniform(0, 1) < undersmp_ratio:
                         item.append(0)
@@ -278,6 +278,8 @@ def joint_constrained_loader(dataset, downsample, batch_size):
         test_dataloader_MATRES = DataLoader(EventDataset(test_set_MATRES), batch_size=batch_size, shuffle = True)
         valid_dataloader_HIEVE = DataLoader(EventDataset(valid_set_HIEVE), batch_size=batch_size, shuffle=True)    
         test_dataloader_HIEVE = DataLoader(EventDataset(test_set_HIEVE), batch_size=batch_size, shuffle = True)
+        print("valid_set_I2B2 size: {}".format(len(valid_set_I2B2)))
+        print("test_set_I2B2 size: {}".format(len(test_set_I2B2)))
         valid_dataloader_I2B2 = DataLoader(EventDataset(valid_set_I2B2), batch_size=batch_size, shuffle = True)    
         test_dataloader_I2B2 = DataLoader(EventDataset(test_set_I2B2), batch_size=batch_size, shuffle = True) 
         return train_dataloader, valid_dataloader_MATRES, test_dataloader_MATRES, valid_dataloader_HIEVE, test_dataloader_HIEVE, valid_dataloader_I2B2, test_dataloader_I2B2, num_classes
