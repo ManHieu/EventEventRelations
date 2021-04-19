@@ -45,7 +45,7 @@ def load_dataset(dir_name, type):
     train_set, validate_set = train_test_split(train_set, train_size=0.75, test_size=0.25)
     return train_set, test_set, validate_set
 
-def join_constrained_loader(dataset, downsample, batch_size):
+def joint_constrained_loader(dataset, downsample, batch_size):
     def get_data_train(my_dict):
         train_data = []
         eids = my_dict['event_dict'].keys()
