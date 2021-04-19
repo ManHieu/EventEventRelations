@@ -328,8 +328,7 @@ def i2b2_xml_reader(dir_name, file_name):
         rel_id = i2b2_label_dict.get(rel)
         if  rel_id != None:
             if e1_id.startswith('E') and e2_id.startswith('E'):
-                my_dict['relation_dict'][rid] = {}
-                my_dict['relation_dict'][rid][(e1_id, e2_id)] = rel_id
+                my_dict['relation_dict'][(e1_id, e2_id)] = rel_id
     
     return my_dict
 

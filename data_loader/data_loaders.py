@@ -225,13 +225,6 @@ def joint_constrained_loader(dataset, downsample, batch_size):
         print("I2B2 Loading .....")
         dir_name = "./datasets/i2b2_2012/2012-07-15.original-annotation.release/"
         train, test, validate = load_dataset(dir_name, 'i2b2_xml')
-        
-        print("Loading train data.....")
-        for my_dict in tqdm.tqdm(train):
-            train_data = get_data_train(my_dict)
-            for item in train_data:
-                item.append(2) # 2 is I2B2
-                train_set_I2B2.append(item)
 
         print("Loading test data.....")
         for my_dict in tqdm.tqdm(test):
@@ -239,6 +232,7 @@ def joint_constrained_loader(dataset, downsample, batch_size):
             for item in test_data:
                 item.append(2) # 2 is I2B2
                 test_set_I2B2.append(item)
+        print("Number data points: {}".format(len(test_data)))
         
         print("Loading validate data ....")
         for my_dict in tqdm.tqdm(validate):
@@ -246,6 +240,15 @@ def joint_constrained_loader(dataset, downsample, batch_size):
             for item in validate_data:
                 item.append(2) # 2 is I2B2
                 valid_set_I2B2.append(item)
+        print("Number data points: {}".format(len(validate_data)))
+        
+        print("Loading train data.....")
+        for my_dict in tqdm.tqdm(train):
+            train_data = get_data_train(my_dict)
+            for item in train_data:
+                item.append(2) # 2 is I2B2
+                train_set_I2B2.append(item)
+        print("Number data points: {}".format(len(train_set_I2B2)))
  
     # ==============================================================
     #      Use DataLoader to convert to Pytorch acceptable form
@@ -264,6 +267,8 @@ def joint_constrained_loader(dataset, downsample, batch_size):
         return train_dataloader_HIEVE, None, None, valid_dataloader_HIEVE, test_dataloader_HIEVE, None, None, num_classes
     if dataset == "I2B2":
         num_classes = 3
+        print("valid_set_I2B2 size: {}".format(len(valid_set_I2B2)))
+        print("test_set_I2B2 size: {}".format(len(test_set_I2B2)))
         train_dataloader_I2B2 = DataLoader(EventDataset(train_set_I2B2), batch_size=batch_size, shuffle = True)
         valid_dataloader_I2B2 = DataLoader(EventDataset(valid_set_I2B2), batch_size=batch_size, shuffle = True)    
         test_dataloader_I2B2 = DataLoader(EventDataset(test_set_I2B2), batch_size=batch_size, shuffle = True) 

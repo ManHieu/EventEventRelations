@@ -11,7 +11,7 @@ HierCo = 758.0
 HierNo = 63755.0 
 HierTo = HierPC + HierCP + HierCo + HierNo # total number of event pairs
 hier_weights = [0.25*HierTo/HierPC, 0.25*HierTo/HierCP, 0.25*HierTo/HierCo, 0.25*HierTo/HierNo]
-temp_weights = [0.25*818.0/412.0, 0.25*818.0/263.0, 0.25*818.0/30.0, 0.25*818.0/53.0]
+temp_weights = [0.25*818.0/412.0, 0.25*818.0/263.0, 0.25*818.0/30.0, 0.25*818.0/13.0]
 
 # roberta + MLP
 class roberta_mlp(nn.Module):
