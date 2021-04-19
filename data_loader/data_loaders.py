@@ -210,7 +210,7 @@ def joint_constrained_loader(dataset, downsample, batch_size):
         print("Loading validate data ....")
         for my_dict in tqdm.tqdm(validate):
             if my_dict != None:
-                validate_data = get_data_train(my_dict)
+                validate_data = get_data_test(my_dict)
                 for item in validate_data:
                     item.append(1) # 1 is MATRES
                 valid_set_MATRES.append(item)
@@ -239,7 +239,7 @@ def joint_constrained_loader(dataset, downsample, batch_size):
         
         print("Loading validate data ....")
         for my_dict in tqdm.tqdm(validate):
-            validate_data = get_data_train(my_dict)
+            validate_data = get_data_test(my_dict)
             for item in validate_data:
                 item.append(2) # 2 is I2B2
                 valid_set_I2B2.append(item)
