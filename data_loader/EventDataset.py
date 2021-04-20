@@ -1,6 +1,4 @@
 from torch.utils.data import Dataset
-from torch.utils.data.sampler import T_co
-
 
 class EventDataset(Dataset):
     def __init__(self, data_instance) -> None:
@@ -9,5 +7,5 @@ class EventDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, index) -> T_co:
+    def __getitem__(self, index):
         return self.data[index]
