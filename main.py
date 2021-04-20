@@ -44,7 +44,7 @@ def objective(trial):
         'MLP_size': trial.suggest_categorical("MLP_size", [512, 256, 768]),
         'num_layers': trial.suggest_int("num_layers", 1, 3),
         'lstm_hidden_size': trial.suggest_categorical("lstm_hidden_size", [512, 256]),
-        'roberta_hidden_size': trial.suggest_categorical("roberta_hidden_size", [768, 1024]),
+        'roberta_hidden_size': trial.suggest_categorical("roberta_hidden_size", [768]),
         'lstm_input_size': 768,
     }
 
@@ -122,3 +122,6 @@ trial = study.best_trial
 
 print('Accuracy: {}'.format(trial.value))
 print("Best hyperparameters: {}".format(trial.params))
+
+
+
