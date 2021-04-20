@@ -1,10 +1,11 @@
+from numpy.lib.function_base import average
 from torch.utils.data.dataloader import DataLoader
 from models.roberta_model import ECIRoberta
 import torch
 import torch.nn as nn
 import time
 import torch.optim as optim
-from transformers import RobertaModel
+from sklearn.metrics import precision_recall_fscore_support, confusion_matrix, classification_report, accuracy_score
 from utils.tools import CUDA, format_time, metric
 from os import path
 from utils.tools import *
@@ -91,18 +92,22 @@ class EXP():
 
         validation_time = format_time(time.time() - t0)
         print("Eval took: {:}".format(validation_time))
-        print(len(pred))
-        print(len(gold))
-        Acc, P, R, F1, CM = metric(gold, y_pred)
+        # print(len(pred))
+        # print(len(gold))
+        # Acc, P, R, F1, CM = metric(gold, y_pred)
+        P, R, F1 = precision_recall_fscore_support(gold, pred, average="micro")
+        CM = confusion_matrix(gold, pred)
         print("  P: {0:.3f}".format(P))
         print("  R: {0:.3f}".format(R))
         print("  F1: {0:.3f}".format(F1))
+        print("Classification report: \n {}".format(classification_report(gold, pred)))
         if is_test:
             print("Test result:", file = self.file)
             print("  P: {0:.3f}".format(P), file = self.file)
             print("  R: {0:.3f}".format(R), file = self.file)
             print("  F1: {0:.3f}".format(F1), file = self.file)
             print("  Confusion Matrix", file = self.file)
+            print("Classification report: \n {}".format(classification_report(gold, pred)))
             print(CM, file = self.file)
         if is_test == False:
             if F1 > self.best_micro_f1 or path.exists(self.best_path) == False:
