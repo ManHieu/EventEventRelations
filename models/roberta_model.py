@@ -1,5 +1,5 @@
 import torch
-from torch._C import set_flush_denormal
+from torch._C import parse_ir, set_flush_denormal
 import torch.nn as nn
 from transformers import RobertaModel
 from utils.constant import CUDA
@@ -39,6 +39,7 @@ class ECIRoberta(nn.Module):
     
     def forward(self, x_sent, y_sent, x_position, y_position, xy):
         batch_size = x_position.size(0)
+        print(x_position.size())
 
         if self.finetune:
             output_x = self.robera(x_sent)[0]
@@ -50,7 +51,7 @@ class ECIRoberta(nn.Module):
 
         output_A = torch.cat([output_x[i, x_position[i], :].unsqueeze(0) for i in range(0, batch_size)])
         output_B = torch.cat([output_y[i, y_position[i], :].unsqueeze(0) for i in range(0, batch_size)])
-
+        print(output_B.size())
         if self.sub and self.mul:
             sub = torch.sub(output_A, output_B)
             mul = torch.mul(output_A, output_B)
