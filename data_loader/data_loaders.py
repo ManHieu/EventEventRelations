@@ -1,6 +1,5 @@
 from itertools import combinations
 import os
-from nltk.util import pr
 import tqdm
 import random
 from torch.utils.data import DataLoader
@@ -41,12 +40,12 @@ def load_dataset(dir_name, type):
             if my_dict != None:
                 corpus.append(my_dict)
         
-    train_set, test_set = train_test_split(corpus, train_size=0.8, test_size=0.2)
-    train_set, validate_set = train_test_split(train_set, train_size=0.75, test_size=0.25)
-    print("Train size {}".format(len(train_set)))
-    print("Test size {}".format(len(test_set)))
-    print("Validate size {}".format(len(validate_set)))
-    return train_set, test_set, validate_set
+    # train_set, test_set = train_test_split(corpus, train_size=0.8, test_size=0.2)
+    # train_set, validate_set = train_test_split(train_set, train_size=0.75, test_size=0.25)
+    # print("Train size {}".format(len(train_set)))
+    # print("Test size {}".format(len(test_set)))
+    # print("Validate size {}".format(len(validate_set)))
+    return corpus
 
 def joint_constrained_loader(dataset, downsample, batch_size):
     def get_data_train(my_dict):
@@ -133,7 +132,9 @@ def joint_constrained_loader(dataset, downsample, batch_size):
         # ========================
         print("HiEve Loading .....")
         dir_name = "./datasets/hievents_v2/processed/"
-        train, test, validate = load_dataset(dir_name, 'tsvx')
+        corpus = load_dataset(dir_name, 'tsvx')
+        train, test = train_test_split(corpus, train_size=0.8, test_size=0.2)
+        train, validate = train_test_split(train, train_size=0.75, test_size=0.25)
         undersmp_ratio = 0.4
         print("Loading train data.....")
         for my_dict in tqdm.tqdm(train):
@@ -184,18 +185,9 @@ def joint_constrained_loader(dataset, downsample, batch_size):
         aquaint_dir_name = "./datasets/MATRES/TBAQ-cleaned/AQUAINT/"
         timebank_dir_name = "./datasets/MATRES/TBAQ-cleaned/TimeBank/"
         platinum_dir_name = "./datasets/MATRES/te3-platinum/"
-        train = []
-        test = []
-        validate = []
-        aquaint = load_dataset(aquaint_dir_name, 'tml')
-        timebank = load_dataset(timebank_dir_name, 'tml')
-        platinum = load_dataset(platinum_dir_name, 'tml')
-        for subset in aquaint:
-            validate.extend(subset)
-        for subset in timebank:
-            train.extend(subset)
-        for subset in platinum:
-            test.extend(subset)
+        validate = load_dataset(aquaint_dir_name, 'tml')
+        train = load_dataset(timebank_dir_name, 'tml')
+        test = load_dataset(platinum_dir_name, 'tml')
         
         print("Loading train data.....")
         for my_dict in tqdm.tqdm(train):
@@ -230,8 +222,9 @@ def joint_constrained_loader(dataset, downsample, batch_size):
         # ========================
         print("I2B2 Loading .....")
         dir_name = "./datasets/i2b2_2012/2012-07-15.original-annotation.release/"
-        train, test, validate = load_dataset(dir_name, 'i2b2_xml')
-
+        corpus = load_dataset(dir_name, 'i2b2_xml')
+        train, test = train_test_split(corpus, train_size=0.8, test_size=0.2)
+        train, validate = train_test_split(train, train_size=0.75, test_size=0.25)
         print("Loading test data.....")
         for my_dict in tqdm.tqdm(test):
             test_data = get_data_test(my_dict)
@@ -296,3 +289,103 @@ def joint_constrained_loader(dataset, downsample, batch_size):
         return train_dataloader, valid_dataloader_MATRES, test_dataloader_MATRES, valid_dataloader_HIEVE, test_dataloader_HIEVE, valid_dataloader_I2B2, test_dataloader_I2B2, num_classes
     else:
         raise ValueError("Currently not supporting this dataset! -_-'")
+
+def single_loader(dataset, batch_size):
+    def get_data_point(my_dict):
+        data = []
+        eids = my_dict['event_dict'].keys()
+        pair_events = list(combinations(eids, 2))
+        for pair in pair_events:
+            x, y = pair
+            x_sent_id = my_dict['event_dict'][x]['sent_id']
+            y_sent_id = my_dict['event_dict'][y]['sent_id']
+
+            x_sent = padding(my_dict["sentences"][x_sent_id]["roberta_subword_to_ID"])
+            y_sent = padding(my_dict["sentences"][y_sent_id]["roberta_subword_to_ID"])
+
+            x_position = my_dict["event_dict"][x]["roberta_subword_id"]
+            y_position = my_dict["event_dict"][y]["roberta_subword_id"]
+
+            x_sent_pos = padding(my_dict["sentences"][x_sent_id]["roberta_subword_pos"], pos = True)
+            y_sent_pos = padding(my_dict["sentences"][y_sent_id]["roberta_subword_pos"], pos = True)
+
+            xy = my_dict["relation_dict"].get((x, y))
+            yx = my_dict["relation_dict"].get((y, x))
+            candidates = [[str(x), str(y), x_sent, y_sent, x_position, y_position, x_sent_pos, y_sent_pos, xy],
+                        [str(y), str(x), y_sent, x_sent, y_position, x_position, y_sent_pos, x_sent_pos, yx]]
+            for item in candidates:
+                if item[-1] != None:
+                    data.append(item)
+        return data
+
+    train_set = []
+    test_set = []
+    validate_set = []
+    num_class = 0
+    if dataset == "MATRES":
+        print("MATRES Loading .......")
+        aquaint_dir_name = "./datasets/MATRES/TBAQ-cleaned/AQUAINT/"
+        timebank_dir_name = "./datasets/MATRES/TBAQ-cleaned/TimeBank/"
+        platinum_dir_name = "./datasets/MATRES/te3-platinum/"
+        validate = load_dataset(aquaint_dir_name, 'tml')
+        train = load_dataset(timebank_dir_name, 'tml')
+        test = load_dataset(platinum_dir_name, 'tml')
+        num_class = 4
+        
+        for my_dict in tqdm.tqdm(train):
+            data = get_data_point(my_dict)
+            train_set.extend(data)
+        for my_dict in tqdm.tqdm(test):
+            data = get_data_point(my_dict)
+            test_set.extend(data)
+        for my_dict in tqdm.tqdm(validate):
+            data = get_data_point(my_dict)
+            validate_set.extend(data)
+        print("Train_size: {}".format(len(train_set)))
+        print("Test_size: {}".format(len(test_set)))
+        print("Validate_size: {}".format(len(validate_set)))
+
+    if dataset == "HiEve":
+        print("HiEve Loading .....")
+        dir_name = "./datasets/hievents_v2/processed/"
+        corpus = load_dataset(dir_name, 'tsvx')
+        train, test = train_test_split(corpus, train_size=0.8, test_size=0.2)
+        train, validate = train_test_split(train, train_size=0.75, test_size=0.25)
+        for my_dict in tqdm.tqdm(train):
+            data = get_data_point(my_dict)
+            train_set.extend(data)
+        for my_dict in tqdm.tqdm(test):
+            data = get_data_point(my_dict)
+            test_set.extend(data)
+        for my_dict in tqdm.tqdm(validate):
+            data = get_data_point(my_dict)
+            validate_set.extend(data)
+        print("Train_size: {}".format(len(train_set)))
+        print("Test_size: {}".format(len(test_set)))
+        print("Validate_size: {}".format(len(validate_set)))
+        num_class = 4
+
+    if dataset == "I2B2":
+        print("I2B2 Loading .....")
+        dir_name = "./datasets/i2b2_2012/2012-07-15.original-annotation.release/"
+        corpus = load_dataset(dir_name, 'i2b2_xml')
+        train, test = train_test_split(corpus, train_size=0.8, test_size=0.2)
+        train, validate = train_test_split(train, train_size=0.75, test_size=0.25)
+        for my_dict in tqdm.tqdm(train):
+            data = get_data_point(my_dict)
+            train_set.extend(data)
+        for my_dict in tqdm.tqdm(test):
+            data = get_data_point(my_dict)
+            test_set.extend(data)
+        for my_dict in tqdm.tqdm(validate):
+            data = get_data_point(my_dict)
+            validate_set.extend(data)
+        print("Train_size: {}".format(len(train_set)))
+        print("Test_size: {}".format(len(test_set)))
+        print("Validate_size: {}".format(len(validate_set)))
+        num_class = 4
+
+    train_loader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
+    test_loader = DataLoader(EventDataset(test_set), batch_size=batch_size, shuffle=True)
+    validate_loader = DataLoader(EventDataset(validate_set), batch_size=batch_size, shuffle=True)
+    return train_loader, test_loader, validate_loader, num_class

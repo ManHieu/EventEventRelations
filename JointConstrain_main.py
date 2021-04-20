@@ -5,7 +5,7 @@ import torch
 import sys
 from models.joint_constrain_model import *
 from data_loader.data_loaders import joint_constrained_loader
-from Exp import EXP
+from JointConstrain_main import EXP
 import csv
 from utils.tools import format_time, CUDA
 
