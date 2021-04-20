@@ -95,7 +95,7 @@ class EXP():
         # print(len(pred))
         # print(len(gold))
         # Acc, P, R, F1, CM = metric(gold, y_pred)
-        P, R, F1 = precision_recall_fscore_support(gold, pred, average="micro")[0, 3]
+        P, R, F1 = precision_recall_fscore_support(gold, pred, average="micro")[0:3]
         CM = confusion_matrix(gold, pred)
         print("  P: {0:.3f}".format(P))
         print("  R: {0:.3f}".format(R))
