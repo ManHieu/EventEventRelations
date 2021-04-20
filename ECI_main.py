@@ -36,7 +36,7 @@ if __name__=="__main__":
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('--seed', help='SEED', default=0, type=int)
     parser.add_argument('--batch_size', help="Batch size", default=32, type=int)
-    parser.add_argument('--roberta_type', help="base or large", default='base', type=str)
+    parser.add_argument('--roberta_type', help="base or large", default='roberta-base', type=str)
     parser.add_argument('--epoches', help='Number epoch', default=30, type=int)
     parser.add_argument('--best_path', help="Path for save model", type=str)
     parser.add_argument('--dataset', help="Path for dataset", type=str)
