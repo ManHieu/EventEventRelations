@@ -1,5 +1,4 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from torch.utils.data import dataset
 from models.roberta_model import ECIRoberta
 from numpy import sin
 import torch
@@ -40,6 +39,7 @@ if __name__=="__main__":
     parser.add_argument('--roberta_type', help="base or large", default='base', type=str)
     parser.add_argument('--epoches', help='Number epoch', default=30, type=int)
     parser.add_argument('--best_path', help="Path for save model", type=str)
+    parser.add_argument('--dataset', help="Path for dataset", type=str)
 
     args = parser.parse_args()
     seed = args.seed
@@ -47,6 +47,7 @@ if __name__=="__main__":
     roberta_type  = args.roberta_type
     epoches = args.epoches
     best_path = args.best_path
+    dataset = args.dataset
 
     study = optuna.create_study(direction='maximize')
     study.optimize(objective, n_trials=30)
