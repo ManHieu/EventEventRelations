@@ -91,6 +91,8 @@ class EXP():
 
         validation_time = format_time(time.time() - t0)
         print("Eval took: {:}".format(validation_time))
+        print(len(pred))
+        print(len(gold))
         Acc, P, R, F1, CM = metric(gold, y_pred)
         print("  P: {0:.3f}".format(P))
         print("  R: {0:.3f}".format(R))
