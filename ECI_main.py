@@ -10,6 +10,9 @@ from utils.tools import format_time
 from utils.constant import CUDA
 from torchsummary import summary
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
 def objective(trial:optuna.Trial):
     params = {
         "learning_rate": trial.suggest_float("lr", 1e-6, 1e-2, log=True),
@@ -22,6 +25,7 @@ def objective(trial:optuna.Trial):
     if CUDA:
         model = model.cuda()
     model.zero_grad()
+    print("# of parameters:", count_parameters(model))
     total_steps = len(train_dataloader) * epoches
     print("Total steps: [number of batches] x [number of epochs] =", total_steps)
 

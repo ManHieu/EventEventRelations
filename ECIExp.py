@@ -45,7 +45,7 @@ class EXP():
                     y_position = y_position.cuda()
                     xy = xy.cuda()
                 logits, loss = self.model(x_sent, y_sent, x_position, y_position, xy)
-                self.train_loss += loss.items()
+                self.train_loss += loss.item()
                 loss.backward()
                 self.optimizer.step()
             
