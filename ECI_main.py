@@ -48,4 +48,10 @@ if __name__=="__main__":
     epoches = args.epoches
     best_path = args.best_path
 
+    study = optuna.create_study(direction='maximize')
+    study.optimize(objective, n_trials=30)
+    trial = study.best_trial
+
+    print('Accuracy: {}'.format(trial.value))
+    print("Best hyperparameters: {}".format(trial.params))
 
