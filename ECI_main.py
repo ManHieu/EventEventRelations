@@ -21,6 +21,7 @@ def objective(trial:optuna.Trial):
     model = ECIRoberta(num_classes, dataset, params["MLP size"], roberta_type, finetune=True)
     if CUDA:
         model = model.cuda()
+    summary(model, 150, 32)
     model.zero_grad()
     total_steps = len(train_dataloader) * epoches
     print("Total steps: [number of batches] x [number of epochs] =", total_steps)

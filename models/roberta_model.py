@@ -25,23 +25,23 @@ class ECIRoberta(nn.Module):
         else:
             self.loss = loss
 
-        if sub and mul:
+        if sub==True and mul==True:
             self.fc1 = nn.Linear(self.roberta_dim*4, self.mlp_size*2)
             self.fc2 = nn.Linear(self.mlp_size*2, num_classes)
-        if sub or mul:
+        if (sub==True and  mul==False) or (sub==False and mul==True):
             self.fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.75))
             self.fc2 = nn.Linear(int(self.mlp_size*1.75), num_classes)
         if not (sub and mul):
             self.fc1 = nn.Linear(self.roberta_dim*2, int(self.mlp_size))
             self.fc2 = nn.Linear(int(self.mlp_size), num_classes)
-            
-        print(self.fc1)
+
+        # print(self.fc1)
 
         self.relu = nn.LeakyReLU(0.2, True)
     
     def forward(self, x_sent, y_sent, x_position, y_position, xy):
         batch_size = x_sent.size(0)
-        print(x_sent.size())
+        # print(x_sent.size())
 
         if self.finetune:
             output_x = self.robera(x_sent)[0]
@@ -53,7 +53,7 @@ class ECIRoberta(nn.Module):
 
         output_A = torch.cat([output_x[i, x_position[i], :].unsqueeze(0) for i in range(0, batch_size)])
         output_B = torch.cat([output_y[i, y_position[i], :].unsqueeze(0) for i in range(0, batch_size)])
-        print(output_B.size())
+        # print(output_B.size())
         if self.sub and self.mul:
             sub = torch.sub(output_A, output_B)
             mul = torch.mul(output_A, output_B)
@@ -65,8 +65,7 @@ class ECIRoberta(nn.Module):
             mul = torch.mul(output_A, output_B)
             presentation = torch.cat([output_A, output_B, mul], 1)
         
-        print(presentation.size())
-        print()
+        # print(presentation.size())
         logits = self.fc2(self.relu(self.fc1(presentation)))
         loss = self.loss(logits, xy)
         return logits, loss
