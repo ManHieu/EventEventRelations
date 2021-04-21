@@ -20,8 +20,11 @@ class ECIRoberta(nn.Module):
         if roberta_type == 'roberta-large':
             self.roberta_dim = 1024
 
+        if dataset == "HiEve":
+            weights = [333/993.0, 349/993.0, 128/933.0, 283/933.0]
+        weights = torch.tensor(weights)
         if loss == None:
-            self.loss = nn.CrossEntropyLoss()
+            self.loss = nn.CrossEntropyLoss(weights=weights)
         else:
             self.loss = loss
 
