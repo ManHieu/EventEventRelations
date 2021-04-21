@@ -102,13 +102,13 @@ class EXP():
         print("  F1: {0:.3f}".format(F1))
         print("Classification report: \n {}".format(classification_report(gold, pred)))
         if is_test:
-            print("Test result:", file = self.file)
-            print("  P: {0:.3f}".format(P), file = self.file)
-            print("  R: {0:.3f}".format(R), file = self.file)
-            print("  F1: {0:.3f}".format(F1), file = self.file)
-            print("  Confusion Matrix", file = self.file)
+            print("Test result:")
+            print("  P: {0:.3f}".format(P))
+            print("  R: {0:.3f}".format(R))
+            print("  F1: {0:.3f}".format(F1))
+            print("  Confusion Matrix")
+            print(CM)
             print("Classification report: \n {}".format(classification_report(gold, pred)))
-            print(CM, file = self.file)
         if is_test == False:
             if F1 > self.best_micro_f1 or path.exists(self.best_path) == False:
                 self.best_micro_f1 = F1
