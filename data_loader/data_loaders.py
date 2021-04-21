@@ -351,15 +351,25 @@ def single_loader(dataset, batch_size):
         corpus = load_dataset(dir_name, 'tsvx')
         train, test = train_test_split(corpus, train_size=0.8, test_size=0.2)
         train, validate = train_test_split(train, train_size=0.75, test_size=0.25)
+        sample = 0.02
         for my_dict in tqdm.tqdm(train):
             data = get_data_point(my_dict)
-            train_set.extend(data)
+            for item in data:
+                if item[-1] == 3:
+                    if random.uniform(0, 1) < sample:
+                        train_set.append(item)
         for my_dict in tqdm.tqdm(test):
             data = get_data_point(my_dict)
-            test_set.extend(data)
+            for item in data:
+                if item[-1] == 3:
+                    if random.uniform(0, 1) < sample:
+                        test_set.append(item)
         for my_dict in tqdm.tqdm(validate):
             data = get_data_point(my_dict)
-            validate_set.extend(data)
+            for item in data:
+                if item[-1] == 3:
+                    if random.uniform(0, 1) < sample:
+                        validate_set.append(item)
         print("Train_size: {}".format(len(train_set)))
         print("Test_size: {}".format(len(test_set)))
         print("Validate_size: {}".format(len(validate_set)))
