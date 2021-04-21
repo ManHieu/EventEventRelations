@@ -358,18 +358,24 @@ def single_loader(dataset, batch_size):
                 if item[-1] == 3:
                     if random.uniform(0, 1) < sample:
                         train_set.append(item)
+                else:
+                    train_set.append(item)
         for my_dict in tqdm.tqdm(test):
             data = get_data_point(my_dict)
             for item in data:
                 if item[-1] == 3:
                     if random.uniform(0, 1) < sample:
                         test_set.append(item)
+                else:
+                    test_set.append(item)
         for my_dict in tqdm.tqdm(validate):
             data = get_data_point(my_dict)
             for item in data:
                 if item[-1] == 3:
                     if random.uniform(0, 1) < sample:
                         validate_set.append(item)
+                else:
+                    validate_set.append(item)
         print("Train_size: {}".format(len(train_set)))
         print("Test_size: {}".format(len(test_set)))
         print("Validate_size: {}".format(len(validate_set)))
