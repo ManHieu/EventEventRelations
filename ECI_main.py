@@ -18,6 +18,8 @@ def objective(trial:optuna.Trial):
         "learning_rate": trial.suggest_float("lr", 1e-6, 1e-2, log=True),
         "MLP size": trial.suggest_categorical("MLP size", [256, 512, 768])
     }
+    print("Hyperparameter will be used in this trial: ")
+    print(params)
     start = timer()
     train_dataloader, test_dataloader, validate_dataloader, num_classes = single_loader(dataset, batch_size)
 
