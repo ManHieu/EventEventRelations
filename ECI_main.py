@@ -15,7 +15,7 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "learning_rate": trial.suggest_float("lr", 1e-6, 1e-3, log=True),
+        "learning_rate": trial.suggest_float("lr", 1e-7, 1e-5, log=True),
         "MLP size": trial.suggest_categorical("MLP size", [256, 512, 768])
     }
     print("Hyperparameter will be used in this trial: ")
