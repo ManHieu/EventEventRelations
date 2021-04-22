@@ -58,7 +58,7 @@ class EXP():
             current_F1 = self.evaluate()
             current_loss = self.train_loss
             if i%3 == 0:
-                if abs(current_F1 - pre_F1) < 0.001 and abs(current_loss - pre_loss) < 15:
+                if abs(current_F1 - pre_F1) < 0.001 or abs(current_loss - pre_loss) < 15:
                     break
             pre_F1 = current_F1
             pre_loss = current_loss

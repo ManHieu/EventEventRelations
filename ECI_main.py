@@ -8,7 +8,7 @@ from data_loader.data_loaders import single_loader
 from ECIExp import EXP
 from utils.tools import format_time
 from utils.constant import CUDA
-from torchsummary import summary
+# from torchsummary import summary
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
