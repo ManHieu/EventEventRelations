@@ -36,6 +36,7 @@ class EXP():
             t0 = time.time()
             self.model.train()
             self.train_loss = 0.0
+            pre_F1 = 0.0
             for step, batch in enumerate(self.train_dataloader):
                 if step%50==0 and not step==0:
                     elapsed = format_time(time.time() - t0)
@@ -58,9 +59,10 @@ class EXP():
             current_F1 = self.evaluate()
             current_loss = self.train_loss
             if i%3 == 0:
-                if abs(current_F1 - self.best_micro_f1) < 0.001 or abs(current_loss - pre_loss) < 5:
+                if abs(current_F1 - pre_F1) < 0.005 or abs(current_loss - pre_loss) < 5:
                     break
             pre_loss = current_loss
+            pre_F1 = current_F1
         
         print("Training complete!")
         print("Total training took {:} (h:mm:ss)".format(format_time(time.time()-total_t0)))
