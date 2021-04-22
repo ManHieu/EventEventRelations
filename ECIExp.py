@@ -61,6 +61,7 @@ class EXP():
                 if abs(current_F1 - pre_F1) < 0.001 and abs(current_loss - pre_loss) < 15:
                     break
             pre_F1 = current_F1
+            pre_loss = current_loss
         
         print("Training complete!")
         print("Total training took {:} (h:mm:ss)".format(format_time(time.time()-total_t0)))
