@@ -26,6 +26,7 @@ class EXP():
     
     def train(self):
         total_t0 = time.time()
+        pre_F1 = 0.0
         for i in range(0, self.epochs):
             print("")
             print('======== Epoch {:} / {:} ========'.format(i + 1, self.epochs))
@@ -53,7 +54,12 @@ class EXP():
             epoch_training_time = format_time(time.time() - t0)
             print("  Total training loss: {0:.2f}".format(self.train_loss))
             print("  Training epoch took: {:}".format(epoch_training_time))
-            self.evaluate()
+            current_F1 = self.evaluate()
+            if i%5 == 0:
+                if abs(current_F1 - pre_F1) < 0.001:
+                    break
+                else:
+                    pre_F1 = current_F1
         
         print("Training complete!")
         print("Total training took {:} (h:mm:ss)".format(format_time(time.time()-total_t0)))
@@ -114,3 +120,5 @@ class EXP():
                 self.best_micro_f1 = F1
                 self.best_cm = CM
                 torch.save(self.model, self.best_path)
+        
+        return F1
