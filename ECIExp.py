@@ -55,11 +55,10 @@ class EXP():
             print("  Total training loss: {0:.2f}".format(self.train_loss))
             print("  Training epoch took: {:}".format(epoch_training_time))
             current_F1 = self.evaluate()
-            if i%5 == 0:
+            if i%3 == 0:
                 if abs(current_F1 - pre_F1) < 0.001:
                     break
-                else:
-                    pre_F1 = current_F1
+            pre_F1 = current_F1
         
         print("Training complete!")
         print("Total training took {:} (h:mm:ss)".format(format_time(time.time()-total_t0)))
