@@ -24,8 +24,8 @@ def objective(trial:optuna.Trial):
     train_dataloader, test_dataloader, validate_dataloader, num_classes = single_loader(dataset, batch_size)
 
     model = ECIRoberta(num_classes, dataset, params["MLP size"], roberta_type, finetune=True)
-    print("Model architecture: ")
-    print(model)
+    # print("Model architecture: ")
+    # print(model)
     if CUDA:
         model = model.cuda()
     model.zero_grad()
