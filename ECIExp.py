@@ -11,15 +11,23 @@ from os import path
 from utils.tools import *
 
 class EXP():
-    def __init__(self, model:ECIRoberta, epochs, lr, train_dataloader:DataLoader, validate_dataloader:DataLoader, test_dataloader:DataLoader, best_path) -> None:
+    def __init__(self, model:ECIRoberta, epochs, b_lr, mlp_lr, train_dataloader:DataLoader, validate_dataloader:DataLoader, test_dataloader:DataLoader, best_path) -> None:
         self.model = model
         self.epochs = epochs
-        self.lr = lr
+        self.b_lr = b_lr
+        self.mlp_lr = mlp_lr
         self.train_dataloader = train_dataloader
         self.test_datatloader = test_dataloader
         self.validate_dataloader = validate_dataloader
 
-        # self.optimizer = optim.AdamW(self.model.parameters(), lr=self.lr, amsgrad=True)
+        bert_param_list = []
+        for name, param in self.model.named_parameters():
+            print(name)
+            if 'Roberta' in name:
+                print("Roberta model params:")
+                print(name)
+                bert_param_list.append(param)
+        self.optimizer = optim.AdamW([{'params': bert_param_list, 'lr': self.b_lr}], lr=self.mlp_lr, amsgrad=True)
         self.best_micro_f1 = -0.1
         self.best_cm = []
         self.best_path = best_path
