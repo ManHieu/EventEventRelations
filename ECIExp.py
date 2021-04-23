@@ -22,11 +22,13 @@ class EXP():
 
         bert_param_list = []
         for name, param in self.model.named_parameters():
-            print(name)
             if 'roberta' in name:
                 print("Roberta model params:")
                 print(name)
                 bert_param_list.append(param)
+            else:
+                print("fc layers params:")
+                print(name)
         self.optimizer = optim.AdamW([{'params': bert_param_list, 'lr': self.b_lr}], lr=self.mlp_lr, amsgrad=True)
         self.best_micro_f1 = -0.1
         self.best_cm = []
