@@ -329,9 +329,6 @@ def single_loader(dataset, batch_size):
         platinum_dir_name = "./datasets/MATRES/te3-platinum/"
         validate = load_dataset(aquaint_dir_name, 'tml')
         train = load_dataset(timebank_dir_name, 'tml')
-        corpus = train.extend(validate)
-        print(len(corpus))
-        train, validate = train_test_split(corpus, test_size=0.2, train_size=0.8)
         test = load_dataset(platinum_dir_name, 'tml')
         num_class = 4
         
@@ -344,6 +341,7 @@ def single_loader(dataset, batch_size):
         for my_dict in tqdm.tqdm(validate):
             data = get_data_point(my_dict)
             validate_set.extend(data)
+        train_set, validate_set = train_test_split(train_set.append(test_set), test_size=0.2, train_size=0.8)
         print("Train_size: {}".format(len(train_set)))
         print("Test_size: {}".format(len(test_set)))
         print("Validate_size: {}".format(len(validate_set)))
