@@ -341,9 +341,7 @@ def single_loader(dataset, batch_size):
         for my_dict in tqdm.tqdm(validate):
             data = get_data_point(my_dict)
             validate_set.extend(data)
-        train_set = list(train_set)
-        test_set = list(test_set)
-        train_set, validate_set = train_test_split(train_set.extend(test_set), test_size=0.2, train_size=0.8)
+        # train_set, validate_set = train_test_split(train_set.extend(test_set), test_size=0.2, train_size=0.8)
         print("Train_size: {}".format(len(train_set)))
         print("Test_size: {}".format(len(test_set)))
         print("Validate_size: {}".format(len(validate_set)))
