@@ -329,6 +329,7 @@ def single_loader(dataset, batch_size):
         platinum_dir_name = "./datasets/MATRES/te3-platinum/"
         validate = load_dataset(aquaint_dir_name, 'tml')
         train = load_dataset(timebank_dir_name, 'tml')
+        train, validate = train_test_split(train.extend(validate), test_size=0.2, train_size=0.8)
         test = load_dataset(platinum_dir_name, 'tml')
         num_class = 4
         
