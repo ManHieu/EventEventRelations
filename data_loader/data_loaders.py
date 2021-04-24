@@ -5,7 +5,7 @@ import random
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 from data_loader.EventDataset import EventDataset
-from data_loader.document_reader import tsvx_reader, tml_reader, i2b2_xml_reader
+from data_loader.document_reader import tsvx_reader, tml_reader, i2b2_xml_reader, tbd_tml_reader
 from utils.tools import *
 
 
@@ -20,6 +20,8 @@ class Reader():
             return tml_reader(dir_name, file_name)
         elif self.type == 'i2b2_xml':
             return i2b2_xml_reader(dir_name, file_name)
+        elif self.type == 'tbd_tml':
+            return tbd_tml_reader(dir_name, file_name)
         else:
             raise ValueError("Wrong reader!")
 
@@ -400,6 +402,28 @@ def single_loader(dataset, batch_size):
         print("Test_size: {}".format(len(test_set)))
         print("Validate_size: {}".format(len(validate_set)))
         num_class = 4
+
+    if dataset == 'TBD':
+        print("Timebank Dense Loading .....")
+        train_dir = "./datasets/TimeBank-dense/train/"
+        test_dir = "./datasets/TimeBank-dense/test/"
+        validate_dir = "./datasets/TimeBank-dense/dev/"
+        train = load_dataset(train_dir, 'tbd_tml')
+        test = load_dataset(test_dir, 'tbd_tml')
+        validate = load_dataset(validate_dir, 'tbd_tml')
+        for my_dict in tqdm.tqdm(train):
+            data = get_data_point(my_dict)
+            train_set.extend(data)
+        for my_dict in tqdm.tqdm(test):
+            data = get_data_point(my_dict)
+            test_set.extend(data)
+        for my_dict in tqdm.tqdm(validate):
+            data = get_data_point(my_dict)
+            validate_set.extend(data)
+        print("Train_size: {}".format(len(train_set)))
+        print("Test_size: {}".format(len(test_set)))
+        print("Validate_size: {}".format(len(validate_set)))
+        num_class = 5
 
     train_loader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(EventDataset(test_set), batch_size=batch_size, shuffle=True)
