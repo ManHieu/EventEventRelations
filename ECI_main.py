@@ -15,15 +15,16 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "learning_rate": trial.suggest_float("lr", 1e-7, 5e-6, log=True),
+        "learning_rate": trial.suggest_float("lr", 1e-8, 1e-6, log=True),
         "MLP size": trial.suggest_categorical("MLP size", [256, 512, 768])
     }
     print("Hyperparameter will be used in this trial: ")
     print(params)
     start = timer()
-    train_dataloader, test_dataloader, validate_dataloader, num_classes = single_loader(dataset, batch_size)
 
     model = ECIRoberta(num_classes, dataset, params["MLP size"], roberta_type, finetune=True)
+    # print("Model architecture: ")
+    # print(model)
     if CUDA:
         model = model.cuda()
     model.zero_grad()
@@ -54,6 +55,8 @@ if __name__=="__main__":
     epoches = args.epoches
     best_path = args.best_path
     dataset = args.dataset
+
+    train_dataloader, test_dataloader, validate_dataloader, num_classes = single_loader(dataset, batch_size)
 
     study = optuna.create_study(direction='maximize')
     study.optimize(objective, n_trials=30)
