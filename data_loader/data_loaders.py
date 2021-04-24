@@ -424,7 +424,7 @@ def single_loader(dataset, batch_size):
         print("Train_size: {}".format(len(train_set)))
         print("Test_size: {}".format(len(test_set)))
         print("Validate_size: {}".format(len(validate_set)))
-        num_class = 5
+        num_class = 6
 
     train_loader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(EventDataset(test_set), batch_size=batch_size, shuffle=True)

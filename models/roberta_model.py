@@ -26,6 +26,8 @@ class ECIRoberta(nn.Module):
             weights = [6404.0/3233, 6404.0/2263, 6404.0/232, 6404.0/676,]
         if dataset == "I2B2":
             weights = [3066.0/660, 3066.0/461, 3066.0/1945,]
+        if dataset == "TBD":
+            weights = [12715.0/2590, 12715.0/2104, 12715.0/836, 12715.0/1060, 12715.0/215, 12715.0/5910,]
         weights = torch.tensor(weights)
         if loss == None:
             self.loss = nn.CrossEntropyLoss(weight=weights)
