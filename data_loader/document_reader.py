@@ -353,7 +353,7 @@ def tbd_tml_reader(dir_name, file_name):
         my_dict['event_dict'][eiid] = {}
         my_dict['event_dict'][eiid]['tense'] = item.attrs['tense']
         my_dict['event_dict'][eiid]['aspect'] = item.attrs['aspect']
-        my_dict['event_dict'][eiid]['polarity'] = item.attrs['polarity']
+        my_dict['event_dict'][eiid]['polarity'] = item.attrs.get('polarity')
         eid_to_eiid[eid] = eiid
 
     raw_content = xml_dom.find('text')
