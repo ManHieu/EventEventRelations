@@ -1,7 +1,5 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from models.roberta_model import ECIRoberta
-from numpy import sin
-import torch
 import optuna
 from timeit import default_timer as timer
 from data_loader.data_loaders import single_loader
