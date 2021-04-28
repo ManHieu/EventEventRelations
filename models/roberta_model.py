@@ -11,7 +11,7 @@ class ECIRoberta(nn.Module):
         self.num_classes = num_classes
         self.data_set = dataset
         self.mlp_size = mlp_size
-        self.roberta = RobertaModel.from_pretrained(roberta_type)
+        self.robera = RobertaModel.from_pretrained('./pretrained_models/models/roberta-large')
         self.sub = sub
         self.mul = mul
         self.finetune = finetune
@@ -22,6 +22,12 @@ class ECIRoberta(nn.Module):
 
         if dataset == "HiEve":
             weights = [993.0/333, 993.0/349, 933.0/128, 933.0/453]
+        if dataset == "MATRES":
+            weights = [6404.0/3233, 6404.0/2263, 6404.0/232, 6404.0/676,]
+        if dataset == "I2B2":
+            weights = [3066.0/660, 3066.0/461, 3066.0/1945,]
+        if dataset == "TBD":
+            weights = [12715.0/2590, 12715.0/2104, 12715.0/836, 12715.0/1060, 12715.0/215, 12715.0/5910,]
         weights = torch.tensor(weights)
         if loss == None:
             self.loss = nn.CrossEntropyLoss(weight=weights)

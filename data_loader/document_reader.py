@@ -1,11 +1,11 @@
-import os
-import sys
+import bs4
 import torch 
 import numpy as np
 import xml.etree.ElementTree as ET
 from utils.constant import *
 from utils.tools import *
 from nltk import sent_tokenize
+from bs4 import BeautifulSoup as Soup
 
 
 # =========================
@@ -331,6 +331,118 @@ def i2b2_xml_reader(dir_name, file_name):
                 my_dict['relation_dict'][(e1_id, e2_id)] = rel_id
     
     return my_dict
+
+# =========================
+#     TimeBank-densen
+# =========================
+def tbd_tml_reader(dir_name, file_name):
+    my_dict = {}
+    my_dict = {}
+    my_dict["event_dict"] = {}
+    eid_to_eiid = {}
+    my_dict["doc_id"] = file_name.replace(".tml", "")
+    try:
+        xml_dom = Soup(open(dir_name + file_name, 'r', encoding='UTF-8'), 'lxml')
+    except:
+        print("Can't load this file: {} T_T". format(dir_name + file_name))
+        return None
+
+    for item in xml_dom.find_all('makeinstance'):
+        eiid = item.attrs['eiid']
+        eid = item.attrs['eventid']
+        my_dict['event_dict'][eiid] = {}
+        my_dict['event_dict'][eiid]['tense'] = item.attrs['tense']
+        my_dict['event_dict'][eiid]['aspect'] = item.attrs['aspect']
+        my_dict['event_dict'][eiid]['polarity'] = item.attrs.get('polarity')
+        eid_to_eiid[eid] = eiid
+
+    raw_content = xml_dom.find('text')
+    content = ''
+    pointer = 0
+    for item in raw_content.contents:
+
+        if type(item) == bs4.element.Tag and item.name == 'event':
+            eid = item.attrs['eid']
+            eiid = eid_to_eiid[eid]
+            my_dict['event_dict'][eiid]['mention'] = item.text
+            my_dict['event_dict'][eiid]['class'] = item.attrs['class']
+            my_dict['event_dict'][eiid]['start_char'] = pointer
+            end_char = pointer + len(my_dict["event_dict"][eiid]['mention']) - 1
+            my_dict['event_dict'][eiid]['end_char'] = end_char
+
+        if type(item) == bs4.element.NavigableString:
+            content += str(item)
+            pointer += len(str(item))
+        else:
+            content += item.text
+            pointer += len(item.text)
+
+    my_dict["doc_content"] = content
+    my_dict["sentences"] = []
+    my_dict["relation_dict"] = {}
+    sent_tokenized_text = sent_tokenize(my_dict["doc_content"])
+    sent_span = tokenized_to_origin_span(my_dict["doc_content"], sent_tokenized_text)
+    count_sent = 0
+    for sent in sent_tokenized_text:
+        sent_dict = {}
+        sent_dict["sent_id"] = count_sent
+        sent_dict["content"] = sent
+        sent_dict["sent_start_char"] = sent_span[count_sent][0]
+        sent_dict["sent_end_char"] = sent_span[count_sent][1]
+        count_sent += 1
+        spacy_token = nlp(sent_dict["content"])
+        sent_dict["tokens"] = []
+        sent_dict["pos"] = []
+        # spaCy-tokenized tokens & Part-Of-Speech Tagging
+        for token in spacy_token:
+            sent_dict["tokens"].append(token.text)
+            sent_dict["pos"].append(token.pos_)
+        sent_dict["token_span_SENT"] = tokenized_to_origin_span(sent, sent_dict["tokens"])
+        sent_dict["token_span_DOC"] = span_SENT_to_DOC(sent_dict["token_span_SENT"], sent_dict["sent_start_char"])
+
+        # RoBERTa tokenizer
+        sent_dict["roberta_subword_to_ID"], sent_dict["roberta_subwords"], \
+        sent_dict["roberta_subword_span_SENT"], sent_dict["roberta_subword_map"] = \
+        RoBERTa_list(sent_dict["content"], sent_dict["tokens"], sent_dict["token_span_SENT"])
+            
+        sent_dict["roberta_subword_span_DOC"] = \
+        span_SENT_to_DOC(sent_dict["roberta_subword_span_SENT"], sent_dict["sent_start_char"])
+        
+        sent_dict["roberta_subword_pos"] = []
+        for token_id in sent_dict["roberta_subword_map"]:
+            if token_id == -1 or token_id is None:
+                sent_dict["roberta_subword_pos"].append("None")
+            else:
+                sent_dict["roberta_subword_pos"].append(sent_dict["pos"][token_id])
+        
+        my_dict["sentences"].append(sent_dict)
+        
+        # Add sent_id as an attribute of event
+    for event_id, event_dict in my_dict["event_dict"].items():
+        # print(event_id)
+        # print(event_dict)
+        my_dict["event_dict"][event_id]["sent_id"] = sent_id = \
+        sent_id_lookup(my_dict, event_dict["start_char"])
+        my_dict["event_dict"][event_id]["token_id"] = \
+        id_lookup(my_dict["sentences"][sent_id]["token_span_DOC"], event_dict["start_char"])
+        my_dict["event_dict"][event_id]["roberta_subword_id"] = \
+        id_lookup(my_dict["sentences"][sent_id]["roberta_subword_span_DOC"], event_dict["start_char"])
+    
+    my_dict['relation_dict'] = {}
+    for item in xml_dom.find_all('tlink'):
+        attr:dict = item.attrs
+        e1_id = attr.get('eventinstanceid')
+        e2_id = attr.get('relatedtoeventinstance')
+        if  e1_id != None and  e2_id != None:
+            rel = attr.get('reltype')
+            rel_id = tbd_label_dict.get(rel)
+            my_dict['relation_dict'][(e1_id, e2_id)] = rel_id
+            if rel_id == None:
+                print(item)
+    return my_dict
+
+
+    
 
 
 
