@@ -19,7 +19,8 @@ class EXP():
         self.test_datatloader = test_dataloader
         self.validate_dataloader = validate_dataloader
 
-        self.optimizer = optim.AdamW(self.model.parameters(), lr=self.lr, amsgrad=True)
+        # self.optimizer = optim.AdamW(self.model.parameters(), lr=self.lr, amsgrad=True)
+        self.optimizer = optim.Adadelta(self.model.parameters(), lr=self.lr)
         self.best_micro_f1 = -0.1
         self.best_cm = []
         self.best_path = best_path
