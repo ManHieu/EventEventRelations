@@ -19,8 +19,8 @@ class EXP():
         self.test_datatloader = test_dataloader
         self.validate_dataloader = validate_dataloader
 
-        # self.optimizer = optim.AdamW(self.model.parameters(), lr=self.lr, amsgrad=True)
-        self.optimizer = optim.Adadelta(self.model.parameters(), lr=self.lr)
+        self.optimizer = optim.AdamW(self.model.parameters(), lr=self.lr, amsgrad=True)
+        # self.optimizer = optim.Adadelta(self.model.parameters(), lr=self.lr)
         self.best_micro_f1 = -0.1
         self.best_cm = []
         self.best_path = best_path
@@ -60,7 +60,7 @@ class EXP():
             current_F1 = self.evaluate()
             current_loss = self.train_loss
             if i%3 == 1:
-                if abs(current_F1 - pre_F1) < 0.005 or abs(current_loss - pre_loss) < 5 or (current_loss - pre_loss) > 1500:
+                if abs(current_F1 - pre_F1) < 0.005 or (current_loss - pre_loss) > 500:
                     break
             pre_loss = current_loss
             pre_F1 = current_F1
