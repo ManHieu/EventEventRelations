@@ -11,7 +11,7 @@ class ECIRoberta(nn.Module):
         self.num_classes = num_classes
         self.data_set = dataset
         self.mlp_size = mlp_size
-        self.robera = RobertaModel.from_pretrained('./pretrained_models/models/roberta-large')
+        self.roberta = RobertaModel.from_pretrained('./pretrained_models/models/roberta-large')
         self.sub = sub
         self.mul = mul
         self.finetune = finetune
@@ -53,12 +53,12 @@ class ECIRoberta(nn.Module):
         # print(x_sent.size())
 
         if self.finetune:
-            output_x = self.robera(x_sent)[0]
-            output_y = self.robera(y_sent)[0]
+            output_x = self.roberta(x_sent)[0]
+            output_y = self.roberta(y_sent)[0]
         else:
             with torch.no_grad():
-                output_x = self.robera(x_sent)[0]
-                output_y = self.robera(y_sent)[0]
+                output_x = self.roberta(x_sent)[0]
+                output_y = self.roberta(y_sent)[0]
 
         output_A = torch.cat([output_x[i, x_position[i], :].unsqueeze(0) for i in range(0, batch_size)])
         output_B = torch.cat([output_y[i, y_position[i], :].unsqueeze(0) for i in range(0, batch_size)])
