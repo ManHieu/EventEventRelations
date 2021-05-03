@@ -36,7 +36,7 @@ class EXP():
     def train(self, stopped=100):
         total_t0 = time.time()
         pre_F1 = 0.0
-        pre_loss = 0.0
+        pre_loss = 10000000.0
         for i in range(0, self.epochs):
             print("")
             print('======== Epoch {:} / {:} ========'.format(i + 1, self.epochs))
@@ -68,10 +68,10 @@ class EXP():
             current_F1 = self.evaluate()
             current_loss = self.train_loss
             if i%3 == 1:
-                if abs(current_F1 - pre_F1) < 0.01 or abs(current_loss - pre_loss) < 5 or (current_loss - pre_loss) > 600:
-                    break
                 print("Loss: {} - {}".format(current_loss, pre_loss))
                 print("F1: {} - {}". format(current_F1, pre_F1))
+                if abs(current_F1 - pre_F1) < 0.01 or abs(current_loss - pre_loss) < 5 or (current_loss - pre_loss) > 600:
+                    break
                 pre_loss = current_loss
                 pre_F1 = current_F1
             
