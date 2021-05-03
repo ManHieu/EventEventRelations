@@ -1,5 +1,4 @@
 import torch
-from torch._C import parse_ir, set_flush_denormal
 import torch.nn as nn
 from transformers import RobertaModel
 from utils.constant import CUDA

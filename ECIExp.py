@@ -11,10 +11,11 @@ from os import path
 from utils.tools import *
 
 class EXP():
-    def __init__(self, model:ECIRoberta, epochs, lr, train_dataloader:DataLoader, validate_dataloader:DataLoader, test_dataloader:DataLoader, best_path) -> None:
+    def __init__(self, model:ECIRoberta, epochs, b_lr, mlp_lr, train_dataloader:DataLoader, validate_dataloader:DataLoader, test_dataloader:DataLoader, best_path) -> None:
         self.model = model
         self.epochs = epochs
-        self.lr = lr
+        self.b_lr = b_lr
+        self.mlp_lr = mlp_lr
         self.train_dataloader = train_dataloader
         self.test_datatloader = test_dataloader
         self.validate_dataloader = validate_dataloader
@@ -25,10 +26,10 @@ class EXP():
         self.best_cm = []
         self.best_path = best_path
     
-    def train(self):
+    def train(self, stopped=100):
         total_t0 = time.time()
         pre_F1 = 0.0
-        pre_loss = 10000000000
+        pre_loss = 10000000.0
         for i in range(0, self.epochs):
             print("")
             print('======== Epoch {:} / {:} ========'.format(i + 1, self.epochs))

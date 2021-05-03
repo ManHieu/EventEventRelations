@@ -1,5 +1,7 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from models.roberta_model import ECIRoberta
+from numpy import sin
+import torch
 import optuna
 from timeit import default_timer as timer
 from data_loader.data_loaders import single_loader
@@ -13,16 +15,17 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "learning_rate": trial.suggest_float("lr", 1e-8, 1e-6, log=True),
-        "MLP size": trial.suggest_categorical("MLP size", [256, 512, 768])
+        "bert_learning_rate": trial.suggest_float("b_lr", 1e-8, 5e-6, log=True),
+        "mlp_learning_rate": trial.suggest_float('mlp_lr', 1e-8, 1e-4, log=True),
+        "MLP size": trial.suggest_categorical("MLP size", [256, 512, 768]),
+        "early_stop": 3,
     }
     print("Hyperparameter will be used in this trial: ")
     print(params)
     start = timer()
+    train_dataloader, test_dataloader, validate_dataloader, num_classes = single_loader(dataset, batch_size)
 
     model = ECIRoberta(num_classes, dataset, params["MLP size"], roberta_type, finetune=True)
-    print("Model architecture: ")
-    print(model)
     if CUDA:
         model = model.cuda()
     model.zero_grad()
@@ -30,8 +33,8 @@ def objective(trial:optuna.Trial):
     total_steps = len(train_dataloader) * epoches
     print("Total steps: [number of batches] x [number of epochs] =", total_steps)
 
-    exp = EXP(model, epoches, params["learning_rate"], train_dataloader, validate_dataloader, test_dataloader, best_path)
-    f1 = exp.train()
+    exp = EXP(model, epoches, params["bert_learning_rate"], params["mlp_learning_rate"], train_dataloader, validate_dataloader, test_dataloader, best_path)
+    f1 = exp.train(params['early_stop'])
     exp.evaluate(is_test=True)
     
     print("Result: Best micro F1 of interaction: {}".format(f1))
@@ -53,8 +56,6 @@ if __name__=="__main__":
     epoches = args.epoches
     best_path = args.best_path
     dataset = args.dataset
-
-    train_dataloader, test_dataloader, validate_dataloader, num_classes = single_loader(dataset, batch_size)
 
     study = optuna.create_study(direction='maximize')
     study.optimize(objective, n_trials=30)
