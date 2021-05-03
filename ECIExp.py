@@ -61,6 +61,8 @@ class EXP():
             current_F1 = self.evaluate()
             current_loss = self.train_loss
             if i%3 == 1:
+                print("Loss: {} - {}".format(current_loss, pre_loss))
+                print("F1: {} - {}". format(current_F1, pre_F1))
                 if abs(current_F1 - pre_F1) < 0.005 or (current_loss - pre_loss) > 500 or abs(current_loss - pre_loss) < 5:
                     break
                 pre_loss = current_loss
