@@ -24,11 +24,11 @@ class EXP():
         for name, param in self.model.named_parameters():
             if 'roberta' in name:
                 bert_param_list.append(param)
-                param.requires_grad = False
+                # param.requires_grad = False
             else:
                 pass
-        # self.optimizer = optim.AdamW([{'params': bert_param_list, 'lr': self.b_lr}], lr=self.mlp_lr, amsgrad=True)
-        self.optimizer = optim.AdamW(model.parameters(),lr=self.mlp_lr, amsgrad=True)
+        self.optimizer = optim.AdamW([{'params': bert_param_list, 'lr': self.b_lr}], lr=self.mlp_lr, amsgrad=True)
+        # self.optimizer = optim.AdamW(model.parameters(),lr=self.mlp_lr, amsgrad=True)
         self.best_micro_f1 = -0.1
         self.best_cm = []
         self.best_path = best_path
