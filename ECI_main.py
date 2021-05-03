@@ -32,7 +32,7 @@ def objective(trial:optuna.Trial):
     print("Total steps: [number of batches] x [number of epochs] =", total_steps)
 
     exp = EXP(model, epoches, params["learning_rate"], train_dataloader, validate_dataloader, test_dataloader, best_path)
-    f1 = exp.train(params['early_stop'])
+    f1 = exp.train()
     exp.evaluate(is_test=True)
     
     print("Result: Best micro F1 of interaction: {}".format(f1))

@@ -25,7 +25,7 @@ class EXP():
         self.best_cm = []
         self.best_path = best_path
     
-    def train(self, stopped=100):
+    def train(self):
         total_t0 = time.time()
         pre_F1 = 0.0
         pre_loss = 10000000.0
