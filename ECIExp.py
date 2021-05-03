@@ -72,6 +72,8 @@ class EXP():
                     break
                 pre_loss = current_loss
                 pre_F1 = current_F1
+                print("Loss: {} - {}".format(current_loss, pre_loss))
+                print("F1: {} - {}". format(current_F1, pre_F1))
             
             if i >= stopped:
                 for param in self.bert_param_list:
