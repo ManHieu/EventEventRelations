@@ -21,8 +21,8 @@ def objective(trial:optuna.Trial):
     start = timer()
 
     model = ECIRoberta(num_classes, dataset, params["MLP size"], roberta_type, finetune=True)
-    # print("Model architecture: ")
-    # print(model)
+    print("Model architecture: ")
+    print(model)
     if CUDA:
         model = model.cuda()
     model.zero_grad()
