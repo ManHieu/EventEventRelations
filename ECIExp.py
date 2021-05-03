@@ -11,11 +11,10 @@ from os import path
 from utils.tools import *
 
 class EXP():
-    def __init__(self, model:ECIRoberta, epochs, b_lr, mlp_lr, train_dataloader:DataLoader, validate_dataloader:DataLoader, test_dataloader:DataLoader, best_path) -> None:
+    def __init__(self, model:ECIRoberta, epochs, lr, train_dataloader:DataLoader, validate_dataloader:DataLoader, test_dataloader:DataLoader, best_path) -> None:
         self.model = model
         self.epochs = epochs
-        self.b_lr = b_lr
-        self.mlp_lr = mlp_lr
+        self.lr = lr
         self.train_dataloader = train_dataloader
         self.test_datatloader = test_dataloader
         self.validate_dataloader = validate_dataloader

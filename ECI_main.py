@@ -15,10 +15,8 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "bert_learning_rate": trial.suggest_float("b_lr", 1e-8, 5e-6, log=True),
-        "mlp_learning_rate": trial.suggest_float('mlp_lr', 1e-8, 1e-4, log=True),
+        "learning_rate": trial.suggest_float("b_lr", 1e-8, 5e-6, log=True),
         "MLP size": trial.suggest_categorical("MLP size", [256, 512, 768]),
-        # "early_stop": 3,
     }
     print("Hyperparameter will be used in this trial: ")
     print(params)
@@ -33,7 +31,7 @@ def objective(trial:optuna.Trial):
     total_steps = len(train_dataloader) * epoches
     print("Total steps: [number of batches] x [number of epochs] =", total_steps)
 
-    exp = EXP(model, epoches, params["bert_learning_rate"], params["mlp_learning_rate"], train_dataloader, validate_dataloader, test_dataloader, best_path)
+    exp = EXP(model, epoches, params["learning_rate"], train_dataloader, validate_dataloader, test_dataloader, best_path)
     f1 = exp.train(params['early_stop'])
     exp.evaluate(is_test=True)
     
