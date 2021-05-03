@@ -45,7 +45,6 @@ class EXP():
             t0 = time.time()
             self.model.train()
             self.train_loss = 0.0
-            pre_F1 = 0.0
             for step, batch in enumerate(self.train_dataloader):
                 if step%50==0 and not step==0:
                     elapsed = format_time(time.time() - t0)
