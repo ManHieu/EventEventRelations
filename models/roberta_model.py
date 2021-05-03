@@ -11,7 +11,7 @@ class ECIRoberta(nn.Module):
         self.num_classes = num_classes
         self.data_set = dataset
         self.mlp_size = mlp_size
-        self.roberta = RobertaModel.from_pretrained('./pretrained_models/models/roberta-large')
+        self.roberta = RobertaModel.from_pretrained(roberta_type)
         self.sub = sub
         self.mul = mul
         self.finetune = finetune
