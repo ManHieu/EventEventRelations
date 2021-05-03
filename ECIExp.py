@@ -20,20 +20,20 @@ class EXP():
         self.test_datatloader = test_dataloader
         self.validate_dataloader = validate_dataloader
 
-        bert_param_list = []
+        self.bert_param_list = []
         for name, param in self.model.named_parameters():
             if 'roberta' in name:
-                bert_param_list.append(param)
+                self.bert_param_list.append(param)
                 # param.requires_grad = False
             else:
                 pass
-        self.optimizer = optim.AdamW([{'params': bert_param_list, 'lr': self.b_lr}], lr=self.mlp_lr, amsgrad=True)
+        self.optimizer = optim.AdamW([{'params': self.bert_param_list, 'lr': self.b_lr}], lr=self.mlp_lr, amsgrad=True)
         # self.optimizer = optim.AdamW(model.parameters(),lr=self.mlp_lr, amsgrad=True)
         self.best_micro_f1 = -0.1
         self.best_cm = []
         self.best_path = best_path
     
-    def train(self):
+    def train(self, stopped=100):
         total_t0 = time.time()
         pre_F1 = 0.0
         pre_loss = 0.0
@@ -72,6 +72,10 @@ class EXP():
                     break
             pre_loss = current_loss
             pre_F1 = current_F1
+            
+            if i >= stopped:
+                for param in self.bert_param_list:
+                    param.requires_grad = False
         
         print("Training complete!")
         print("Total training took {:} (h:mm:ss)".format(format_time(time.time()-total_t0)))
