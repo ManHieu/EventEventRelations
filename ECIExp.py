@@ -28,7 +28,7 @@ class EXP():
     def train(self):
         total_t0 = time.time()
         pre_F1 = 0.0
-        pre_loss = 0.0
+        pre_loss = 10000000000
         for i in range(0, self.epochs):
             print("")
             print('======== Epoch {:} / {:} ========'.format(i + 1, self.epochs))
@@ -62,8 +62,8 @@ class EXP():
             if i%3 == 1:
                 if abs(current_F1 - pre_F1) < 0.005 or (current_loss - pre_loss) > 500 or abs(current_loss - pre_loss) < 5:
                     break
-            pre_loss = current_loss
-            pre_F1 = current_F1
+                pre_loss = current_loss
+                pre_F1 = current_F1
         
         print("Training complete!")
         print("Total training took {:} (h:mm:ss)".format(format_time(time.time()-total_t0)))
