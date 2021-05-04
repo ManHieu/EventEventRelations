@@ -11,7 +11,9 @@ from os import path
 from utils.tools import *
 
 class EXP():
-    def __init__(self, model:ECIRoberta, epochs, lr, train_dataloader:DataLoader, validate_dataloader:DataLoader, test_dataloader:DataLoader, best_path) -> None:
+    def __init__(self, model:ECIRoberta, epochs, lr, 
+                train_dataloader:DataLoader, validate_dataloader:DataLoader, test_dataloader:DataLoader, 
+                best_path, weight_decay=0.01) -> None:
         self.model = model
         self.epochs = epochs
         self.lr = lr
@@ -19,7 +21,7 @@ class EXP():
         self.test_datatloader = test_dataloader
         self.validate_dataloader = validate_dataloader
 
-        self.optimizer = optim.AdamW(self.model.parameters(), lr=self.lr, amsgrad=True)
+        self.optimizer = optim.AdamW(self.model.parameters(), lr=self.lr, amsgrad=True, weight_decay=weight_decay)
         # self.optimizer = optim.Adadelta(self.model.parameters(), lr=self.lr)
         self.best_micro_f1 = -0.1
         self.best_cm = []
