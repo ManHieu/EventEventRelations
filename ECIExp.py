@@ -60,6 +60,9 @@ class EXP():
                 self.train_loss += loss.item()
                 loss.backward()
                 self.optimizer.step()
+                if i%50 >= 15:
+                    for param in self.bert_param_list:
+                        param.requires_grad = False
             
             epoch_training_time = format_time(time.time() - t0)
             print("  Total training loss: {0:.2f}".format(self.train_loss))
