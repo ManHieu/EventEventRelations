@@ -60,7 +60,7 @@ class EXP():
                 self.train_loss += loss.item()
                 loss.backward()
                 self.optimizer.step()
-                if i%50 >= 15:
+                if step%50 >= 10:
                     for param in self.bert_param_list:
                         param.requires_grad = False
             
