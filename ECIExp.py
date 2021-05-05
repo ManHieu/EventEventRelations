@@ -38,6 +38,10 @@ class EXP():
         pre_F1 = 0.0
         pre_loss = 10000000.0
         for i in range(0, self.epochs):
+            if i >= stopped:
+                for param in self.bert_param_list:
+                    param.requires_grad = False
+
             print("")
             print('======== Epoch {:} / {:} ========'.format(i + 1, self.epochs))
             print('Training...')
@@ -77,10 +81,6 @@ class EXP():
                 pre_loss = current_loss
                 pre_F1 = current_F1
             
-            if i >= stopped:
-                for param in self.bert_param_list:
-                    param.requires_grad = False
-        
         print("Training complete!")
         print("Total training took {:} (h:mm:ss)".format(format_time(time.time()-total_t0)))
         print("Best micro F1:{}".format(self.best_micro_f1))
