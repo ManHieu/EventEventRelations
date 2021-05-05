@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import time
 import torch.optim as optim
+from transformers import get_linear_schedule_with_warmup
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix, classification_report, accuracy_score
 from utils.tools import CUDA, format_time, metric
 from os import path
@@ -16,6 +17,7 @@ class EXP():
         self.epochs = epochs
         self.b_lr = b_lr
         self.mlp_lr = mlp_lr
+        
         self.train_dataloader = train_dataloader
         self.test_datatloader = test_dataloader
         self.validate_dataloader = validate_dataloader
@@ -25,10 +27,9 @@ class EXP():
             if 'roberta' in name:
                 self.bert_param_list.append(param)
                 # param.requires_grad = False
-            else:
-                pass
         self.optimizer = optim.AdamW([{'params': self.bert_param_list, 'lr': self.b_lr}], lr=self.mlp_lr, amsgrad=True)
-        # self.optimizer = optim.AdamW(model.parameters(),lr=self.mlp_lr, amsgrad=True)
+        self.scheduler = get_linear_schedule_with_warmup(self.optimizer, int(len(self.train_dataloader)*0.1), len(self.train_dataloader))
+        
         self.best_micro_f1 = -0.1
         self.best_cm = []
         self.best_path = best_path
@@ -38,6 +39,7 @@ class EXP():
         pre_F1 = 0.0
         pre_loss = 10000000.0
         for i in range(0, self.epochs):
+
             if i >= stopped:
                 for param in self.bert_param_list:
                     param.requires_grad = False
@@ -50,9 +52,6 @@ class EXP():
             self.model.train()
             self.train_loss = 0.0
             for step, batch in enumerate(self.train_dataloader):
-                if step%50==0 and not step==0:
-                    elapsed = format_time(time.time() - t0)
-                    print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(self.train_dataloader), elapsed))
                 x_sent, y_sent, x_position, y_position, x_sent_pos, y_sent_pos, xy = batch[2:]
                 if CUDA:
                     x_sent = x_sent.cuda()
@@ -60,13 +59,17 @@ class EXP():
                     x_position = x_position.cuda()
                     y_position = y_position.cuda()
                     xy = xy.cuda()
+
                 logits, loss = self.model(x_sent, y_sent, x_position, y_position, xy)
                 self.train_loss += loss.item()
                 loss.backward()
                 self.optimizer.step()
-                if step%50 >= 10:
-                    for param in self.bert_param_list:
-                        param.requires_grad = False
+                self.scheduler.step()
+
+                if step%50==0 and not step==0:
+                    elapsed = format_time(time.time() - t0)
+                    print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(self.train_dataloader), elapsed))
+                
             
             epoch_training_time = format_time(time.time() - t0)
             print("  Total training loss: {0:.2f}".format(self.train_loss))

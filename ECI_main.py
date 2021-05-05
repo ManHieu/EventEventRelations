@@ -18,7 +18,7 @@ def objective(trial:optuna.Trial):
         "bert_learning_rate": trial.suggest_float("b_lr", 1e-8, 5e-6, log=True),
         "mlp_learning_rate": trial.suggest_float('mlp_lr', 1e-8, 1e-4, log=True),
         "MLP size": trial.suggest_categorical("MLP size", [256, 512, 768]),
-        "early_stop": 3,
+        "early_stop": 100,
     }
     print("Hyperparameter will be used in this trial: ")
     print(params)
