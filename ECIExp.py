@@ -20,14 +20,16 @@ class EXP():
         self.test_datatloader = test_dataloader
         self.validate_dataloader = validate_dataloader
 
-        bert_param_list = []
+        self.bert_param_list = []
+        self.mlp_param_list = []
         for name, param in self.model.named_parameters():
             if 'roberta' in name:
-                bert_param_list.append(param)
+                self.bert_param_list.append(param)
                 # param.requires_grad = False
             else:
-                pass
-        self.optimizer = optim.AdamW([{'params': bert_param_list, 'lr': self.b_lr}], lr=self.mlp_lr, amsgrad=True)
+                self.mlp_param_list.append(param)
+        self.optimizer = optim.AdamW([{'params': self.bert_param_list, 'lr': self.b_lr},
+                                    {'params': self.mlp_param_list, 'lr': self.mlp_lr}], amsgrad=True)
         # self.optimizer = optim.AdamW(model.parameters(),lr=self.mlp_lr, amsgrad=True)
         self.best_micro_f1 = -0.1
         self.best_cm = []
