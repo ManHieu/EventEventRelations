@@ -1,12 +1,11 @@
 from numpy.lib.function_base import average
-from torch.nn import parameter
 from torch.utils.data.dataloader import DataLoader
 from models.roberta_model import ECIRoberta
 import torch
 import torch.nn as nn
 import time
 import torch.optim as optim
-from transformers import get_constant_schedule_with_warmup
+from transformers import get_linear_schedule_with_warmup
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix, classification_report, accuracy_score
 from utils.tools import CUDA, format_time, metric
 from os import path
@@ -28,8 +27,8 @@ class EXP():
             if 'roberta' in name:
                 self.bert_param_list.append(param)
                 # param.requires_grad = False
-        self.optimizer = optim.AdamW(self.model.parameters(), lr=self.mlp_lr, amsgrad=True)
-        self.scheduler = get_constant_schedule_with_warmup(self.optimizer, int(len(self.train_dataloader)*0.1), 5)
+        self.optimizer = optim.AdamW([{'params': self.bert_param_list, 'lr': self.b_lr}], lr=self.mlp_lr, amsgrad=True)
+        self.scheduler = get_linear_schedule_with_warmup(self.optimizer, int(len(self.train_dataloader)*0.1), len(self.train_dataloader))
         
         self.best_micro_f1 = -0.1
         self.best_cm = []
