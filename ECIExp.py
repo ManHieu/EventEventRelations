@@ -21,8 +21,17 @@ class EXP():
         self.test_datatloader = test_dataloader
         self.validate_dataloader = validate_dataloader
 
-        self.optimizer = optim.AdamW(self.model.parameters(), lr=self.lr, amsgrad=True, weight_decay=weight_decay)
-        # self.optimizer = optim.Adadelta(self.model.parameters(), lr=self.lr)
+        self.bert_param_list = []
+        self.mlp_param_list = []
+        for name, param in self.model.named_parameters():
+            if 'roberta' in name:
+                self.bert_param_list.append(param)
+                # param.requires_grad = False
+            else:
+                self.mlp_param_list.append(param)
+        self.optimizer = optim.AdamW([{'params': self.bert_param_list, 'lr': self.b_lr},
+                                    {'params': self.mlp_param_list, 'lr': self.mlp_lr}], amsgrad=True, weight_decay=weight_decay)
+        # self.optimizer = optim.AdamW(model.parameters(),lr=self.mlp_lr, amsgrad=True)
         self.best_micro_f1 = -0.1
         self.best_cm = []
         self.best_path = best_path
