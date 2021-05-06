@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from transformers import RobertaModel
 from utils.constant import CUDA
+import os.path as path
 
 
 class ECIRoberta(nn.Module):
@@ -10,7 +11,10 @@ class ECIRoberta(nn.Module):
         self.num_classes = num_classes
         self.data_set = dataset
         self.mlp_size = mlp_size
-        self.roberta = RobertaModel.from_pretrained(roberta_type)
+        if path.exists("./pretrained_models/models/{}".format(roberta_type)):
+            self.roberta = RobertaModel.from_pretrained("./pretrained_models/models/{}".format(roberta_type))
+        else:
+            self.roberta = RobertaModel.from_pretrained(roberta_type)
         self.sub = sub
         self.mul = mul
         self.finetune = finetune
