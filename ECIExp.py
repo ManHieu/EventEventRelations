@@ -35,7 +35,7 @@ class EXP():
                                     {'params': self.mlp_param_list, 'lr': self.mlp_lr}], 
                                     amsgrad=True, weight_decay=weight_decay)
         self.scheduler = get_constant_schedule_with_warmup(self.optimizer, int(len(self.train_dataloader)*0.1))
-        # self.optimizer = optim.AdamW(model.parameters(),lr=self.mlp_lr, amsgrad=True)
+        
         self.best_micro_f1 = -0.1
         self.best_cm = []
         self.best_path = best_path
@@ -82,6 +82,7 @@ class EXP():
             print("  Training epoch took: {:}".format(epoch_training_time))
             current_F1 = self.evaluate()
             current_loss = self.train_loss
+            
             if i%3 == 1:
                 print("Loss: {} - {}".format(current_loss, pre_loss))
                 print("F1: {} - {}". format(current_F1, pre_F1))

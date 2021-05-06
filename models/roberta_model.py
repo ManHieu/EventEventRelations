@@ -44,7 +44,7 @@ class ECIRoberta(nn.Module):
             self.fc2 = nn.Linear(int(self.mlp_size), num_classes)
 
         # print(self.fc1)
-
+        self.drop_out = nn.Dropout(0.5)
         self.relu = nn.LeakyReLU(0.2, True)
     
     def forward(self, x_sent, y_sent, x_position, y_position, xy):
@@ -74,6 +74,7 @@ class ECIRoberta(nn.Module):
             presentation = torch.cat([output_A, output_B, mul], 1)
         
         # print(presentation.size())
-        logits = self.fc2(self.relu(self.fc1(presentation)))
+        presentation = self.drop_out(presentation)
+        logits = self.fc2(self.drop_out(self.relu(self.fc1(presentation))))
         loss = self.loss(logits, xy)
         return logits, loss

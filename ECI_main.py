@@ -19,6 +19,7 @@ def objective(trial:optuna.Trial):
         "mlp_learning_rate": trial.suggest_categorical('mlp_lr', [1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6, 1e-5, 5e-5]),
         "MLP size": trial.suggest_categorical("MLP size", [256, 512, 768]),
         "early_stop": 100,
+        'weight_decay': trial.suggest_float("weight_decay", 0, 1),
     }
     print("Hyperparameter will be used in this trial: ")
     print(params)
@@ -33,7 +34,9 @@ def objective(trial:optuna.Trial):
     total_steps = len(train_dataloader) * epoches
     print("Total steps: [number of batches] x [number of epochs] =", total_steps)
 
-    exp = EXP(model, epoches, params["bert_learning_rate"], params["mlp_learning_rate"], train_dataloader, validate_dataloader, test_dataloader, best_path, weight_decay=params['weight_decay'])
+    exp = EXP(model, epoches, params["bert_learning_rate"], params["mlp_learning_rate"], 
+            train_dataloader, validate_dataloader, test_dataloader, 
+            best_path, weight_decay=params['weight_decay'])
     f1 = exp.train()
     exp.evaluate(is_test=True)
     
