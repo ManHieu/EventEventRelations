@@ -16,7 +16,7 @@ def count_parameters(model):
 def objective(trial:optuna.Trial):
     params = {
         "bert_learning_rate": trial.suggest_categorical("b_lr", [1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6, 1e-5, 5e-5]),
-        "mlp_learning_rate": trial.suggest_categorical('mlp_lr', [1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6, 1e-5, 5e-5]),
+        "mlp_learning_rate": trial.suggest_categorical('mlp_lr', [1e-7, 5e-7, 1e-6, 5e-6, 1e-5, 5e-5, 1e-4, 5e-4, 1e-3]),
         "MLP size": trial.suggest_categorical("MLP size", [256, 512, 768]),
         "early_stop": 100,
         'weight_decay': trial.suggest_float("weight_decay", 0, 1),
