@@ -12,8 +12,10 @@ class ECIRoberta(nn.Module):
         self.data_set = dataset
         self.mlp_size = mlp_size
         if path.exists("./pretrained_models/models/{}".format(roberta_type)):
+            print("Loading pretrain model from local ......")
             self.roberta = RobertaModel.from_pretrained("./pretrained_models/models/{}".format(roberta_type))
         else:
+            print("Loading pretrain model ......")
             self.roberta = RobertaModel.from_pretrained(roberta_type)
         self.sub = sub
         self.mul = mul
