@@ -94,8 +94,8 @@ class EXP():
         print("Training complete!")
         print("Total training took {:} (h:mm:ss)".format(format_time(time.time()-total_t0)))
         print("Best micro F1:{}".format(self.best_micro_f1))
-        print("Bset confusion matrix: \n {} \n".format(self.best_cm))
-        return self.best_micro_f1
+        print("Best confusion matrix: \n {} \n".format(self.best_cm))
+        return self.best_micro_f1, self.best_cm
 
     def evaluate(self, is_test=False):
         t0 = time.time()
