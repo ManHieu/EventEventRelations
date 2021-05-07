@@ -83,7 +83,7 @@ class EXP():
             current_F1 = self.evaluate()
             current_loss = self.train_loss
             
-            if i%3 == 1:
+            if i%3 == 1 and i > 9:
                 print("Loss: {} - {}".format(current_loss, pre_loss))
                 print("F1: {} - {}". format(current_F1, pre_F1))
                 if abs(current_F1 - pre_F1) < 0.005 or (current_loss - pre_loss) > 500:
