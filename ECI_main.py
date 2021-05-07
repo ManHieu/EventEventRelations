@@ -42,7 +42,7 @@ def objective(trial:optuna.Trial):
     
     print("Result: Best micro F1 of interaction: {}".format(f1))
 
-    with open("./result/{}.txt".format(dataset), 'w', encoding='UTF-8') as f:
+    with open("./result/{}.txt".format(dataset), 'a', encoding='UTF-8') as f:
         f.write(" F1: {} \n CM: {} \n Hypeparameter: {} ".format(f1, CM, params))
         f.write("--------------------------------------------")
     return f1
