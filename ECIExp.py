@@ -79,10 +79,10 @@ class EXP():
                 self.optimizer.step()
                 self.scheduler.step()
 
-                print("LR: {} - {}".format(self.optimizer.param_groups[0]['lr'], self.optimizer.param_groups[1]['lr']))
                 if step%50==0 and not step==0:
                     elapsed = format_time(time.time() - t0)
                     print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(self.train_dataloader), elapsed))
+                    print("LR: {} - {}".format(self.optimizer.param_groups[0]['lr'], self.optimizer.param_groups[1]['lr']))
                 
             
             epoch_training_time = format_time(time.time() - t0)
