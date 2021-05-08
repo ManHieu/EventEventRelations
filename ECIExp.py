@@ -14,7 +14,7 @@ from utils.tools import *
 class EXP():
     def __init__(self, model:ECIRoberta, epochs, b_lr, m_lr, 
                 train_dataloader:DataLoader, validate_dataloader:DataLoader, test_dataloader:DataLoader, 
-                best_path, weight_decay=0.01) -> None:
+                best_path, weight_decay=0.01, train_lm_epoch=3, warmup_proportion=0.1) -> None:
         self.model = model
         self.epochs = epochs
         self.b_lr = b_lr
@@ -25,6 +25,8 @@ class EXP():
 
         self.bert_param_list = []
         self.mlp_param_list = []
+        self.train_roberta_epoch = train_lm_epoch
+        self.warmup_proportion = warmup_proportion
         for name, param in self.model.named_parameters():
             if 'roberta' in name:
                 self.bert_param_list.append(param)
@@ -34,19 +36,24 @@ class EXP():
         self.optimizer = optim.AdamW([{'params': self.bert_param_list, 'lr': self.b_lr},
                                     {'params': self.mlp_param_list, 'lr': self.mlp_lr}], 
                                     amsgrad=True, weight_decay=weight_decay)
-        self.scheduler = get_linear_schedule_with_warmup(self.optimizer, int(len(self.train_dataloader)*self.epochs*0.1), len(self.train_dataloader)*self.epochs)
+        def mlp_lamda(step):
+            return 0.9**int(step/len(self.train_dataloader))
+        def robeata_lamba(step):
+            train_step = len(self.train_dataloader) * self.train_roberta_epoch
+            return warmup_linear(step/train_step, warmup=self.warmup_proportion)
+        self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=[robeata_lamba, mlp_lamda])
         
         self.best_micro_f1 = -0.1
         self.best_cm = []
         self.best_path = best_path
     
-    def train(self, stopped=1000):
+    def train(self):
         total_t0 = time.time()
         pre_F1 = 0.0
         pre_loss = 10000000.0
         for i in range(0, self.epochs):
 
-            if i >= stopped:
+            if i >= self.train_roberta_epoch:
                 for param in self.bert_param_list:
                     param.requires_grad = False
 
@@ -72,6 +79,7 @@ class EXP():
                 self.optimizer.step()
                 self.scheduler.step()
 
+                print("LR: {} - {}".format(self.optimizer.param_groups[0]['lr'], self.optimizer.param_groups[1]['lr']))
                 if step%50==0 and not step==0:
                     elapsed = format_time(time.time() - t0)
                     print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(self.train_dataloader), elapsed))
