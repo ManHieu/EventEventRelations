@@ -40,7 +40,7 @@ def objective(trial:optuna.Trial):
     exp = EXP(model, epoches, params["bert_learning_rate"], params["mlp_learning_rate"], 
             train_dataloader, validate_dataloader, test_dataloader, 
             best_path, weight_decay=params['weight_decay'], 
-            train_lm_epoch=params['"early_stop"'], warmup_proportion=params['warmup_proportion'])
+            train_lm_epoch=params['early_stop'], warmup_proportion=params['warmup_proportion'])
     f1, CM = exp.train()
     exp.evaluate(is_test=True)
     
