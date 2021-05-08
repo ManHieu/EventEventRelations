@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import time
 import torch.optim as optim
-from transformers import get_constant_schedule_with_warmup
+from transformers import get_linear_schedule_with_warmup
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix, classification_report, accuracy_score
 from utils.tools import CUDA, format_time, metric
 from os import path
@@ -34,7 +34,7 @@ class EXP():
         self.optimizer = optim.AdamW([{'params': self.bert_param_list, 'lr': self.b_lr},
                                     {'params': self.mlp_param_list, 'lr': self.mlp_lr}], 
                                     amsgrad=True, weight_decay=weight_decay)
-        self.scheduler = get_constant_schedule_with_warmup(self.optimizer, int(len(self.train_dataloader)*self.epochs*0.1))
+        self.scheduler = get_linear_schedule_with_warmup(self.optimizer, int(len(self.train_dataloader)*self.epochs*0.1), len(self.train_dataloader)*self.epochs)
         
         self.best_micro_f1 = -0.1
         self.best_cm = []
