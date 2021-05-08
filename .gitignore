@@ -4,6 +4,7 @@ rst_file/*
 output_redirect/*
 results/*
 EER_dl_env/*
+ECI_env/*
 .vscode/*
 *.pyc
 models/__pycache__/*
