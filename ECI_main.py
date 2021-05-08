@@ -20,13 +20,15 @@ def objective(trial:optuna.Trial):
         "MLP size": trial.suggest_categorical("MLP size", [256, 512, 768]),
         "early_stop": 100,
         'weight_decay': trial.suggest_float("weight_decay", 0, 1, step=0.2),
+        'negative_slope': trial.suggest_float("negative_slope", 0, 0.5, step=0.1)
     }
     print("Hyperparameter will be used in this trial: ")
     print(params)
     start = timer()
     train_dataloader, test_dataloader, validate_dataloader, num_classes = single_loader(dataset, batch_size)
 
-    model = ECIRoberta(num_classes, dataset, params["MLP size"], roberta_type, finetune=True)
+    model = ECIRoberta(num_classes, dataset, params["MLP size"], 
+                    roberta_type, finetune=True, negative_slope=params["negative_slope"])
     if CUDA:
         model = model.cuda()
     model.zero_grad()

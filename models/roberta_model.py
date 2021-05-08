@@ -6,7 +6,9 @@ import os.path as path
 
 
 class ECIRoberta(nn.Module):
-    def __init__(self, num_classes, dataset, mlp_size, roberta_type, finetune, loss=None, sub=True, mul=True):
+    def __init__(self, num_classes, dataset, mlp_size, roberta_type, 
+                finetune, loss=None, sub=True, mul=True, 
+                negative_slope=0.2, drop_rate=0.5):
         super().__init__()
         self.num_classes = num_classes
         self.data_set = dataset
@@ -50,8 +52,8 @@ class ECIRoberta(nn.Module):
             self.fc2 = nn.Linear(int(self.mlp_size), num_classes)
 
         # print(self.fc1)
-        self.drop_out = nn.Dropout(0.5)
-        self.relu = nn.LeakyReLU(0.2, True)
+        self.drop_out = nn.Dropout(drop_rate)
+        self.relu = nn.LeakyReLU(negative_slope, True)
     
     def forward(self, x_sent, y_sent, x_position, y_position, xy):
         batch_size = x_sent.size(0)
