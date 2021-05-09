@@ -1,4 +1,5 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+import datetime
 from models.roberta_model import ECIRoberta
 from numpy import sin
 import torch
@@ -48,7 +49,8 @@ def objective(trial:optuna.Trial):
 
     with open("{}{}.txt".format(result_folder, dataset), 'a', encoding='UTF-8') as f:
         f.write("\n -------------------------------------------- \n")
-        f.write(" F1: \n {} \n CM: \n{} \n Hypeparameter: \n {} ".format(f1, CM, params))
+        f.write(" F1: \n {} \n CM: \n{} \n Hypeparameter: \n {} \n ".format(f1, CM, params))
+        f.write("Time: {} \n".format(datetime.datetime.now()))
     return f1
 
 if __name__=="__main__":
