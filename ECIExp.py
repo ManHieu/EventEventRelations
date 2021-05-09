@@ -40,7 +40,10 @@ class EXP():
             return 0.9**int(step/len(self.train_dataloader))
         def robeata_lamba(step):
             train_step = len(self.train_dataloader) * self.train_roberta_epoch
-            return warmup_linear(step/train_step, warmup=self.warmup_proportion)
+            if step < train_step:
+                return warmup_linear(step/train_step, warmup=self.warmup_proportion)
+            else:
+                return 0
         self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=[robeata_lamba, mlp_lamda])
         
         self.best_micro_f1 = -0.1

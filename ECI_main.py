@@ -71,7 +71,7 @@ if __name__=="__main__":
     result_folder = args.result_log
 
     study = optuna.create_study(direction='maximize')
-    study.optimize(objective, n_trials=30)
+    study.optimize(objective, n_trials=100)
     trial = study.best_trial
 
     print('Accuracy: {}'.format(trial.value))
