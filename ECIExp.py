@@ -37,7 +37,7 @@ class EXP():
                                     {'params': self.mlp_param_list, 'lr': self.mlp_lr}], 
                                     amsgrad=True, weight_decay=weight_decay)
         def mlp_lamda(step):
-            return 0.9**int(step/len(self.train_dataloader))
+            return 0.9**int(step/5*len(self.train_dataloader))
         def robeata_lamba(step):
             train_step = len(self.train_dataloader) * self.train_roberta_epoch
             if step < train_step:
