@@ -28,6 +28,7 @@ class EXP():
         self.train_roberta_epoch = train_lm_epoch
         self.warmup_proportion = warmup_proportion
         
+        mlp = ['fc1', 'fc2']
         no_decay = ['bias', 'gamma', 'beta']
         group1=['layer.0.','layer.1.','layer.2.','layer.3.']
         group2=['layer.4.','layer.5.','layer.6.','layer.7.']
@@ -37,34 +38,44 @@ class EXP():
         group6=['layer.20.','layer.21.','layer.22.','layer.23.']
         group_all = group1 + group2 + group3 + group4 + group5 + group6
         
-        optimizer_parameters = [
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and not any(nd in n for nd in group_all)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # all params not include bert layers 
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and any(nd in n for nd in group1)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(2.6**5)}, # param in group1
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and any(nd in n for nd in group2)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(2.6**4)}, # param in group2
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and any(nd in n for nd in group3)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(2.6**3)}, # param in group3
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and any(nd in n for nd in group4)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(2.6**2)}, # param in group4
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and any(nd in n for nd in group5)],'weight_decay_rate': 0.01, 'lr': self.b_lr/2.6}, # param in group5
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and any(nd in n for nd in group6)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # param in group6
+        b_parameters = [
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and not any(nd in n for nd in group_all)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # all params not include bert layers 
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group1)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.3**5)}, # param in group1
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group2)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.3**4)}, # param in group2
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group3)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.3**3)}, # param in group3
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group4)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.3**2)}, # param in group4
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group5)],'weight_decay_rate': 0.01, 'lr': self.b_lr/1.3}, # param in group5
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group6)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # param in group6
             # no_decay
-            {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and not any(nd in n for nd in group_all)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # all params not include bert layers 
-            {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and any(nd in n for nd in group1)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(2.6**5)}, # param in group1
-            {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and any(nd in n for nd in group2)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(2.6**4)}, # param in group2
-            {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and any(nd in n for nd in group3)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(2.6**3)}, # param in group3
-            {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and any(nd in n for nd in group4)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(2.6**2)}, # param in group4
-            {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and any(nd in n for nd in group5)],'weight_decay_rate': 0.01, 'lr': self.b_lr/2.6}, # param in group5
-            {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and any(nd in n for nd in group6)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # param in group6
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and not any(nd in n for nd in group_all)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # all params not include bert layers 
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group1)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.3**5)}, # param in group1
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group2)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.3**4)}, # param in group2
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group3)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.3**3)}, # param in group3
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group4)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.3**2)}, # param in group4
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group5)],'weight_decay_rate': 0.01, 'lr': self.b_lr/1.3}, # param in group5
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group6)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # param in group6
         ]
-        self.optimizer = optim.AdamW(optimizer_parameters, lr=self.b_lr, amsgrad=True, weight_decay=weight_decay)
+        mlp_parameters = [
+            {'params': [p for p, n in model.named_parameters() if any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.01, 'lr': self.mlp_lr},
+            {'params': [p for p, n in model.named_parameters() if any(nd in n for nd in mlp) and any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.00, 'lr': self.mlp_lr},
+            ]
+        optimizer_parameters = mlp_parameters + b_parameters
+        self.optimizer = optim.AdamW(optimizer_parameters, amsgrad=True, weight_decay=weight_decay)
 
-        self.num_training_steps = len(self.train_dataloader) * self.epochs
+        self.num_training_steps = len(self.train_dataloader) * self.train_roberta_epoch
         self.num_warmup_steps = int(self.warmup_proportion * self.num_training_steps)
-        def lr_lambda(current_step: int):
+        def b_lr_lambda(current_step: int):
             if current_step < self.num_warmup_steps:
                 return float(current_step) / float(max(1, self.num_warmup_steps))
             return max(
                 0.0, float(self.num_training_steps - current_step) / float(max(1, self.num_training_steps - self.num_warmup_steps))
             )
-        self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lr_lambda)
+        def m_lr_lambda(current_step: int):
+            return 0.9 ** int(current_step / (3*len(self.train_dataloader)))
+        lamd = [b_lr_lambda] * 14
+        mlp_lambda = [m_lr_lambda] * 2
+        lamd.extend(mlp_lambda)
+        self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lamd)
 
         self.best_micro_f1 = -0.1
         self.best_cm = []
@@ -75,9 +86,9 @@ class EXP():
         pre_F1 = 0.0
         pre_loss = 10000000.0
         for i in range(0, self.epochs):
-            # if i >= self.train_roberta_epoch:
-            #     for param in self.bert_param_list:
-            #         param.requires_grad = False
+            if i >= self.train_roberta_epoch:
+                for param in self.bert_param_list:
+                    param.requires_grad = False
 
             print("")
             print('======== Epoch {:} / {:} ========'.format(i + 1, self.epochs))

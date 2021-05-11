@@ -17,7 +17,7 @@ def count_parameters(model):
 def objective(trial:optuna.Trial):
     params = {
         "bert_learning_rate": trial.suggest_categorical("b_lr", [1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6, 1e-5, 5e-5, 1e-4,]),
-        "mlp_learning_rate":0,
+        "mlp_learning_rate":trial.suggest_float("m_lr", [1e-6, 1e-5, 1e-4]),
         "MLP size": trial.suggest_categorical("MLP size", [512, 768]),
         "epoches": trial.suggest_categorical("epoches", [3, 6, 5, 9]),
         'weight_decay': trial.suggest_float("weight_decay", 0, 0.6, step=0.2),
@@ -34,7 +34,7 @@ def objective(trial:optuna.Trial):
     if CUDA:
         model = model.cuda()
     model.zero_grad()
-    epoches = params['epoches']
+    # epoches = params['epoches']
     print("# of parameters:", count_parameters(model))
     total_steps = len(train_dataloader) * epoches
     print("Total steps: [number of batches] x [number of epochs] =", total_steps)
@@ -68,7 +68,7 @@ if __name__=="__main__":
     seed = args.seed
     batch_size = args.batch_size
     roberta_type  = args.roberta_type
-    # epoches = args.epoches
+    epoches = args.epoches
     best_path = args.best_path
     dataset = args.dataset
     result_folder = args.result_log
