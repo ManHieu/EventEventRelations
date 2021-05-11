@@ -38,7 +38,7 @@ class EXP():
         group6=['layer.20.','layer.21.','layer.22.','layer.23.']
         group_all = group1 + group2 + group3 + group4 + group5 + group6
         
-        b_parameters = [
+        self.b_parameters = [
             {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and not any(nd in n for nd in group_all)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # all params not include bert layers 
             {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group1)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.3**5)}, # param in group1
             {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group2)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.3**4)}, # param in group2
@@ -55,11 +55,11 @@ class EXP():
             {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group5)],'weight_decay_rate': 0.01, 'lr': self.b_lr/1.3}, # param in group5
             {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group6)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # param in group6
         ]
-        mlp_parameters = [
+        self.mlp_parameters = [
             {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.01, 'lr': self.mlp_lr},
             {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in mlp) and any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.00, 'lr': self.mlp_lr},
             ]
-        optimizer_parameters = b_parameters + mlp_parameters 
+        optimizer_parameters = self.b_parameters + self.mlp_parameters 
         self.optimizer = optim.AdamW(optimizer_parameters, amsgrad=True, weight_decay=weight_decay)
 
         self.num_training_steps = len(self.train_dataloader) * self.train_roberta_epoch
@@ -87,8 +87,9 @@ class EXP():
         pre_loss = 10000000.0
         for i in range(0, self.epochs):
             if i >= self.train_roberta_epoch:
-                for param in self.bert_param_list:
-                    param.requires_grad = False
+                for group in self.b_parameters:
+                    for param in group['params']:
+                        param.requires_grad = False
 
             print("")
             print('======== Epoch {:} / {:} ========'.format(i + 1, self.epochs))
@@ -96,6 +97,7 @@ class EXP():
 
             t0 = time.time()
             self.model.train()
+            self.model.zero_grad()
             self.train_loss = 0.0
             for step, batch in enumerate(self.train_dataloader):
                 x_sent, y_sent, x_position, y_position, x_sent_pos, y_sent_pos, xy = batch[2:]
@@ -115,7 +117,7 @@ class EXP():
                 if step%50==0 and not step==0:
                     elapsed = format_time(time.time() - t0)
                     print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(self.train_dataloader), elapsed))
-                    print("LR: {} - {}".format(self.optimizer.param_groups[0]['lr'], self.optimizer.param_groups[1]['lr']))
+                    print("LR: {} - {}".format(self.optimizer.param_groups[0]['lr'], self.optimizer.param_groups[-1]['lr']))
                 
             
             epoch_training_time = format_time(time.time() - t0)
