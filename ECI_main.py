@@ -16,10 +16,10 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "bert_learning_rate": trial.suggest_float("b_lr", 1e-8, 1e-7, log=True),
-        "mlp_learning_rate": trial.suggest_float('mlp_lr', 1e-5, 1e-4, log=True),
+        "bert_learning_rate": trial.suggest_float("b_lr", 1e-8, 1e-4, log=True),
+        "mlp_learning_rate":0,
         "MLP size": trial.suggest_categorical("MLP size", [512, 768]),
-        "early_stop": trial.suggest_categorical("early_stop", [3, 6, 9]),
+        "early_stop": trial.suggest_categorical("early_stop", [3, 6, 5, 9]),
         'weight_decay': trial.suggest_float("weight_decay", 0, 0.6, step=0.2),
         'negative_slope': trial.suggest_float("negative_slope", 0, 0.5, step=0.1),
         'warmup_proportion': 0.1,
@@ -38,7 +38,7 @@ def objective(trial:optuna.Trial):
     total_steps = len(train_dataloader) * epoches
     print("Total steps: [number of batches] x [number of epochs] =", total_steps)
 
-    exp = EXP(model, epoches, params["bert_learning_rate"], params["mlp_learning_rate"], 
+    exp = EXP(model, params['early_stop'], params["bert_learning_rate"], params["mlp_learning_rate"], 
             train_dataloader, validate_dataloader, test_dataloader, 
             best_path, weight_decay=params['weight_decay'], 
             train_lm_epoch=params['early_stop'], warmup_proportion=params['warmup_proportion'])

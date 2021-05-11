@@ -122,19 +122,3 @@ def id_lookup(span_SENT, start_char):
         if token_span[0] <= start_char and token_span[1] >= start_char:
             return token_id
     raise ValueError("Nothing is found. \n span sentence: {} \n start_char: {}".format(span_SENT, start_char))
-
-def warmup_cosine(x, warmup=0.002):
-    if x < warmup:
-        return x/warmup
-    return 0.5 * (1.0 + torch.cos(math.pi * x))
-
-def warmup_constant(x, warmup=0.002):
-    if x < warmup:
-        return x/warmup
-    return 1.0
-
-def warmup_linear(x, warmup=0.002):
-    if x < warmup:
-        return x/warmup
-    return 1.0 - x
-
