@@ -34,11 +34,12 @@ def objective(trial:optuna.Trial):
     if CUDA:
         model = model.cuda()
     model.zero_grad()
+    epoches = params['early_stop']
     print("# of parameters:", count_parameters(model))
     total_steps = len(train_dataloader) * epoches
     print("Total steps: [number of batches] x [number of epochs] =", total_steps)
 
-    exp = EXP(model, params['early_stop'], params["bert_learning_rate"], params["mlp_learning_rate"], 
+    exp = EXP(model, epoches, params["bert_learning_rate"], params["mlp_learning_rate"], 
             train_dataloader, validate_dataloader, test_dataloader, 
             best_path, weight_decay=params['weight_decay'], 
             train_lm_epoch=params['early_stop'], warmup_proportion=params['warmup_proportion'])
@@ -67,7 +68,7 @@ if __name__=="__main__":
     seed = args.seed
     batch_size = args.batch_size
     roberta_type  = args.roberta_type
-    epoches = args.epoches
+    # epoches = args.epoches
     best_path = args.best_path
     dataset = args.dataset
     result_folder = args.result_log
