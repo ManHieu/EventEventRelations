@@ -56,7 +56,7 @@ class EXP():
         ]
         self.optimizer = optim.AdamW(optimizer_parameters, lr=self.b_lr, amsgrad=True, weight_decay=weight_decay)
 
-        self.num_training_steps = len(self,train_dataloader) * self.epochs
+        self.num_training_steps = len(self.train_dataloader) * self.epochs
         self.num_warmup_steps = int(self.warmup_proportion * self.num_training_steps)
         def lr_lambda(current_step: int):
             if current_step < self.num_warmup_steps:
