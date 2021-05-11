@@ -56,10 +56,10 @@ class EXP():
             {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group6)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # param in group6
         ]
         mlp_parameters = [
-            {'params': [p for p, n in model.named_parameters() if any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.01, 'lr': self.mlp_lr},
-            {'params': [p for p, n in model.named_parameters() if any(nd in n for nd in mlp) and any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.00, 'lr': self.mlp_lr},
+            {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.01, 'lr': self.mlp_lr},
+            {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in mlp) and any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.00, 'lr': self.mlp_lr},
             ]
-        optimizer_parameters = mlp_parameters + b_parameters
+        optimizer_parameters = b_parameters + mlp_parameters 
         self.optimizer = optim.AdamW(optimizer_parameters, amsgrad=True, weight_decay=weight_decay)
 
         self.num_training_steps = len(self.train_dataloader) * self.train_roberta_epoch
