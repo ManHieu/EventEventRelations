@@ -19,7 +19,7 @@ def objective(trial:optuna.Trial):
         "bert_learning_rate": trial.suggest_float("b_lr", 1e-8, 1e-4, log=True),
         "mlp_learning_rate":0,
         "MLP size": trial.suggest_categorical("MLP size", [512, 768]),
-        "early_stop": trial.suggest_categorical("early_stop", [3, 6, 5, 9]),
+        "epoches": trial.suggest_categorical("epoches", [3, 6, 5, 9]),
         'weight_decay': trial.suggest_float("weight_decay", 0, 0.6, step=0.2),
         'negative_slope': trial.suggest_float("negative_slope", 0, 0.5, step=0.1),
         'warmup_proportion': 0.1,
