@@ -64,7 +64,7 @@ class EXP():
             if current_step < self.num_warmup_steps:
                 return float(current_step) / float(max(1, self.num_warmup_steps))
             
-            if current_step >= self.num_training_steps*len(self.train_dataloader):
+            if current_step >= self.num_training_steps:
                 return 0
 
             return max(
