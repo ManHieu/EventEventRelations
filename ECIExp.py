@@ -9,6 +9,7 @@ from transformers import get_linear_schedule_with_warmup
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix, classification_report, accuracy_score
 from utils.tools import CUDA, format_time, metric
 from os import path
+import math
 from utils.tools import *
 
 class EXP():
@@ -58,15 +59,24 @@ class EXP():
 
         self.num_training_steps = len(self.train_dataloader) * self.train_roberta_epoch
         self.num_warmup_steps = int(self.warmup_proportion * self.num_training_steps)
-        def b_lr_lambda(current_step: int):
+        
+        def linear_lr_lambda(current_step: int):
             if current_step < self.num_warmup_steps:
                 return float(current_step) / float(max(1, self.num_warmup_steps))
             return max(
                 0.0, float(self.num_training_steps - current_step) / float(max(1, self.num_training_steps - self.num_warmup_steps))
             )
+        
+        def cosin_lr_lambda(current_step):
+            if current_step < self.num_warmup_steps:
+                return float(current_step) / float(max(1, self.num_warmup_steps))
+            progress = float(current_step - self.num_warmup_steps) / float(max(1, self.num_training_steps - self.num_warmup_steps))
+            return max(0.0, 0.5 * (1.0 + math.cos(math.pi * float(0.5) * 2.0 * progress)))
+        
         def m_lr_lambda(current_step: int):
-            return 0.6 ** int(current_step / (3*len(self.train_dataloader)))
-        lamd = [b_lr_lambda] * 8
+            return 0.5 ** int(current_step / (3*len(self.train_dataloader)))
+        
+        lamd = [linear_lr_lambda] * 8
         mlp_lambda = [m_lr_lambda] * 2
         lamd.extend(mlp_lambda)
         self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lamd)
