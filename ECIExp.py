@@ -67,11 +67,13 @@ class EXP():
         def b_lr_lambda(current_step: int):
             if current_step < self.num_warmup_steps:
                 return float(current_step) / float(max(1, self.num_warmup_steps))
+            if current_step >= self.num_training_steps:
+                return 0
             return max(
-                0.0, float(self.num_training_steps - current_step) / float(max(1, self.num_training_steps - self.num_warmup_steps))
+                0.1, float(self.num_training_steps - current_step) / float(max(1, self.num_training_steps - self.num_warmup_steps))
             )
         def m_lr_lambda(current_step: int):
-            return 0.9 ** int(current_step / (3*len(self.train_dataloader)))
+            return 0.5 ** int(current_step / (3*len(self.train_dataloader)))
         lamd = [b_lr_lambda] * 14
         mlp_lambda = [m_lr_lambda] * 2
         lamd.extend(mlp_lambda)
