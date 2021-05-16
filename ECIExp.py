@@ -63,8 +63,12 @@ class EXP():
         def linear_lr_lambda(current_step: int):
             if current_step < self.num_warmup_steps:
                 return float(current_step) / float(max(1, self.num_warmup_steps))
+            
+            if current_step >= self.num_training_steps*len(self.train_dataloader):
+                return 0
+
             return max(
-                0.2, float(self.num_training_steps - current_step) / float(max(1, self.num_training_steps - self.num_warmup_steps))
+                0.1, float(self.num_training_steps - current_step) / float(max(1, self.num_training_steps - self.num_warmup_steps))
             )
         
         def cosin_lr_lambda(current_step):
