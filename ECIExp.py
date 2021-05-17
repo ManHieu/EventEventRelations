@@ -79,10 +79,17 @@ class EXP():
             progress = float(current_step - self.num_warmup_steps) / float(max(1, self.num_training_steps - self.num_warmup_steps))
             return max(0.0, 0.5 * (1.0 + math.cos(math.pi * float(0.5) * 2.0 * progress)))
         
+        def step_lr_lambda(current_step):
+            if current_step < self.num_warmup_steps:
+                return float(current_step) / float(max(1, self.num_warmup_steps))
+            if current_step >= self.num_training_steps:
+                return 0.0 
+            return 0.5 ** int(current_step / (1*len(self.train_dataloader)))
+        
         def m_lr_lambda(current_step: int):
             return 0.5 ** int(current_step / (3*len(self.train_dataloader)))
         
-        lamd = [cosin_lr_lambda] * 8
+        lamd = [step_lr_lambda] * 8
         mlp_lambda = [m_lr_lambda] * 2
         lamd.extend(mlp_lambda)
         self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lamd)
