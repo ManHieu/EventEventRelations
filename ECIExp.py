@@ -74,6 +74,8 @@ class EXP():
         def cosin_lr_lambda(current_step):
             if current_step < self.num_warmup_steps:
                 return float(current_step) / float(max(1, self.num_warmup_steps))
+            if current_step >= self.num_training_steps:
+                return 0.0 
             progress = float(current_step - self.num_warmup_steps) / float(max(1, self.num_training_steps - self.num_warmup_steps))
             return max(0.0, 0.5 * (1.0 + math.cos(math.pi * float(0.5) * 2.0 * progress)))
         
