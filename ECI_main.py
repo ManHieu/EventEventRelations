@@ -51,7 +51,7 @@ def objective(trial:optuna.Trial):
 
     with open("{}{}.txt".format(result_folder, dataset), 'a', encoding='UTF-8') as f:
         f.write("\n -------------------------------------------- \n")
-        f.write("\n Step scheduler \n")
+        f.write("\n cosine_with_hard_restarts_lambda \n")
         f.write(" F1: \n {} \n CM: \n{} \n Hypeparameter: \n {} \n ".format(f1, CM, params))
         f.write("Time: {} \n".format(datetime.datetime.now()))
     return f1

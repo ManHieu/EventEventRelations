@@ -86,10 +86,21 @@ class EXP():
                 return 0.0 
             return 0.5 ** int(current_step / (1*len(self.train_dataloader)))
         
+        def cosine_with_hard_restarts_lambda(current_step):
+            if current_step < self.num_warmup_steps:
+                return float(current_step) / float(max(1, self.num_warmup_steps))
+            progress = float(current_step - self.num_warmup_steps) / float(max(1, self.num_training_steps - self.num_warmup_steps))
+            if progress >= 1.0:
+                return 0.0
+            if current_step >= self.num_training_steps:
+                return 0.0
+            num_cycles = int(self.num_training_steps/1000)
+            return max(0.0, 0.5 * (1.0 + math.cos(math.pi * ((float(5) * progress) % 1.0))))
+        
         def m_lr_lambda(current_step: int):
             return 0.5 ** int(current_step / (3*len(self.train_dataloader)))
         
-        lamd = [step_lr_lambda] * 8
+        lamd = [cosine_with_hard_restarts_lambda] * 8
         mlp_lambda = [m_lr_lambda] * 2
         lamd.extend(mlp_lambda)
         self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lamd)
