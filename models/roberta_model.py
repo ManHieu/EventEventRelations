@@ -22,9 +22,9 @@ class ECIRoberta(nn.Module):
         self.sub = sub
         self.mul = mul
         self.finetune = finetune
-        if roberta_type == 'roberta-base':
+        if 'base' in roberta_type:
             self.roberta_dim = 768
-        if roberta_type == 'roberta-large':
+        if 'large' in roberta_type:
             self.roberta_dim = 1024
 
         if dataset == "HiEve":
