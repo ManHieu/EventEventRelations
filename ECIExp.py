@@ -94,7 +94,7 @@ class EXP():
                 return 0.0
             if current_step >= self.num_training_steps:
                 return 0.0
-            num_cycles = int(self.num_training_steps/1000)
+            num_cycles = int(self.num_training_steps/500)
             return max(0.0, 0.5 * (1.0 + math.cos(math.pi * ((float(num_cycles) * progress) % 1.0))))
         
         def m_lr_lambda(current_step: int):
