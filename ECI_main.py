@@ -22,7 +22,7 @@ def objective(trial:optuna.Trial):
         "epoches": trial.suggest_categorical("epoches", [1, 3, 5, 7]),
         'weight_decay': 0, 
         # trial.suggest_float("weight_decay", 0, 0.4, step=0.2),
-        'negative_slope': trial.suggest_float("negative_slope", 0, 0.5, step=0.1),
+        'negative_slope': 0.2,
         'warmup_proportion': 0.1,
     }
     print("Hyperparameter will be used in this trial: ")
