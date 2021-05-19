@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from transformers import BertModel
+from transformers import AutoModel
 from utils.constant import CUDA
 import os.path as path
 
@@ -15,10 +15,10 @@ class ECIRoberta(nn.Module):
         self.mlp_size = mlp_size
         if path.exists("./pretrained_models/models/{}".format(roberta_type)):
             print("Loading pretrain model from local ......")
-            self.roberta = BertModel.from_pretrained("./pretrained_models/models/{}".format(roberta_type))
+            self.roberta = AutoModel.from_pretrained("./pretrained_models/models/{}".format(roberta_type))
         else:
             print("Loading pretrain model ......")
-            self.roberta = BertModel.from_pretrained(roberta_type)
+            self.roberta = AutoModel.from_pretrained(roberta_type)
         self.sub = sub
         self.mul = mul
         self.finetune = finetune
