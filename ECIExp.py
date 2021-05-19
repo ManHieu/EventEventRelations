@@ -31,30 +31,28 @@ class EXP():
         
         mlp = ['fc1', 'fc2']
         no_decay = ['bias', 'gamma', 'beta']
-        group1=['layer.0.','layer.1.','layer.2.','layer.3.']
-        group2=['layer.4.','layer.5.','layer.6.','layer.7.']
-        group3=['layer.8.','layer.9.','layer.10.','layer.11.']
-        group4=['layer.12.','layer.13.','layer.14.','layer.15.']
-        group5=['layer.16.','layer.17.','layer.18.','layer.19.']
-        group6=['layer.20.','layer.21.','layer.22.','layer.23.']
-        group_all = group1 + group2 + group3 + group4 + group5 + group6
+        group1=['layer.0.','layer.1.','layer.2.','layer.3.', 'layer.4.','layer.5.']
+        group2=['layer.6.','layer.7.','layer.8.','layer.9.','layer.10.','layer.11.']
+        group3=['layer.12.','layer.13.','layer.14.','layer.15.''layer.16.','layer.17.']
+        group4=['layer.18.','layer.19.','layer.20.','layer.21.','layer.22.','layer.23.']
+        group_all = group1 + group2 + group3 + group4 
         
         self.b_parameters = [
             {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and not any(nd in n for nd in group_all)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # all params not include bert layers 
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group1)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.5**5)}, # param in group1
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group2)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.5**4)}, # param in group2
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group3)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.5**3)}, # param in group3
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group4)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.5**2)}, # param in group4
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group5)],'weight_decay_rate': 0.01, 'lr': self.b_lr/1.5}, # param in group5
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group6)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # param in group6
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group1)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(2.6**3)}, # param in group1
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group2)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(2.6**2)}, # param in group2
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group3)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(2.6**1)}, # param in group3
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group4)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(2.6**0)}, # param in group4
+            # {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group5)],'weight_decay_rate': 0.01, 'lr': self.b_lr/1.5}, # param in group5
+            # {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group6)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # param in group6
             # no_decay
             {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and not any(nd in n for nd in group_all)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # all params not include bert layers 
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group1)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.5**5)}, # param in group1
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group2)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.5**4)}, # param in group2
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group3)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.5**3)}, # param in group3
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group4)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.5**2)}, # param in group4
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group5)],'weight_decay_rate': 0.01, 'lr': self.b_lr/1.5}, # param in group5
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group6)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # param in group6
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group1)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(2.6**3)}, # param in group1
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group2)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(2.6**2)}, # param in group2
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group3)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(2.6**1)}, # param in group3
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group4)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(2.6**0)}, # param in group4
+            # {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group5)],'weight_decay_rate': 0.01, 'lr': self.b_lr/1.5}, # param in group5
+            # {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group6)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # param in group6
         ]
         self.mlp_parameters = [
             {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.01, 'lr': self.mlp_lr},
