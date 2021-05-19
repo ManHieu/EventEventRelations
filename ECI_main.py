@@ -16,13 +16,13 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "bert_learning_rate": trial.suggest_categorical("b_lr", [1e-7, 5e-7, 7e-7, 1e-6]),
+        "bert_learning_rate": trial.suggest_categorical("b_lr", [1e-7, 5e-7, 7e-7, 9e-7, 3e-7]),
         "mlp_learning_rate":trial.suggest_categorical("m_lr", [5e-6, 1e-5, 5e-5]),
         "MLP size": trial.suggest_categorical("MLP size", [512, 768]),
         "epoches": trial.suggest_categorical("epoches", [1, 3, 5, 7]),
         'weight_decay': 0, 
         # trial.suggest_float("weight_decay", 0, 0.4, step=0.2),
-        'negative_slope': trial.suggest_float("negative_slope", 0, 0.5, step=0.1),
+        'negative_slope': 0.2,
         'warmup_proportion': 0.1,
     }
     print("Hyperparameter will be used in this trial: ")
