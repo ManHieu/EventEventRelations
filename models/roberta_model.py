@@ -60,6 +60,7 @@ class ECIRoberta(nn.Module):
         # print(x_sent.size())
 
         if self.finetune:
+            print(self.roberta(x_sent))
             output_x = self.roberta(x_sent)[0]
             output_y = self.roberta(y_sent)[0]
         else:
