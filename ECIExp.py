@@ -82,7 +82,7 @@ class EXP():
             return max(0.0, 0.5 * (1.0 + math.cos(math.pi * float(0.5) * 2.0 * progress)))
         
         def m_lr_lambda(current_step: int):
-            return 0.5 ** int(current_step / (3*len(self.train_dataloader)))
+            return 0.5 ** int(current_step / (2*len(self.train_dataloader)))
         
         lamd = [cosin_lr_lambda] * 10
         mlp_lambda = [m_lr_lambda] * 2
