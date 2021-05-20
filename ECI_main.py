@@ -51,7 +51,7 @@ def objective(trial:optuna.Trial):
 
     with open("{}{}.txt".format(result_folder, dataset), 'a', encoding='UTF-8') as f:
         f.write("\n -------------------------------------------- \n")
-        f.write("\n cosin_lr_lambda \n")
+        f.write("\n cosin_lr_lambda - decay rate 2.3 \n")
         f.write(" F1: \n {} \n CM: \n{} \n Hypeparameter: \n {} \n ".format(f1, CM, params))
         f.write("Time: {} \n".format(datetime.datetime.now()))
     return f1
