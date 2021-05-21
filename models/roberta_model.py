@@ -40,6 +40,9 @@ class ECIRoberta(nn.Module):
             self.loss = nn.CrossEntropyLoss(weight=weights)
         else:
             self.loss = loss
+        
+        self.lstm = nn.LSTM(self.roberta_dim, self.roberta_dim, num_layers=1, 
+                            batch_first=True, bidirectional=True, dropout=0.6)
 
         if sub==True and mul==True:
             self.fc1 = nn.Linear(self.roberta_dim*4, self.mlp_size*2)
@@ -66,7 +69,9 @@ class ECIRoberta(nn.Module):
             with torch.no_grad():
                 output_x = self.roberta(x_sent)[0]
                 output_y = self.roberta(y_sent)[0]
-
+        output_x, _ = self.lstm(output_x)
+        output_y, _ = self.lstm(output_y)
+        print(output_x.size())
         output_A = torch.cat([output_x[i, x_position[i], :].unsqueeze(0) for i in range(0, batch_size)])
         output_B = torch.cat([output_y[i, y_position[i], :].unsqueeze(0) for i in range(0, batch_size)])
         # print(output_B.size())

@@ -32,7 +32,7 @@ class EXP():
         self.train_roberta_epoch = train_lm_epoch
         self.warmup_proportion = warmup_proportion
         
-        mlp = ['fc1', 'fc2']
+        mlp = ['fc1', 'fc2', 'lstm']
         no_decay = ['bias', 'gamma', 'beta']
         group1=['layer.0.','layer.1.','layer.2.','layer.3.']
         group2=['layer.4.','layer.5.','layer.6.','layer.7.']
