@@ -49,7 +49,7 @@ def objective(trial:optuna.Trial):
     
     print("Result: Best micro F1 of interaction: {}".format(f1))
 
-    with open("{}{}.txt".format(result_folder, dataset), 'a', encoding='UTF-8') as f:
+    with open(result_folder, 'a', encoding='UTF-8') as f:
         f.write("\n -------------------------------------------- \n")
         f.write("\n  cosin lr \n")
         f.write(" F1: \n {} \n CM: \n{} \n Hypeparameter: \n {} \n ".format(f1, CM, params))
@@ -64,7 +64,7 @@ if __name__=="__main__":
     parser.add_argument('--epoches', help='Number epoch', default=30, type=int)
     parser.add_argument('--best_path', help="Path for save model", type=str)
     parser.add_argument('--dataset', help="Name of dataset", type=str)
-    parser.add_argument('--result_log', help="Path of result folder",default='./result/', type=str)
+    parser.add_argument('--result_log', help="Path of result folder", type=str)
 
     args = parser.parse_args()
     seed = args.seed
