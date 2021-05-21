@@ -16,22 +16,22 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "bert_learning_rate": trial.suggest_categorical("b_lr", [3e-7, 5e-7, 7e-7, 9e-7]),
-        "mlp_learning_rate":trial.suggest_categorical("m_lr", [1e-6, 5e-6, 1e-5, 5e-5]),
-        "MLP size": trial.suggest_categorical("MLP size", [512, 768]),
-        "epoches": trial.suggest_categorical("epoches", [3, 5, 7]),
-        'weight_decay': 0, 
-        # trial.suggest_float("weight_decay", 0, 0.4, step=0.2),
-        'negative_slope': 0.2,
-        'warmup_proportion': 0.1,
+        "bert_learning_rate": trial.suggest_float("b_lr", 1e-7, 5e-7, step=2e-7),
+        "mlp_learning_rate":trial.suggest_categorical("m_lr", [5e-6, 1e-5, 5e-5]),
+        "MLP size": trial.suggest_categorical("MLP size", [768]),
+        "epoches": trial.suggest_categorical("epoches", [1, 3, 5]),
+        "b_lambda_scheduler": trial.suggest_categorical("b_scheduler", ['cosin']),
+        "m_step": trial.suggest_int('m_step', 1, 3),
+        'b_lr_decay_rate': trial.suggest_float('decay_rate', 0.5, 0.8, step=0.1)
     }
     print("Hyperparameter will be used in this trial: ")
     print(params)
     start = timer()
     train_dataloader, test_dataloader, validate_dataloader, num_classes = single_loader(dataset, batch_size)
 
-    model = ECIRoberta(num_classes, dataset, params["MLP size"], 
-                    roberta_type, finetune=True, negative_slope=params["negative_slope"])
+    model = ECIRoberta(num_classes, dataset, params['MLP size'], roberta_type, finetune=True)
+    # ECIRoberta(num_classes, dataset, params["MLP size"], 
+                    # roberta_type, finetune=True, negative_slope=params["negative_slope"])
     if CUDA:
         model = model.cuda()
     model.zero_grad()
@@ -40,10 +40,14 @@ def objective(trial:optuna.Trial):
     total_steps = len(train_dataloader) * epoches
     print("Total steps: [number of batches] x [number of epochs] =", total_steps)
 
-    exp = EXP(model, epoches, params["bert_learning_rate"], params["mlp_learning_rate"], 
-            train_dataloader, validate_dataloader, test_dataloader, 
-            best_path, weight_decay=params['weight_decay'], 
-            train_lm_epoch=params['epoches'], warmup_proportion=params['warmup_proportion'])
+    exp = EXP(model, epochs=params['epoches'], b_lr=params['bert_learning_rate'], m_lr=params['mlp_learning_rate'],
+            decay_rate=params['b_lr_decay_rate'], m_lr_step=params['m_step'], b_scheduler_lambda=params['b_lambda_scheduler'],
+            train_dataloader=train_dataloader, validate_dataloader=validate_dataloader, test_dataloader=test_dataloader,
+            best_path=best_path, train_lm_epoch=params['epoches'])
+    # EXP(model, epoches, params["bert_learning_rate"], params["mlp_learning_rate"], 
+    #         train_dataloader, validate_dataloader, test_dataloader, 
+    #         best_path, weight_decay=params['weight_decay'], 
+    #         train_lm_epoch=params['epoches'], warmup_proportion=params['warmup_proportion'])
     f1, CM = exp.train()
     exp.evaluate(is_test=True)
     

@@ -1,3 +1,4 @@
+from logging import exception
 from numpy.lib.function_base import average
 from torch.utils.data.dataloader import DataLoader
 from models.roberta_model import ECIRoberta
@@ -11,9 +12,10 @@ from utils.tools import CUDA, format_time, metric
 from os import path
 import math
 from utils.tools import *
+import math
 
 class EXP():
-    def __init__(self, model:ECIRoberta, epochs, b_lr, m_lr, 
+    def __init__(self, model:ECIRoberta, epochs, b_lr, m_lr, decay_rate, b_scheduler_lambda, m_lr_step,
                 train_dataloader:DataLoader, validate_dataloader:DataLoader, test_dataloader:DataLoader, 
                 best_path, weight_decay=0.01, train_lm_epoch=3, warmup_proportion=0.1) -> None:
         self.model = model
@@ -23,6 +25,7 @@ class EXP():
         self.train_dataloader = train_dataloader
         self.test_datatloader = test_dataloader
         self.validate_dataloader = validate_dataloader
+        self.decay_rate = decay_rate
 
         self.bert_param_list = []
         self.mlp_param_list = []
@@ -41,14 +44,14 @@ class EXP():
         
         self.b_parameters = [
             {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and not any(nd in n for nd in group_all)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # all params not include bert layers 
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group1)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.5**2)}, # param in group1
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group2)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.5**1)}, # param in group2
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group3)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.5**0)}, # param in group3
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group1)],'weight_decay_rate': 0.01, 'lr': self.b_lr*(self.decay_rate**2)}, # param in group1
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group2)],'weight_decay_rate': 0.01, 'lr': self.b_lr*(self.decay_rate**1)}, # param in group2
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay) and any(nd in n for nd in group3)],'weight_decay_rate': 0.01, 'lr': self.b_lr*(self.decay_rate**0)}, # param in group3
             # no_decay
             {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and not any(nd in n for nd in group_all)],'weight_decay_rate': 0.01, 'lr': self.b_lr}, # all params not include bert layers 
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group1)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.5**2)}, # param in group1
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group2)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.5**1)}, # param in group2
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group3)],'weight_decay_rate': 0.01, 'lr': self.b_lr/(1.5**0)}, # param in group3
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group1)],'weight_decay_rate': 0.01, 'lr': self.b_lr*(self.decay_rate**2)}, # param in group1
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group2)],'weight_decay_rate': 0.01, 'lr': self.b_lr*(self.decay_rate**1)}, # param in group2
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group3)],'weight_decay_rate': 0.01, 'lr': self.b_lr*(self.decay_rate**0)}, # param in group3
         ]
         self.mlp_parameters = [
             {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.01, 'lr': self.mlp_lr},
@@ -63,10 +66,8 @@ class EXP():
         def linear_lr_lambda(current_step: int):
             if current_step < self.num_warmup_steps:
                 return float(current_step) / float(max(1, self.num_warmup_steps))
-            
             if current_step >= self.num_training_steps:
                 return 0
-
             return max(
                 0.1, float(self.num_training_steps - current_step) / float(max(1, self.num_training_steps - self.num_warmup_steps))
             )
@@ -74,35 +75,24 @@ class EXP():
         def cosin_lr_lambda(current_step):
             if current_step < self.num_warmup_steps:
                 return float(current_step) / float(max(1, self.num_warmup_steps))
-            if current_step >= self.num_training_steps:
-                return 0.0 
             progress = float(current_step - self.num_warmup_steps) / float(max(1, self.num_training_steps - self.num_warmup_steps))
+            if current_step >= self.num_training_steps:
+                return 0.0
             return max(0.0, 0.5 * (1.0 + math.cos(math.pi * float(0.5) * 2.0 * progress)))
         
-        # def step_lr_lambda(current_step):
-        #     if current_step < self.num_warmup_steps:
-        #         return float(current_step) / float(max(1, self.num_warmup_steps))
-        #     if current_step >= self.num_training_steps:
-        #         return 0.0 
-        #     return 0.5 ** int(current_step / (1*len(self.train_dataloader)))
-        
-        # def cosine_with_hard_restarts_lambda(current_step):
-        #     if current_step < self.num_warmup_steps:
-        #         return float(current_step) / float(max(1, self.num_warmup_steps))
-        #     progress = float(current_step - self.num_warmup_steps) / float(max(1, self.num_training_steps - self.num_warmup_steps))
-        #     if progress >= 1.0:
-        #         return 0.0
-        #     if current_step >= self.num_training_steps:
-        #         return 0.0
-        #     num_cycles = int(self.num_training_steps/500)
-        #     return max(0.0, 0.5 * (1.0 + math.cos(math.pi * ((float(num_cycles) * progress) % 1.0))))
-        
         def m_lr_lambda(current_step: int):
-            return 0.5 ** int(current_step / (2*len(self.train_dataloader)))
+            return 0.5 ** int(current_step / (m_lr_step*len(self.train_dataloader)))
         
-        lamd = [cosin_lr_lambda] * 8
+        if b_scheduler_lambda == "cosin":
+            b_lambda = cosin_lr_lambda
+        if b_scheduler_lambda == "linear":
+            b_lambda = linear_lr_lambda
+        else:
+            exception("We haven't support that lambda!!")
+        lamd = [b_lambda] * 10
         mlp_lambda = [m_lr_lambda] * 2
         lamd.extend(mlp_lambda)
+        
         self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lamd)
 
         self.best_micro_f1 = -0.1
