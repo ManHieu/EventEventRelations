@@ -41,7 +41,7 @@ class ECIRoberta(nn.Module):
         else:
             self.loss = loss
         
-        self.lstm = nn.LSTM(self.roberta_dim, self.roberta_dim, num_layers=1, 
+        self.lstm = nn.LSTM(self.roberta_dim, self.roberta_dim//2, num_layers=1, 
                             batch_first=True, bidirectional=True, dropout=0.6)
 
         if sub==True and mul==True:
