@@ -71,7 +71,7 @@ class ECIRoberta(nn.Module):
                 output_y = self.roberta(y_sent)[0]
         output_x, _ = self.lstm(output_x)
         output_y, _ = self.lstm(output_y)
-        print(output_x.size())
+        # print(output_x.size())
         output_A = torch.cat([output_x[i, x_position[i], :].unsqueeze(0) for i in range(0, batch_size)])
         output_B = torch.cat([output_y[i, y_position[i], :].unsqueeze(0) for i in range(0, batch_size)])
         # print(output_B.size())
