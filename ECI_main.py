@@ -41,7 +41,7 @@ def objective(trial:optuna.Trial):
     print("Total steps: [number of batches] x [number of epochs] =", total_steps)
 
     exp = EXP(model, epochs=params['epoches'], b_lr=params['bert_learning_rate'], m_lr=params['mlp_learning_rate'],
-            decay_rate=params['b_lr_decay_rate'], m_lr_step=params['m_step'], 
+            decay_rate=params['b_lr_decay_rate'], m_lr_step=params['m_step'], b_scheduler_lambda=params['b_lambda_scheduler'],
             train_dataloader=train_dataloader, validate_dataloader=validate_dataloader, test_dataloader=test_dataloader,
             best_path=best_path, train_lm_epoch=params['epoches'])
     # EXP(model, epoches, params["bert_learning_rate"], params["mlp_learning_rate"], 
