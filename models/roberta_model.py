@@ -41,7 +41,7 @@ class ECIRoberta(nn.Module):
         else:
             self.loss = loss
         
-        self.lstm = nn.LSTM(self.roberta_dim, self.roberta_dim//2, num_layers=1, 
+        self.lstm = nn.LSTM(self.roberta_dim, self.roberta_dim//2, num_layers=2, 
                             batch_first=True, bidirectional=True, dropout=0.6)
 
         if sub==True and mul==True:
@@ -69,6 +69,9 @@ class ECIRoberta(nn.Module):
             with torch.no_grad():
                 output_x = self.roberta(x_sent)[0]
                 output_y = self.roberta(y_sent)[0]
+
+        output_x = self.drop_out(output_x)
+        output_y = self.drop_out(output_y)
         output_x, _ = self.lstm(output_x)
         output_y, _ = self.lstm(output_y)
         # print(output_x.size())
