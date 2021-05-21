@@ -49,7 +49,7 @@ def objective(trial:optuna.Trial):
     
     print("Result: Best micro F1 of interaction: {}".format(f1))
 
-    with open("{}{}.txt".format(result_folder, dataset), 'a', encoding='UTF-8') as f:
+    with open(result_file, 'a', encoding='UTF-8') as f:
         f.write("\n -------------------------------------------- \n")
         f.write("\n cosin_lr_lambda - decay rate 1.5 \n")
         f.write(" F1: \n {} \n CM: \n{} \n Hypeparameter: \n {} \n ".format(f1, CM, params))
@@ -64,7 +64,7 @@ if __name__=="__main__":
     parser.add_argument('--epoches', help='Number epoch', default=30, type=int)
     parser.add_argument('--best_path', help="Path for save model", type=str)
     parser.add_argument('--dataset', help="Name of dataset", type=str)
-    parser.add_argument('--result_log', help="Path of result folder",default='./result/', type=str)
+    parser.add_argument('--result_log', help="Path of result folder", type=str)
 
     args = parser.parse_args()
     seed = args.seed
@@ -73,7 +73,7 @@ if __name__=="__main__":
     epoches = args.epoches
     best_path = args.best_path
     dataset = args.dataset
-    result_folder = args.result_log
+    result_file = args.result_log
 
     study = optuna.create_study(direction='maximize')
     study.optimize(objective, n_trials=100)
