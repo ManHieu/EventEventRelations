@@ -16,15 +16,15 @@ import math
 
 class EXP():
     def __init__(self, model:ECIRobertaJointTask, epochs, b_lr, m_lr, decay_rate, b_scheduler_lambda, m_lr_step,
-                train_dataloader:DataLoader, validate_dataloader:DataLoader, test_dataloader:DataLoader, 
+                train_dataloader:DataLoader, validate_dataloaders, test_dataloaders, 
                 best_path, weight_decay=0.01, train_lm_epoch=3, warmup_proportion=0.1) -> None:
         self.model = model
         self.epochs = epochs
         self.b_lr = b_lr
         self.mlp_lr = m_lr
         self.train_dataloader = train_dataloader
-        self.test_datatloader = test_dataloader
-        self.validate_dataloader = validate_dataloader
+        self.test_datatloaders = test_dataloaders
+        self.validate_dataloaders = validate_dataloaders
         self.decay_rate = decay_rate
 
         self.bert_param_list = []
@@ -95,7 +95,7 @@ class EXP():
         
         self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lamd)
 
-        self.best_micro_f1 = -0.1
+        self.best_micro_f1 = [-0.1]*len(self.test_datatloaders)
         self.best_cm = []
         self.best_path = best_path
     
@@ -142,16 +142,15 @@ class EXP():
             epoch_training_time = format_time(time.time() - t0)
             print("  Total training loss: {0:.2f}".format(self.train_loss))
             print("  Training epoch took: {:}".format(epoch_training_time))
-            current_F1 = self.evaluate()
-            current_loss = self.train_loss
+            self.evaluate()
             
-            if i%3 == 1 and i > 9:
-                print("Loss: {} - {}".format(current_loss, pre_loss))
-                print("F1: {} - {}". format(current_F1, pre_F1))
-                if abs(current_F1 - pre_F1) < 0.005 or (current_loss - pre_loss) > 500:
-                    break
-                pre_loss = current_loss
-                pre_F1 = current_F1
+            # if i%3 == 1 and i > 9:
+            #     print("Loss: {} - {}".format(current_loss, pre_loss))
+            #     print("F1: {} - {}". format(current_F1, pre_F1))
+            #     if abs(current_F1 - pre_F1) < 0.005 or (current_loss - pre_loss) > 500:
+            #         break
+            #     pre_loss = current_loss
+            #     pre_F1 = current_F1
         
         print("Training complete!")
         print("Total training took {:} (h:mm:ss)".format(format_time(time.time()-total_t0)))
@@ -161,57 +160,60 @@ class EXP():
 
     def evaluate(self, is_test=False):
         t0 = time.time()
-        if is_test:
-            dataloader = self.test_datatloader
-            self.model = torch.load(self.best_path)
-            print("Loaded best model for test!")
-            print("Running on testset......")
-        else:
-            dataloader = self.validate_dataloader
-            print("Running on dev set......")
-        
-        self.model.eval()
-        pred = []
-        gold = []
-        for batch in dataloader:
-            x_sent, y_sent, x_position, y_position, x_sent_pos, y_sent_pos, flag, xy = batch[2:]
-            if CUDA:
-                x_sent = x_sent.cuda()
-                y_sent = y_sent.cuda()
-                x_position = x_position.cuda()
-                y_position = y_position.cuda()
-                xy = xy.cuda()
-                flag = flag.cuda()
-            logits, loss = self.model(x_sent, y_sent, x_position, y_position, xy, flag)
+        F1s = []
+        for i in range(0, len(self.test_datatloaders)):
+            if is_test:
+                dataloader = self.test_datatloaders[i]
+                self.model = torch.load(self.best_path)
+                print("Loaded best model for test!")
+                print("Running on testset......")
+            else:
+                dataloader = self.validate_dataloaders[i]
+                print("Running on dev set......")
+            
+            self.model.eval()
+            pred = []
+            gold = []
+            for batch in dataloader:
+                x_sent, y_sent, x_position, y_position, x_sent_pos, y_sent_pos, flag, xy = batch[2:]
+                if CUDA:
+                    x_sent = x_sent.cuda()
+                    y_sent = y_sent.cuda()
+                    x_position = x_position.cuda()
+                    y_position = y_position.cuda()
+                    xy = xy.cuda()
+                    flag = flag.cuda()
+                logits, loss = self.model(x_sent, y_sent, x_position, y_position, xy, flag)
 
-            label_ids = xy.cpu().numpy()
-            y_pred = torch.max(logits, 1).indices.cpu().numpy()
-            pred.extend(y_pred)
-            gold.extend(label_ids)
+                label_ids = xy.cpu().numpy()
+                y_pred = torch.max(logits, 1).indices.cpu().numpy()
+                pred.extend(y_pred)
+                gold.extend(label_ids)
 
-        validation_time = format_time(time.time() - t0)
-        print("Eval took: {:}".format(validation_time))
-        # print(len(pred))
-        # print(len(gold))
-        # Acc, P, R, F1, CM = metric(gold, y_pred)
-        P, R, F1 = precision_recall_fscore_support(gold, pred, average="micro")[0:3]
-        CM = confusion_matrix(gold, pred)
-        print("  P: {0:.3f}".format(P))
-        print("  R: {0:.3f}".format(R))
-        print("  F1: {0:.3f}".format(F1))
-        print("Classification report: \n {}".format(classification_report(gold, pred)))
-        if is_test:
-            print("Test result:")
+            validation_time = format_time(time.time() - t0)
+            print("Eval took: {:}".format(validation_time))
+            # print(len(pred))
+            # print(len(gold))
+            # Acc, P, R, F1, CM = metric(gold, y_pred)
+            P, R, F1 = precision_recall_fscore_support(gold, pred, average="micro")[0:3]
+            CM = confusion_matrix(gold, pred)
             print("  P: {0:.3f}".format(P))
             print("  R: {0:.3f}".format(R))
             print("  F1: {0:.3f}".format(F1))
-            print("  Confusion Matrix")
-            print(CM)
             print("Classification report: \n {}".format(classification_report(gold, pred)))
-        if is_test == False:
-            if F1 > self.best_micro_f1 or path.exists(self.best_path) == False:
-                self.best_micro_f1 = F1
-                self.best_cm = CM
-                torch.save(self.model, self.best_path)
+            if is_test:
+                print("Test result:")
+                print("  P: {0:.3f}".format(P))
+                print("  R: {0:.3f}".format(R))
+                print("  F1: {0:.3f}".format(F1))
+                print("  Confusion Matrix")
+                print(CM)
+                print("Classification report: \n {}".format(classification_report(gold, pred)))
+            if is_test == False:
+                if F1 > self.best_micro_f1[i] or path.exists(self.best_path) == False:
+                    self.best_micro_f1[i] = F1
+                    self.best_cm[i] = CM
+                    torch.save(self.model, self.best_path)
+            F1s.append(F1)
         
-        return F1
+        return F1s

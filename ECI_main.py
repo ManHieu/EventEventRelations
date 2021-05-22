@@ -31,16 +31,16 @@ def objective(trial:optuna.Trial):
     print(params)
     start = timer()
     train_set = []
-    test_set = []
-    val_set = []
+    validate_dataloaders = []
+    test_dataloaders = []
     for dataset in datasets:
         train, test, validate = single_loader(dataset)
         train_set.extend(train)
-        val_set.extend(validate)
-        test_set.extend(test)
+        validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=True)
+        test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=True)
+        validate_dataloaders.extend(validate_dataloader)
+        test_dataloaders.extend(test_dataloader)
     train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
-    validate_dataloader = DataLoader(EventDataset(val_set), batch_size=batch_size, shuffle=True)
-    test_dataloader = DataLoader(EventDataset(test_set), batch_size=batch_size, shuffle=True)
 
     model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, finetune=True)
     # ECIRoberta(num_classes, dataset, params['MLP size'], roberta_type, finetune=True)
@@ -54,7 +54,7 @@ def objective(trial:optuna.Trial):
 
     exp = EXP(model, epochs=epoches, b_lr=params['bert_learning_rate'], m_lr=params['mlp_learning_rate'],
             decay_rate=params['b_lr_decay_rate'], m_lr_step=params['m_step'], b_scheduler_lambda=params['b_lambda_scheduler'],
-            train_dataloader=train_dataloader, validate_dataloader=validate_dataloader, test_dataloader=test_dataloader,
+            train_dataloader=train_dataloader, validate_dataloaders=validate_dataloaders, test_dataloaders=test_dataloaders,
             best_path=best_path, train_lm_epoch=params['epoches'])
     f1, CM = exp.train()
     exp.evaluate(is_test=True)
@@ -66,7 +66,7 @@ def objective(trial:optuna.Trial):
         f.write("\n cosin_lr_lambda - decay rate 1.5 \n")
         f.write(" F1: \n {} \n CM: \n{} \n Hypeparameter: \n {} \n ".format(f1, CM, params))
         f.write("Time: {} \n".format(datetime.datetime.now()))
-    return f1
+    return sum(f1)
 
 if __name__=="__main__":
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
