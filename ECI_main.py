@@ -38,8 +38,8 @@ def objective(trial:optuna.Trial):
         train_set.extend(train)
         validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=True)
         test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=True)
-        validate_dataloaders.extend(validate_dataloader)
-        test_dataloaders.extend(test_dataloader)
+        validate_dataloaders.append(validate_dataloader)
+        test_dataloaders.append(test_dataloader)
     train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
 
     model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, finetune=True)
