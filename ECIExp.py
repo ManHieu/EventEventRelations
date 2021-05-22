@@ -85,7 +85,7 @@ class EXP():
         
         if b_scheduler_lambda == "cosin":
             b_lambda = cosin_lr_lambda
-        if b_scheduler_lambda == "linear":
+        elif b_scheduler_lambda == "linear":
             b_lambda = linear_lr_lambda
         else:
             print("We haven't support that lambda!!")
