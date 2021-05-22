@@ -44,6 +44,7 @@ class ECIRobertaJointTask(nn.Module):
                     fc2 = nn.Linear(int(self.mlp_size), num_classes)
                 
                 weights = [993.0/333, 993.0/349, 933.0/128, 933.0/453]
+                weights = torch.tensor(weights)
                 loss = nn.CrossEntropyLoss(weight=weights)
 
                 module_dict[1] = nn.Sequential(self.drop_out, fc1, self.drop_out, self.relu, fc2, loss)
@@ -61,6 +62,7 @@ class ECIRobertaJointTask(nn.Module):
                     fc2 = nn.Linear(int(self.mlp_size), num_classes)
                 
                 weights = [6404.0/3233, 6404.0/2263, 6404.0/232, 6404.0/676,]
+                weights = torch.tensor(weights)
                 loss = nn.CrossEntropyLoss(weight=weights)
 
                 module_dict[2] = nn.Sequential(self.drop_out, fc1, self.drop_out, self.relu, fc2, loss)
@@ -78,6 +80,7 @@ class ECIRobertaJointTask(nn.Module):
                     fc2 = nn.Linear(int(self.mlp_size), num_classes)
                 
                 weights = [3066.0/660, 3066.0/461, 3066.0/1945,]
+                weights = torch.tensor(weights)
                 loss = nn.CrossEntropyLoss(weight=weights)
 
                 module_dict[3] = nn.Sequential(self.drop_out, fc1, self.drop_out, self.relu, fc2, loss)
@@ -95,6 +98,7 @@ class ECIRobertaJointTask(nn.Module):
                     fc2 = nn.Linear(int(self.mlp_size), num_classes)
                 
                 weights = [12715.0/2590, 12715.0/2104, 12715.0/836, 12715.0/1060, 12715.0/215, 12715.0/5910,]
+                weights = torch.tensor(weights)
                 loss = nn.CrossEntropyLoss(weight=weights)
 
                 module_dict[4] = nn.Sequential(self.drop_out, fc1, self.drop_out, self.relu, fc2, loss)
