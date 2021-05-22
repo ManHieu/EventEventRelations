@@ -1,5 +1,8 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from models.roberta_model_multi import ECIRobertaJointTask
+from data_loader.EventDataset import EventDataset
 import datetime
+from torch.utils.data.dataloader import DataLoader
 from models.roberta_model import ECIRoberta
 from numpy import sin
 import torch
@@ -27,11 +30,20 @@ def objective(trial:optuna.Trial):
     print("Hyperparameter will be used in this trial: ")
     print(params)
     start = timer()
-    train_dataloader, test_dataloader, validate_dataloader, num_classes = single_loader(dataset, batch_size)
+    train_set = []
+    test_set = []
+    val_set = []
+    for dataset in datasets:
+        train, test, validate = single_loader(dataset)
+        train_set.extend(train)
+        val_set.extend(validate)
+        test_set.extend(test)
+    train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
+    validate_dataloader = DataLoader(EventDataset(val_set), batch_size=batch_size, shuffle=True)
+    test_dataloader = DataLoader(EventDataset(test_set), batch_size=batch_size, shuffle=True)
 
-    model = ECIRoberta(num_classes, dataset, params['MLP size'], roberta_type, finetune=True)
-    # ECIRoberta(num_classes, dataset, params["MLP size"], 
-                    # roberta_type, finetune=True, negative_slope=params["negative_slope"])
+    model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, finetune=True)
+    # ECIRoberta(num_classes, dataset, params['MLP size'], roberta_type, finetune=True)
     if CUDA:
         model = model.cuda()
     model.zero_grad()
@@ -44,10 +56,6 @@ def objective(trial:optuna.Trial):
             decay_rate=params['b_lr_decay_rate'], m_lr_step=params['m_step'], b_scheduler_lambda=params['b_lambda_scheduler'],
             train_dataloader=train_dataloader, validate_dataloader=validate_dataloader, test_dataloader=test_dataloader,
             best_path=best_path, train_lm_epoch=params['epoches'])
-    # EXP(model, epoches, params["bert_learning_rate"], params["mlp_learning_rate"], 
-    #         train_dataloader, validate_dataloader, test_dataloader, 
-    #         best_path, weight_decay=params['weight_decay'], 
-    #         train_lm_epoch=params['epoches'], warmup_proportion=params['warmup_proportion'])
     f1, CM = exp.train()
     exp.evaluate(is_test=True)
     
@@ -67,7 +75,7 @@ if __name__=="__main__":
     parser.add_argument('--roberta_type', help="base or large", default='roberta-base', type=str)
     parser.add_argument('--epoches', help='Number epoch', default=30, type=int)
     parser.add_argument('--best_path', help="Path for save model", type=str)
-    parser.add_argument('--dataset', help="Name of dataset", type=str)
+    parser.add_argument('--dataset', help="Name of dataset", type=list)
     parser.add_argument('--result_log', help="Path of result folder", type=str)
 
     args = parser.parse_args()
@@ -76,7 +84,7 @@ if __name__=="__main__":
     roberta_type  = args.roberta_type
     epoches = args.epoches
     best_path = args.best_path
-    dataset = args.dataset
+    datasets = args.dataset
     result_file = args.result_log
 
     study = optuna.create_study(direction='maximize')

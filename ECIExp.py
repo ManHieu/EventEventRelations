@@ -1,7 +1,7 @@
 from logging import exception
 from numpy.lib.function_base import average
 from torch.utils.data.dataloader import DataLoader
-from models.roberta_model import ECIRoberta
+from models.roberta_model_multi import ECIRobertaJointTask
 import torch
 import torch.nn as nn
 import time
@@ -15,7 +15,7 @@ from utils.tools import *
 import math
 
 class EXP():
-    def __init__(self, model:ECIRoberta, epochs, b_lr, m_lr, decay_rate, b_scheduler_lambda, m_lr_step,
+    def __init__(self, model:ECIRobertaJointTask, epochs, b_lr, m_lr, decay_rate, b_scheduler_lambda, m_lr_step,
                 train_dataloader:DataLoader, validate_dataloader:DataLoader, test_dataloader:DataLoader, 
                 best_path, weight_decay=0.01, train_lm_epoch=3, warmup_proportion=0.1) -> None:
         self.model = model
@@ -118,15 +118,16 @@ class EXP():
             self.model.zero_grad()
             self.train_loss = 0.0
             for step, batch in enumerate(self.train_dataloader):
-                x_sent, y_sent, x_position, y_position, x_sent_pos, y_sent_pos, xy = batch[2:]
+                x_sent, y_sent, x_position, y_position, x_sent_pos, y_sent_pos, flag, xy = batch[2:]
                 if CUDA:
                     x_sent = x_sent.cuda()
                     y_sent = y_sent.cuda()
                     x_position = x_position.cuda()
                     y_position = y_position.cuda()
                     xy = xy.cuda()
+                    flag = flag.cuda()
 
-                logits, loss = self.model(x_sent, y_sent, x_position, y_position, xy)
+                logits, loss = self.model(x_sent, y_sent, x_position, y_position, xy, flag)
                 self.train_loss += loss.item()
                 loss.backward()
                 self.optimizer.step()
@@ -173,14 +174,15 @@ class EXP():
         pred = []
         gold = []
         for batch in dataloader:
-            x_sent, y_sent, x_position, y_position, x_sent_pos, y_sent_pos, xy = batch[2:]
+            x_sent, y_sent, x_position, y_position, x_sent_pos, y_sent_pos, flag, xy = batch[2:]
             if CUDA:
                 x_sent = x_sent.cuda()
                 y_sent = y_sent.cuda()
                 x_position = x_position.cuda()
                 y_position = y_position.cuda()
                 xy = xy.cuda()
-            logits, loss = self.model(x_sent, y_sent, x_position, y_position, xy)
+                flag = flag.cuda()
+            logits, loss = self.model(x_sent, y_sent, x_position, y_position, xy, flag)
 
             label_ids = xy.cpu().numpy()
             y_pred = torch.max(logits, 1).indices.cpu().numpy()
