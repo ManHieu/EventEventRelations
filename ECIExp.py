@@ -96,7 +96,7 @@ class EXP():
         self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lamd)
 
         self.best_micro_f1 = [-0.1]*len(self.test_datatloaders)
-        self.best_cm = []
+        self.best_cm = [None]*len(self.test_datatloaders)
         self.best_path = best_path
     
     def train(self):
