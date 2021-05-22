@@ -196,5 +196,5 @@ class ECIRobertaJointTask(nn.Module):
             typ = str(flag[i].item())
             logit = self.module_dict[typ](presentation)
             loss += self.loss_dict[typ](logit, xy)
-            logits.append(logits)
+            logits.append(logit)
         return torch.cat(logits, 0), loss
