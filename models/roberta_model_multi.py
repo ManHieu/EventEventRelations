@@ -47,7 +47,7 @@ class ECIRobertaJointTask(nn.Module):
                 weights = torch.tensor(weights)
                 loss = nn.CrossEntropyLoss(weight=weights)
 
-                module_dict['1'] = nn.Sequential(self.drop_out, fc1, self.drop_out, self.relu, fc2, loss)
+                module_dict['1'] = nn.Sequential(fc1, self.relu, fc2, loss)
             
             if dataset == "MATRES":
                 num_classes = 4
@@ -65,7 +65,7 @@ class ECIRobertaJointTask(nn.Module):
                 weights = torch.tensor(weights)
                 loss = nn.CrossEntropyLoss(weight=weights)
 
-                module_dict['2'] = nn.Sequential(self.drop_out, fc1, self.drop_out, self.relu, fc2, loss)
+                module_dict['2'] = nn.Sequential(fc1, self.relu, fc2, loss)
             
             if dataset == "I2B2":
                 num_classes = 3
@@ -83,7 +83,7 @@ class ECIRobertaJointTask(nn.Module):
                 weights = torch.tensor(weights)
                 loss = nn.CrossEntropyLoss(weight=weights)
 
-                module_dict['3'] = nn.Sequential(self.drop_out, fc1, self.drop_out, self.relu, fc2, loss)
+                module_dict['3'] = nn.Sequential(fc1, self.relu, fc2, loss)
             
             if dataset == "TBD":
                 num_classes = 6
@@ -101,7 +101,7 @@ class ECIRobertaJointTask(nn.Module):
                 weights = torch.tensor(weights)
                 loss = nn.CrossEntropyLoss(weight=weights)
 
-                module_dict['4'] = nn.Sequential(self.drop_out, fc1, self.drop_out, self.relu, fc2, loss)
+                module_dict['4'] = nn.Sequential(fc1, self.relu, fc2, loss)
         
         self.module_dict = nn.ModuleDict(module_dict)
         # if dataset == "HiEve":
