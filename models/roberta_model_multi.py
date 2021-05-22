@@ -165,6 +165,6 @@ class ECIRobertaJointTask(nn.Module):
         # print(presentation.size())
         loss = 0.0
         for i in range(0, batch_size):
-            typ = str(flag[i])
+            typ = str(flag[i].item())
             loss += self.module_dict[typ](presentation)
         return loss
