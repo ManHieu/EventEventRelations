@@ -75,7 +75,7 @@ if __name__=="__main__":
     parser.add_argument('--roberta_type', help="base or large", default='roberta-base', type=str)
     parser.add_argument('--epoches', help='Number epoch', default=30, type=int)
     parser.add_argument('--best_path', help="Path for save model", type=str)
-    parser.add_argument('--dataset', help="Name of dataset", type=list)
+    parser.add_argument('--dataset', help="Name of dataset", action='append', required=True)
     parser.add_argument('--result_log', help="Path of result folder", type=str)
 
     args = parser.parse_args()
@@ -85,6 +85,7 @@ if __name__=="__main__":
     epoches = args.epoches
     best_path = args.best_path
     datasets = args.dataset
+    print(datasets)
     result_file = args.result_log
 
     study = optuna.create_study(direction='maximize')
