@@ -2,11 +2,11 @@ import datetime
 import torch
 import spacy
 from sklearn.metrics import confusion_matrix
-from transformers import RobertaModel, RobertaTokenizer
+from transformers import RobertaModel, AutoTokenizer
 
 
 CUDA = torch.cuda.is_available()
-tokenizer = RobertaTokenizer.from_pretrained('roberta-base', unk_token='<unk>')
+tokenizer = AutoTokenizer.from_pretrained("SpanBERT/spanbert-base-cased", unk_token='<unk>')
 nlp = spacy.load("en_core_web_sm")
 
 # Padding function

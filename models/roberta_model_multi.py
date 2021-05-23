@@ -17,11 +17,11 @@ class ECIRobertaJointTask(nn.Module):
             self.roberta = RobertaModel.from_pretrained("./pretrained_models/models/{}".format(roberta_type))
         else:
             print("Loading pretrain model ......")
-            self.roberta = RobertaModel.from_pretrained(roberta_type)
+            self.roberta = RobertaModel.from_pretrained("SpanBERT/spanbert-base-cased")
         self.sub = sub
         self.mul = mul
         self.finetune = finetune
-        if roberta_type == 'roberta-base':
+        if roberta_type == 'spanbert-base-cased':
             self.roberta_dim = 768
         if roberta_type == 'roberta-large':
             self.roberta_dim = 1024
