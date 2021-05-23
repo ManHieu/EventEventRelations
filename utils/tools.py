@@ -83,7 +83,7 @@ def SpanBERT_list(content, token_list = None, token_span_SENT = None):
     roberta_subwords = []
     roberta_subwords_no_space = []
     for index, i in enumerate(encoded):
-        r_token = tokenizer.decode([i])
+        r_token = spanbert_tokenizer.decode([i])
         if r_token != " ":
             roberta_subwords.append(r_token)
             if r_token[:2] == "##":
