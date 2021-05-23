@@ -68,7 +68,6 @@ def objective(trial:optuna.Trial):
             f.write("{} \n".format(dataset[i]))
             f.write("F1: {} \n".format(f1[i]))
             f.write("CM: \n {} \n".format(CM[i]))
-
         f.write("Time: {} \n".format(datetime.datetime.now()))
     return sum_f1
 

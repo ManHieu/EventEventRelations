@@ -140,7 +140,6 @@ class EXP():
                     elapsed = format_time(time.time() - t0)
                     print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(self.train_dataloader), elapsed))
                     print("LR: {} - {}".format(self.optimizer.param_groups[0]['lr'], self.optimizer.param_groups[-1]['lr']))
-                    break
             
             epoch_training_time = format_time(time.time() - t0)
             print("  Total training loss: {0:.2f}".format(self.train_loss))
@@ -158,7 +157,9 @@ class EXP():
         print("Training complete!")
         print("Total training took {:} (h:mm:ss)".format(format_time(time.time()-total_t0)))
         print("Best micro F1:{}".format(self.best_micro_f1))
-        print("Best confusion matrix: \n {} \n".format(self.best_cm))
+        print("Best confusion matrix: ")
+        for cm in self.best_cm:
+            print(cm)
         return self.best_micro_f1, self.best_cm, self.sum_f1
 
     def evaluate(self, is_test=False):
@@ -224,7 +225,6 @@ class EXP():
             if sum_f1 > self.sum_f1 or path.exists(self.best_path) == False:
                 self.sum_f1 = sum_f1
                 self.best_cm = best_cm
+                self.best_micro_f1 = F1s
                 torch.save(self.model, self.best_path)
-            
-        
         return F1s
