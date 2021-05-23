@@ -2,11 +2,12 @@ import datetime
 import torch
 import spacy
 from sklearn.metrics import confusion_matrix
-from transformers import RobertaModel, AutoTokenizer
+from transformers import RobertaModel, RobertaTokenizer, AutoTokenizer
 
 
 CUDA = torch.cuda.is_available()
-tokenizer = AutoTokenizer.from_pretrained("SpanBERT/spanbert-base-cased", unk_token='<unk>')
+tokenizer = RobertaTokenizer.from_pretrained('roberta-base', unk_token='<unk>')
+spanbert_tokenizer = AutoTokenizer.from_pretrained("SpanBERT/spanbert-base-cased", unk_token='<unk>')
 nlp = spacy.load("en_core_web_sm")
 
 # Padding function
@@ -62,6 +63,34 @@ def RoBERTa_list(content, token_list = None, token_span_SENT = None):
             else:
                 roberta_subwords_no_space.append(r_token)
 
+    roberta_subword_span = tokenized_to_origin_span(content, roberta_subwords_no_space[1:-1]) # w/o <s> and </s>
+    roberta_subword_map = []
+    if token_span_SENT is not None:
+        roberta_subword_map.append(-1) # "<s>"
+        for subword in roberta_subword_span:
+            roberta_subword_map.append(token_id_lookup(token_span_SENT, subword[0], subword[1]))
+        roberta_subword_map.append(-1) # "</s>" 
+        return roberta_subword_to_ID, roberta_subwords, roberta_subword_span, roberta_subword_map
+    else:
+        return roberta_subword_to_ID, roberta_subwords, roberta_subword_span, -1
+
+def SpanBERT_list(content, token_list = None, token_span_SENT = None):
+    encoded = spanbert_tokenizer.encode(content)
+    roberta_subword_to_ID = encoded
+    # input_ids = torch.tensor(encoded).unsqueeze(0)  # Batch size 1
+    # outputs = model(input_ids)
+    # last_hidden_states = outputs[0]  # The last hidden-state is the first element of the output tuple
+    roberta_subwords = []
+    roberta_subwords_no_space = []
+    for index, i in enumerate(encoded):
+        r_token = tokenizer.decode([i])
+        if r_token != " ":
+            roberta_subwords.append(r_token)
+            if r_token[:2] == "##":
+                roberta_subwords_no_space.append(r_token[2:])
+            else:
+                roberta_subwords_no_space.append(r_token)
+    content = content.lower()
     roberta_subword_span = tokenized_to_origin_span(content, roberta_subwords_no_space[1:-1]) # w/o <s> and </s>
     roberta_subword_map = []
     if token_span_SENT is not None:

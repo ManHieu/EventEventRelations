@@ -59,7 +59,7 @@ def tsvx_reader(dir_name, file_name):
         # RoBERTa tokenizer
         sent_dict["roberta_subword_to_ID"], sent_dict["roberta_subwords"], \
         sent_dict["roberta_subword_span_SENT"], sent_dict["roberta_subword_map"] = \
-        RoBERTa_list(sent_dict["content"], sent_dict["tokens"], sent_dict["token_span_SENT"])
+        SpanBERT_list(sent_dict["content"], sent_dict["tokens"], sent_dict["token_span_SENT"])
             
         sent_dict["roberta_subword_span_DOC"] = \
         span_SENT_to_DOC(sent_dict["roberta_subword_span_SENT"], sent_dict["sent_start_char"])
@@ -213,7 +213,7 @@ def tml_reader(dir_name, file_name):
         # RoBERTa tokenizer
         sent_dict["roberta_subword_to_ID"], sent_dict["roberta_subwords"], \
         sent_dict["roberta_subword_span_SENT"], sent_dict["roberta_subword_map"] = \
-        RoBERTa_list(sent_dict["content"], sent_dict["tokens"], sent_dict["token_span_SENT"])
+        SpanBERT_list(sent_dict["content"], sent_dict["tokens"], sent_dict["token_span_SENT"])
             
         sent_dict["roberta_subword_span_DOC"] = \
         span_SENT_to_DOC(sent_dict["roberta_subword_span_SENT"], sent_dict["sent_start_char"])
@@ -300,7 +300,7 @@ def i2b2_xml_reader(dir_name, file_name):
         # RoBERTa tokenizer
         sent_dict["roberta_subword_to_ID"], sent_dict["roberta_subwords"], \
         sent_dict["roberta_subword_span_SENT"], sent_dict["roberta_subword_map"] = \
-        RoBERTa_list(sent_dict["content"], sent_dict["tokens"], sent_dict["token_span_SENT"])
+        SpanBERT_list(sent_dict["content"], sent_dict["tokens"], sent_dict["token_span_SENT"])
             
         sent_dict["roberta_subword_span_DOC"] = \
         span_SENT_to_DOC(sent_dict["roberta_subword_span_SENT"], sent_dict["sent_start_char"])
@@ -403,7 +403,7 @@ def tbd_tml_reader(dir_name, file_name):
         # RoBERTa tokenizer
         sent_dict["roberta_subword_to_ID"], sent_dict["roberta_subwords"], \
         sent_dict["roberta_subword_span_SENT"], sent_dict["roberta_subword_map"] = \
-        RoBERTa_list(sent_dict["content"], sent_dict["tokens"], sent_dict["token_span_SENT"])
+        SpanBERT_list(sent_dict["content"], sent_dict["tokens"], sent_dict["token_span_SENT"])
             
         sent_dict["roberta_subword_span_DOC"] = \
         span_SENT_to_DOC(sent_dict["roberta_subword_span_SENT"], sent_dict["sent_start_char"])
