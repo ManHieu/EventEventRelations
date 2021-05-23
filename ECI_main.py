@@ -19,11 +19,13 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "bert_learning_rate": trial.suggest_categorical("b_lr", [1e-8, 5e-8, 1e-7,]),
-        "mlp_learning_rate":trial.suggest_categorical("m_lr", [1e-6, 5e-6, 1e-5, 5e-5, 1e-4]),
-        "MLP size": trial.suggest_categorical("MLP size", [768]),
+        "bert_learning_rate": trial.suggest_categorical("b_lr", [1e-8, 5e-8, 1e-7, 5e-7]),
+        "mlp_learning_rate":trial.suggest_categorical("m_lr", [1e-6, 5e-6, 1e-5]),
+        "MLP size": 768,
+        # trial.suggest_categorical("MLP size", [768]),
         "epoches": trial.suggest_categorical("epoches", [1, 3, 5]),
-        "b_lambda_scheduler": trial.suggest_categorical("b_scheduler", ['cosin']),
+        "b_lambda_scheduler": 'cosin',
+        # trial.suggest_categorical("b_scheduler", ['cosin']),
         "m_step": trial.suggest_int('m_step', 1, 3),
         'b_lr_decay_rate': trial.suggest_float('decay_rate', 0.5, 0.8, step=0.1)
     }
