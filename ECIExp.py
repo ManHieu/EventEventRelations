@@ -159,7 +159,7 @@ class EXP():
         print("Total training took {:} (h:mm:ss)".format(format_time(time.time()-total_t0)))
         print("Best micro F1:{}".format(self.best_micro_f1))
         print("Best confusion matrix: \n {} \n".format(self.best_cm))
-        return self.best_micro_f1, self.best_cm
+        return self.best_micro_f1, self.best_cm, self.sum_f1
 
     def evaluate(self, is_test=False):
         t0 = time.time()
@@ -168,7 +168,7 @@ class EXP():
         best_cm = []
         for i in range(0, len(self.test_datatloaders)):
             dataset = self.datasets[i]
-            print("---------------------{}---------------------- \n".format(dataset))
+            print("---------------------{}----------------------".format(dataset))
             if is_test:
                 dataloader = self.test_datatloaders[i]
                 self.model = torch.load(self.best_path)

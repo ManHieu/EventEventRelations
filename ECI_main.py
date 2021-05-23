@@ -56,7 +56,7 @@ def objective(trial:optuna.Trial):
             decay_rate=params['b_lr_decay_rate'], m_lr_step=params['m_step'], b_scheduler_lambda=params['b_lambda_scheduler'],
             train_dataloader=train_dataloader, validate_dataloaders=validate_dataloaders, test_dataloaders=test_dataloaders,
             best_path=best_path, train_lm_epoch=params['epoches'])
-    f1, CM = exp.train()
+    f1, CM, sum_f1 = exp.train()
     exp.evaluate(is_test=True)
     
     print("Result: Best micro F1 of interaction: {}".format(f1))
@@ -64,13 +64,13 @@ def objective(trial:optuna.Trial):
     with open(result_file, 'a', encoding='UTF-8') as f:
         f.write("\n -------------------------------------------- \n")
         f.write("Hypeparameter: \n {} \n ".format(params))
-        for i in range(0, datasets):
+        for i in range(0, len(datasets)):
             f.write("{} \n".format(dataset[i]))
             f.write("F1: {} \n".format(f1[i]))
             f.write("CM: \n {} \n".format(CM[i]))
 
         f.write("Time: {} \n".format(datetime.datetime.now()))
-    return sum(f1)
+    return sum_f1
 
 if __name__=="__main__":
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
