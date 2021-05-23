@@ -205,6 +205,7 @@ class ECIRobertaJointTask(nn.Module):
             typ = str(flag[i].item())
             logit = self.module_dict[typ](presentation[i])
             pad_logit = torch.zeros((1,self.max_num_class))
+            pad_logit = pad_logit - 1000
             pad_logit[:, :len(logit)] = logit
             logit = logit.unsqueeze(0)
             target = xy[i].unsqueeze(0)
