@@ -24,9 +24,9 @@ class EXP():
         self.b_lr = b_lr
         self.mlp_lr = m_lr
         self.train_dataloader = train_dataloader
-        self.test_datatloaders = test_dataloaders.values()
-        self.validate_dataloaders = validate_dataloaders.values()
-        self.dataset = test_dataloaders.keys()
+        self.test_datatloaders = list(test_dataloaders.values())
+        self.validate_dataloaders = list(validate_dataloaders.values())
+        self.datasets = list(test_dataloaders.keys())
         self.decay_rate = decay_rate
 
         self.bert_param_list = []
@@ -140,7 +140,7 @@ class EXP():
                     elapsed = format_time(time.time() - t0)
                     print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(self.train_dataloader), elapsed))
                     print("LR: {} - {}".format(self.optimizer.param_groups[0]['lr'], self.optimizer.param_groups[-1]['lr']))
-                
+                    break
             
             epoch_training_time = format_time(time.time() - t0)
             print("  Total training loss: {0:.2f}".format(self.train_loss))
@@ -167,7 +167,7 @@ class EXP():
         sum_f1 = 0.0
         best_cm = []
         for i in range(0, len(self.test_datatloaders)):
-            dataset = self.dataset[i]
+            dataset = self.datasets[i]
             print("---------------------{}---------------------- \n".format(dataset))
             if is_test:
                 dataloader = self.test_datatloaders[i]
