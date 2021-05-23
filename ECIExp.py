@@ -1,4 +1,5 @@
 from logging import exception
+from typing import Dict
 from numpy.lib.function_base import average
 from torch.utils.data.dataloader import DataLoader
 from models.roberta_model_multi import ECIRobertaJointTask
@@ -16,15 +17,16 @@ import math
 
 class EXP():
     def __init__(self, model:ECIRobertaJointTask, epochs, b_lr, m_lr, decay_rate, b_scheduler_lambda, m_lr_step,
-                train_dataloader:DataLoader, validate_dataloaders, test_dataloaders, 
+                train_dataloader:DataLoader, validate_dataloaders: Dict, test_dataloaders: Dict, 
                 best_path, weight_decay=0.01, train_lm_epoch=3, warmup_proportion=0.1) -> None:
         self.model = model
         self.epochs = epochs
         self.b_lr = b_lr
         self.mlp_lr = m_lr
         self.train_dataloader = train_dataloader
-        self.test_datatloaders = test_dataloaders
-        self.validate_dataloaders = validate_dataloaders
+        self.test_datatloaders = test_dataloaders.values()
+        self.validate_dataloaders = validate_dataloaders.values()
+        self.dataset = test_dataloaders.keys()
         self.decay_rate = decay_rate
 
         self.bert_param_list = []
@@ -96,6 +98,7 @@ class EXP():
         self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lamd)
 
         self.best_micro_f1 = [-0.1]*len(self.test_datatloaders)
+        self.sum_f1 = -0.1
         self.best_cm = [None]*len(self.test_datatloaders)
         self.best_path = best_path
     
@@ -161,7 +164,11 @@ class EXP():
     def evaluate(self, is_test=False):
         t0 = time.time()
         F1s = []
+        sum_f1 = 0.0
+        best_cm = []
         for i in range(0, len(self.test_datatloaders)):
+            dataset = self.dataset[i]
+            print("---------------------{}---------------------- \n".format(dataset))
             if is_test:
                 dataloader = self.test_datatloaders[i]
                 self.model = torch.load(self.best_path)
@@ -209,11 +216,15 @@ class EXP():
                 print("  Confusion Matrix")
                 print(CM)
                 print("Classification report: \n {}".format(classification_report(gold, pred)))
-            if is_test == False:
-                if F1 > self.best_micro_f1[i] or path.exists(self.best_path) == False:
-                    self.best_micro_f1[i] = F1
-                    self.best_cm[i] = CM
-                    torch.save(self.model, self.best_path)
+            sum_f1 += F1
+            best_cm.append(CM)
             F1s.append(F1)
+
+        if is_test == False:
+            if sum_f1 > self.sum_f1 or path.exists(self.best_path) == False:
+                self.sum_f1 = sum_f1
+                self.best_cm = best_cm
+                torch.save(self.model, self.best_path)
+            
         
         return F1s

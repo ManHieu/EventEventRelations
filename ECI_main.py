@@ -31,15 +31,15 @@ def objective(trial:optuna.Trial):
     print(params)
     start = timer()
     train_set = []
-    validate_dataloaders = []
-    test_dataloaders = []
+    validate_dataloaders = {}
+    test_dataloaders = {}
     for dataset in datasets:
         train, test, validate = single_loader(dataset)
         train_set.extend(train)
         validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=True)
         test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=True)
-        validate_dataloaders.append(validate_dataloader)
-        test_dataloaders.append(test_dataloader)
+        validate_dataloaders[dataset] = validate_dataloader
+        test_dataloaders[dataset] = test_dataloader
     train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
 
     model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, finetune=True)
@@ -63,8 +63,12 @@ def objective(trial:optuna.Trial):
 
     with open(result_file, 'a', encoding='UTF-8') as f:
         f.write("\n -------------------------------------------- \n")
-        f.write("\n cosin_lr_lambda - decay rate 1.5 \n")
-        f.write(" F1: \n {} \n CM: \n{} \n Hypeparameter: \n {} \n ".format(f1, CM, params))
+        f.write("Hypeparameter: \n {} \n ".format(params))
+        for i in range(0, datasets):
+            f.write("{} \n".format(dataset[i]))
+            f.write("F1: {} \n".format(f1[i]))
+            f.write("CM: \n {} \n".format(CM[i]))
+
         f.write("Time: {} \n".format(datetime.datetime.now()))
     return sum(f1)
 
