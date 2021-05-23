@@ -116,7 +116,7 @@ class EXP():
             self.model.train()
             self.model.zero_grad()
             self.train_loss = 0.0
-            for step, batch in tqdm.tqdm(enumerate(self.train_dataloader)):
+            for step, batch in tqdm.tqdm(enumerate(self.train_dataloader), desc="Training processing", total=len(self.train_dataloader)):
                 x_sent, y_sent, x_position, y_position, x_sent_pos, y_sent_pos, flag, xy = batch[2:]
                 if CUDA:
                     x_sent = x_sent.cuda()
