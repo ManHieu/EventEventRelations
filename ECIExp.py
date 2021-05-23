@@ -110,7 +110,6 @@ class EXP():
 
             print("")
             print('======== Epoch {:} / {:} ========'.format(i + 1, self.epochs))
-            print('Training...')
 
             t0 = time.time()
             self.model.train()
@@ -170,7 +169,7 @@ class EXP():
             self.model.eval()
             pred = []
             gold = []
-            for batch in dataloader:
+            for batch in tqdm.tqdm(dataloader):
                 x_sent, y_sent, x_position, y_position, x_sent_pos, y_sent_pos, flag, xy = batch[2:]
                 if CUDA:
                     x_sent = x_sent.cuda()
