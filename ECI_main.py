@@ -45,11 +45,9 @@ def objective(trial:optuna.Trial):
     train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
 
     model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, finetune=True)
-    # ECIRoberta(num_classes, dataset, params['MLP size'], roberta_type, finetune=True)
     if CUDA:
         model = model.cuda()
     model.zero_grad()
-    # epoches = params['epoches']
     print("# of parameters:", count_parameters(model))
     total_steps = len(train_dataloader) * epoches
     print("Total steps: [number of batches] x [number of epochs] =", total_steps)

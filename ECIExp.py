@@ -1,34 +1,34 @@
-from logging import exception
 from typing import Dict
-from numpy.lib.function_base import average
 from torch.utils.data.dataloader import DataLoader
 from models.roberta_model_multi import ECIRobertaJointTask
 import torch
 import torch.nn as nn
 import time
 import torch.optim as optim
-from transformers import get_linear_schedule_with_warmup
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix, classification_report, accuracy_score
-from utils.tools import CUDA, format_time, metric
+from utils.tools import CUDA, format_time
 from os import path
 import math
 from utils.tools import *
 import math
+
 
 class EXP():
     def __init__(self, model:ECIRobertaJointTask, epochs, b_lr, m_lr, decay_rate, b_scheduler_lambda, m_lr_step,
                 train_dataloader:DataLoader, validate_dataloaders: Dict, test_dataloaders: Dict, 
                 best_path, weight_decay=0.01, train_lm_epoch=3, warmup_proportion=0.1) -> None:
         self.model = model
+
         self.epochs = epochs
-        self.b_lr = b_lr
-        self.mlp_lr = m_lr
+
         self.train_dataloader = train_dataloader
         self.test_datatloaders = list(test_dataloaders.values())
         self.validate_dataloaders = list(validate_dataloaders.values())
         self.datasets = list(test_dataloaders.keys())
+        
         self.decay_rate = decay_rate
-
+        self.b_lr = b_lr
+        self.mlp_lr = m_lr
         self.bert_param_list = []
         self.mlp_param_list = []
         self.train_roberta_epoch = train_lm_epoch
@@ -39,9 +39,6 @@ class EXP():
         group1=['layer.0.','layer.1.','layer.2.','layer.3.']
         group2=['layer.4.','layer.5.','layer.6.','layer.7.']
         group3=['layer.8.','layer.9.','layer.10.','layer.11.']
-        # group4=['layer.12.','layer.13.','layer.14.','layer.15.']
-        # group5=['layer.16.','layer.17.','layer.18.','layer.19.']
-        # group6=['layer.20.','layer.21.','layer.22.','layer.23.']
         group_all = group1 + group2 + group3 
         
         self.b_parameters = [
@@ -56,8 +53,8 @@ class EXP():
             {'params': [p for n, p in self.model.named_parameters() if not any(nd in n for nd in mlp) and any(nd in n for nd in no_decay) and any(nd in n for nd in group3)],'weight_decay_rate': 0.01, 'lr': self.b_lr*(self.decay_rate**0)}, # param in group3
         ]
         self.mlp_parameters = [
-            {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.01, 'lr': self.mlp_lr},
-            {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in mlp) and any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.00, 'lr': self.mlp_lr},
+            {'params': [p for n, p in self.model.named_parameters() if any(nd in n for nd in mlp) and not any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.01, 'lr': self.mlp_lr},
+            {'params': [p for n, p in self.model.named_parameters() if any(nd in n for nd in mlp) and any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.00, 'lr': self.mlp_lr},
             ]
         optimizer_parameters = self.b_parameters + self.mlp_parameters 
         self.optimizer = optim.AdamW(optimizer_parameters, amsgrad=True, weight_decay=weight_decay)
@@ -71,10 +68,10 @@ class EXP():
             if current_step >= self.num_training_steps:
                 return 0
             return max(
-                0.1, float(self.num_training_steps - current_step) / float(max(1, self.num_training_steps - self.num_warmup_steps))
+                0.0, float(self.num_training_steps - current_step) / float(max(1, self.num_training_steps - self.num_warmup_steps))
             )
         
-        def cosin_lr_lambda(current_step):
+        def cosin_lr_lambda(current_step: int):
             if current_step < self.num_warmup_steps:
                 return float(current_step) / float(max(1, self.num_warmup_steps))
             progress = float(current_step - self.num_warmup_steps) / float(max(1, self.num_training_steps - self.num_warmup_steps))
@@ -104,8 +101,6 @@ class EXP():
     
     def train(self):
         total_t0 = time.time()
-        pre_F1 = 0.0
-        pre_loss = 10000000.0
         for i in range(0, self.epochs):
             if i >= self.train_roberta_epoch:
                 for group in self.b_parameters:
@@ -146,14 +141,6 @@ class EXP():
             print("  Training epoch took: {:}".format(epoch_training_time))
             self.evaluate()
             
-            # if i%3 == 1 and i > 9:
-            #     print("Loss: {} - {}".format(current_loss, pre_loss))
-            #     print("F1: {} - {}". format(current_F1, pre_F1))
-            #     if abs(current_F1 - pre_F1) < 0.005 or (current_loss - pre_loss) > 500:
-            #         break
-            #     pre_loss = current_loss
-            #     pre_F1 = current_F1
-        
         print("Training complete!")
         print("Total training took {:} (h:mm:ss)".format(format_time(time.time()-total_t0)))
         print("Best micro F1:{}".format(self.best_micro_f1))
@@ -200,15 +187,13 @@ class EXP():
 
             validation_time = format_time(time.time() - t0)
             print("Eval took: {:}".format(validation_time))
-            # print(len(pred))
-            # print(len(gold))
-            # Acc, P, R, F1, CM = metric(gold, y_pred)
             P, R, F1 = precision_recall_fscore_support(gold, pred, average="micro")[0:3]
             CM = confusion_matrix(gold, pred)
             print("  P: {0:.3f}".format(P))
             print("  R: {0:.3f}".format(R))
             print("  F1: {0:.3f}".format(F1))
             print("Classification report: \n {}".format(classification_report(gold, pred)))
+            
             if is_test:
                 print("Test result:")
                 print("  P: {0:.3f}".format(P))
@@ -217,6 +202,7 @@ class EXP():
                 print("  Confusion Matrix")
                 print(CM)
                 print("Classification report: \n {}".format(classification_report(gold, pred)))
+            
             sum_f1 += F1
             best_cm.append(CM)
             F1s.append(F1)

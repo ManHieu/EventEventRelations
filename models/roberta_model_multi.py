@@ -11,22 +11,27 @@ class ECIRobertaJointTask(nn.Module):
                 finetune, loss=None, sub=True, mul=True, 
                 negative_slope=0.2, drop_rate=0.5):
         super().__init__()
-        self.mlp_size = mlp_size
+        
         if path.exists("./pretrained_models/models/{}".format(roberta_type)):
             print("Loading pretrain model from local ......")
             self.roberta = RobertaModel.from_pretrained("./pretrained_models/models/{}".format(roberta_type))
         else:
             print("Loading pretrain model ......")
             self.roberta = RobertaModel.from_pretrained(roberta_type)
-        self.sub = sub
-        self.mul = mul
-        self.finetune = finetune
         if roberta_type == 'roberta-base':
             self.roberta_dim = 768
         if roberta_type == 'roberta-large':
             self.roberta_dim = 1024
+
+        self.sub = sub
+        self.mul = mul
+        self.finetune = finetune
+        
         self.lstm = nn.LSTM(self.roberta_dim, self.roberta_dim//2, num_layers=2, 
                             batch_first=True, bidirectional=True, dropout=0.6)
+        
+        self.mlp_size = mlp_size
+
         self.drop_out = nn.Dropout(drop_rate)
         self.relu = nn.LeakyReLU(negative_slope, True)
         self.max_num_class = 0
@@ -140,32 +145,6 @@ class ECIRobertaJointTask(nn.Module):
         
         self.module_dict = nn.ModuleDict(module_dict)
         self.loss_dict = nn.ModuleDict(loss_dict)
-        # if dataset == "HiEve":
-        #     weights = [993.0/333, 993.0/349, 933.0/128, 933.0/453]
-        # if dataset == "MATRES":
-        #     weights = [6404.0/3233, 6404.0/2263, 6404.0/232, 6404.0/676,]
-        # if dataset == "I2B2":
-        #     weights = [3066.0/660, 3066.0/461, 3066.0/1945,]
-        # if dataset == "TBD":
-        #     weights = [12715.0/2590, 12715.0/2104, 12715.0/836, 12715.0/1060, 12715.0/215, 12715.0/5910,]
-        # weights = torch.tensor(weights)
-        # if loss == None:
-        #     self.loss = nn.CrossEntropyLoss(weight=weights)
-        # else:
-        #     self.loss = loss
-
-        # if sub==True and mul==True:
-        #     self.fc1 = nn.Linear(self.roberta_dim*4, self.mlp_size*2)
-        #     self.fc2 = nn.Linear(self.mlp_size*2, num_classes)
-        # if (sub==True and  mul==False) or (sub==False and mul==True):
-        #     self.fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.75))
-        #     self.fc2 = nn.Linear(int(self.mlp_size*1.75), num_classes)
-        # if not (sub and mul):
-        #     self.fc1 = nn.Linear(self.roberta_dim*2, int(self.mlp_size))
-        #     self.fc2 = nn.Linear(int(self.mlp_size), num_classes)
-
-        # print(self.fc1)
-        
     
     def forward(self, x_sent, y_sent, x_position, y_position, xy, flag):
         batch_size = x_sent.size(0)
