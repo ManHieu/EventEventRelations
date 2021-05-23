@@ -1,5 +1,6 @@
 from typing import Dict
 from torch.utils.data.dataloader import DataLoader
+import tqdm
 from models.roberta_model_multi import ECIRobertaJointTask
 import torch
 import torch.nn as nn
@@ -115,7 +116,7 @@ class EXP():
             self.model.train()
             self.model.zero_grad()
             self.train_loss = 0.0
-            for step, batch in enumerate(self.train_dataloader):
+            for step, batch in tqdm.tqdm(enumerate(self.train_dataloader)):
                 x_sent, y_sent, x_position, y_position, x_sent_pos, y_sent_pos, flag, xy = batch[2:]
                 if CUDA:
                     x_sent = x_sent.cuda()
@@ -131,10 +132,10 @@ class EXP():
                 self.optimizer.step()
                 self.scheduler.step()
 
-                if step%50==0 and not step==0:
-                    elapsed = format_time(time.time() - t0)
-                    print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(self.train_dataloader), elapsed))
-                    print("LR: {} - {}".format(self.optimizer.param_groups[0]['lr'], self.optimizer.param_groups[-1]['lr']))
+                # if step%50==0 and not step==0:
+                #     elapsed = format_time(time.time() - t0)
+                #     print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(self.train_dataloader), elapsed))
+                #     print("LR: {} - {}".format(self.optimizer.param_groups[0]['lr'], self.optimizer.param_groups[-1]['lr']))
             
             epoch_training_time = format_time(time.time() - t0)
             print("  Total training loss: {0:.2f}".format(self.train_loss))
