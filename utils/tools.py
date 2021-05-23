@@ -122,4 +122,3 @@ def id_lookup(span_SENT, start_char):
         if token_span[0] <= start_char and token_span[1] >= start_char:
             return token_id
     raise ValueError("Nothing is found. \n span sentence: {} \n start_char: {}".format(span_SENT, start_char))
-

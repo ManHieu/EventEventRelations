@@ -1,4 +1,8 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from models.roberta_model_multi import ECIRobertaJointTask
+from data_loader.EventDataset import EventDataset
+import datetime
+from torch.utils.data.dataloader import DataLoader
 from models.roberta_model import ECIRoberta
 from numpy import sin
 import torch
@@ -15,39 +19,59 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "bert_learning_rate": trial.suggest_float("b_lr", 1e-8, 1e-7, log=True),
-        "mlp_learning_rate": trial.suggest_float('mlp_lr', 1e-6, 5e-6, log=True),
-        "MLP size": trial.suggest_categorical("MLP size", [512, 768]),
-        "early_stop": 100,
-        'weight_decay': trial.suggest_float("weight_decay", 0, 0.6, step=0.2),
-        'negative_slope': trial.suggest_float("negative_slope", 0, 0.5, step=0.1)
+        "bert_learning_rate": trial.suggest_categorical("b_lr", [1e-8, 5e-8, 1e-7, 5e-7]),
+        "mlp_learning_rate":trial.suggest_categorical("m_lr", [1e-6, 5e-6, 1e-5]),
+        "MLP size": 768,
+        # trial.suggest_categorical("MLP size", [768]),
+        "epoches": trial.suggest_categorical("epoches", [1, 3, 5]),
+        "b_lambda_scheduler": 'cosin',
+        # trial.suggest_categorical("b_scheduler", ['cosin']),
+        "m_step": trial.suggest_int('m_step', 1, 3),
+        'b_lr_decay_rate': trial.suggest_float('decay_rate', 0.5, 0.8, step=0.1)
     }
     print("Hyperparameter will be used in this trial: ")
     print(params)
     start = timer()
-    train_dataloader, test_dataloader, validate_dataloader, num_classes = single_loader(dataset, batch_size)
+    train_set = []
+    validate_dataloaders = {}
+    test_dataloaders = {}
+    for dataset in datasets:
+        train, test, validate = single_loader(dataset)
+        train_set.extend(train)
+        validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=True)
+        test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=True)
+        validate_dataloaders[dataset] = validate_dataloader
+        test_dataloaders[dataset] = test_dataloader
+    train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
 
-    model = ECIRoberta(num_classes, dataset, params["MLP size"], 
-                    roberta_type, finetune=True, negative_slope=params["negative_slope"])
+    model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, finetune=True)
+    # ECIRoberta(num_classes, dataset, params['MLP size'], roberta_type, finetune=True)
     if CUDA:
         model = model.cuda()
     model.zero_grad()
+    # epoches = params['epoches']
     print("# of parameters:", count_parameters(model))
     total_steps = len(train_dataloader) * epoches
     print("Total steps: [number of batches] x [number of epochs] =", total_steps)
 
-    exp = EXP(model, epoches, params["bert_learning_rate"], params["mlp_learning_rate"], 
-            train_dataloader, validate_dataloader, test_dataloader, 
-            best_path, weight_decay=params['weight_decay'])
-    f1, CM = exp.train()
+    exp = EXP(model, epochs=epoches, b_lr=params['bert_learning_rate'], m_lr=params['mlp_learning_rate'],
+            decay_rate=params['b_lr_decay_rate'], m_lr_step=params['m_step'], b_scheduler_lambda=params['b_lambda_scheduler'],
+            train_dataloader=train_dataloader, validate_dataloaders=validate_dataloaders, test_dataloaders=test_dataloaders,
+            best_path=best_path, train_lm_epoch=params['epoches'])
+    f1, CM, sum_f1 = exp.train()
     exp.evaluate(is_test=True)
     
     print("Result: Best micro F1 of interaction: {}".format(f1))
 
-    with open("{}{}.txt".format(result_folder, dataset), 'a', encoding='UTF-8') as f:
+    with open(result_file, 'a', encoding='UTF-8') as f:
         f.write("\n -------------------------------------------- \n")
-        f.write(" F1: \n {} \n CM: \n{} \n Hypeparameter: \n {} ".format(f1, CM, params))
-    return f1
+        f.write("Hypeparameter: \n {} \n ".format(params))
+        for i in range(0, len(datasets)):
+            f.write("{} \n".format(dataset[i]))
+            f.write("F1: {} \n".format(f1[i]))
+            f.write("CM: \n {} \n".format(CM[i]))
+        f.write("Time: {} \n".format(datetime.datetime.now()))
+    return sum_f1
 
 if __name__=="__main__":
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
@@ -56,8 +80,8 @@ if __name__=="__main__":
     parser.add_argument('--roberta_type', help="base or large", default='roberta-base', type=str)
     parser.add_argument('--epoches', help='Number epoch', default=30, type=int)
     parser.add_argument('--best_path', help="Path for save model", type=str)
-    parser.add_argument('--dataset', help="Name of dataset", type=str)
-    parser.add_argument('--result_log', help="Path of result folder",default='./result/', type=str)
+    parser.add_argument('--dataset', help="Name of dataset", action='append', required=True)
+    parser.add_argument('--result_log', help="Path of result folder", type=str)
 
     args = parser.parse_args()
     seed = args.seed
@@ -65,11 +89,12 @@ if __name__=="__main__":
     roberta_type  = args.roberta_type
     epoches = args.epoches
     best_path = args.best_path
-    dataset = args.dataset
-    result_folder = args.result_log
+    datasets = args.dataset
+    print(datasets)
+    result_file = args.result_log
 
     study = optuna.create_study(direction='maximize')
-    study.optimize(objective, n_trials=30)
+    study.optimize(objective, n_trials=100)
     trial = study.best_trial
 
     print('Accuracy: {}'.format(trial.value))
