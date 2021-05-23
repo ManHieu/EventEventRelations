@@ -29,12 +29,15 @@ class ECIRobertaJointTask(nn.Module):
                             batch_first=True, bidirectional=True, dropout=0.6)
         self.drop_out = nn.Dropout(drop_rate)
         self.relu = nn.LeakyReLU(negative_slope, True)
+        self.max_num_class = 0
 
         module_dict = {}
         loss_dict = {}
         for dataset in datasets:
             if dataset == "HiEve":
                 num_classes = 4
+                if self.max_num_class < num_classes:
+                    self.max_num_class = num_classes
                 if sub==True and mul==True:
                     fc1 = nn.Linear(self.roberta_dim*4, self.mlp_size*2)
                     fc2 = nn.Linear(self.mlp_size*2, num_classes)
@@ -59,6 +62,8 @@ class ECIRobertaJointTask(nn.Module):
             
             if dataset == "MATRES":
                 num_classes = 4
+                if self.max_num_class < num_classes:
+                    self.max_num_class = num_classes
                 if sub==True and mul==True:
                     fc1 = nn.Linear(self.roberta_dim*4, self.mlp_size*2)
                     fc2 = nn.Linear(self.mlp_size*2, num_classes)
@@ -83,6 +88,8 @@ class ECIRobertaJointTask(nn.Module):
             
             if dataset == "I2B2":
                 num_classes = 3
+                if self.max_num_class < num_classes:
+                    self.max_num_class = num_classes
                 if sub==True and mul==True:
                     fc1 = nn.Linear(self.roberta_dim*4, self.mlp_size*2)
                     fc2 = nn.Linear(self.mlp_size*2, num_classes)
@@ -107,6 +114,8 @@ class ECIRobertaJointTask(nn.Module):
             
             if dataset == "TBD":
                 num_classes = 6
+                if self.max_num_class < num_classes:
+                    self.max_num_class = num_classes
                 if sub==True and mul==True:
                     fc1 = nn.Linear(self.roberta_dim*4, self.mlp_size*2)
                     fc2 = nn.Linear(self.mlp_size*2, num_classes)
@@ -195,8 +204,11 @@ class ECIRobertaJointTask(nn.Module):
         for i in range(0, batch_size):
             typ = str(flag[i].item())
             logit = self.module_dict[typ](presentation[i])
+            pad_logit = torch.zeros((1,self.max_num_class))
+            pad_logit[:, :len(logit)] = logit
             logit = logit.unsqueeze(0)
             target = xy[i].unsqueeze(0)
             loss += self.loss_dict[typ](logit, target)
-            logits.append(logit)
+            
+            logits.append(pad_logit)
         return torch.cat(logits, 0), loss
