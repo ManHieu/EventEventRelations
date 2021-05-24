@@ -29,7 +29,7 @@ def objective(trial:optuna.Trial):
         'b_lr_decay_rate': trial.suggest_float('decay_rate', 0.5, 0.8, step=0.1),
         "task_weights": {
             '1': 1,
-            '2': trial.suggest_categorical('task_weight', [0.2, 0.5, 0.8, 1]),
+            '2': trial.suggest_categorical('task_weight', [0.5, 0.8, 1]),
         }
     }
     
