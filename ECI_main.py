@@ -23,7 +23,7 @@ def objective(trial:optuna.Trial):
         "mlp_learning_rate":trial.suggest_categorical("m_lr", [1e-6, 5e-6, 1e-5, 5e-5]),
         "MLP size": 768,
         # trial.suggest_categorical("MLP size", [768]),
-        "epoches": trial.suggest_categorical("epoches", [3, 5]),
+        "epoches": trial.suggest_categorical("epoches", [3, 5, 7]),
         "b_lambda_scheduler": trial.suggest_categorical("b_scheduler", ['cosin', 'linear']),
         "m_step": trial.suggest_int('m_step', 1, 3),
         'b_lr_decay_rate': trial.suggest_float('decay_rate', 0.5, 0.8, step=0.1),
