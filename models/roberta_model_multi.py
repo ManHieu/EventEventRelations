@@ -172,8 +172,8 @@ class ECIRobertaJointTask(nn.Module):
         if x_sent_pos != None and y_sent_pos != None:
             pos_x = self.pos_emb(x_sent_pos)
             pos_y = self.pos_emb(y_sent_pos)
-            output_x = torch.cat([output_x, pos_x], dim=1)
-            output_y = torch.cat([output_y, pos_y], dim=1)
+            output_x = torch.cat([output_x, pos_x], dim=2)
+            output_y = torch.cat([output_y, pos_y], dim=2)
 
         output_x = self.drop_out(output_x)
         output_y = self.drop_out(output_y)
