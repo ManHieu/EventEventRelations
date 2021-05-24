@@ -308,8 +308,8 @@ def single_loader(dataset):
             x_position = my_dict["event_dict"][x]["roberta_subword_id"]
             y_position = my_dict["event_dict"][y]["roberta_subword_id"]
 
-            x_sent_pos = padding(my_dict["sentences"][x_sent_id]["roberta_subword_pos"], pos = True)
-            y_sent_pos = padding(my_dict["sentences"][y_sent_id]["roberta_subword_pos"], pos = True)
+            x_sent_pos = pos_to_id(padding(my_dict["sentences"][x_sent_id]["roberta_subword_pos"], pos = True))
+            y_sent_pos = pos_to_id(padding(my_dict["sentences"][y_sent_id]["roberta_subword_pos"], pos = True))
 
             xy = my_dict["relation_dict"].get((x, y))
             yx = my_dict["relation_dict"].get((y, x))

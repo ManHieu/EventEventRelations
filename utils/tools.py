@@ -3,7 +3,7 @@ import torch
 import spacy
 from sklearn.metrics import confusion_matrix
 from transformers import RobertaModel, RobertaTokenizer
-
+from utils.constant import *
 
 CUDA = torch.cuda.is_available()
 tokenizer = RobertaTokenizer.from_pretrained('roberta-base', unk_token='<unk>')
@@ -122,3 +122,8 @@ def id_lookup(span_SENT, start_char):
         if token_span[0] <= start_char and token_span[1] >= start_char:
             return token_id
     raise ValueError("Nothing is found. \n span sentence: {} \n start_char: {}".format(span_SENT, start_char))
+
+def pos_to_id(sent_pos):
+    id_pos_sent =  [pos_dict.get(pos) if pos_dict.get(pos) != None else 0 
+                    for pos in sent_pos]
+    return torch.tensor(id_pos_sent, dtype=torch.long)

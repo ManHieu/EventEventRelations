@@ -48,7 +48,7 @@ def objective(trial:optuna.Trial):
         test_dataloaders[dataset] = test_dataloader
     train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
 
-    model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, finetune=True, task_weights=params['task_weights'])
+    model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, finetune=True, pos_dim=20, task_weights=params['task_weights'])
     if CUDA:
         model = model.cuda()
     model.zero_grad()

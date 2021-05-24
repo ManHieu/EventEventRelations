@@ -115,7 +115,7 @@ class EXP():
             self.model.train()
             self.model.zero_grad()
             self.train_loss = 0.0
-            for step, batch in tqdm.tqdm(enumerate(self.train_dataloader), desc="Training processing", total=len(self.train_dataloader)):
+            for step, batch in tqdm.tqdm(enumerate(self.train_dataloader), desc="Training process", total=len(self.train_dataloader)):
                 x_sent, y_sent, x_position, y_position, x_sent_pos, y_sent_pos, flag, xy = batch[2:]
                 if CUDA:
                     x_sent = x_sent.cuda()
@@ -124,8 +124,10 @@ class EXP():
                     y_position = y_position.cuda()
                     xy = xy.cuda()
                     flag = flag.cuda()
+                    x_sent_pos = x_sent_pos.cuda() 
+                    y_sent_pos = y_sent_pos.cuda()
 
-                logits, loss = self.model(x_sent, y_sent, x_position, y_position, xy, flag)
+                logits, loss = self.model(x_sent, y_sent, x_position, y_position, xy, flag, x_sent_pos, y_sent_pos)
                 self.train_loss += loss.item()
                 loss.backward()
                 self.optimizer.step()
@@ -168,7 +170,7 @@ class EXP():
             self.model.eval()
             pred = []
             gold = []
-            for batch in tqdm.tqdm(dataloader, desc="Processing"):
+            for batch in tqdm.tqdm(dataloader, desc="Process"):
                 x_sent, y_sent, x_position, y_position, x_sent_pos, y_sent_pos, flag, xy = batch[2:]
                 if CUDA:
                     x_sent = x_sent.cuda()

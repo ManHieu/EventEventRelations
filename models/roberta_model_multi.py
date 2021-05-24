@@ -1,14 +1,15 @@
 from collections import OrderedDict
+from utils.tools import pos_to_id
 import torch
 import torch.nn as nn
 from transformers import RobertaModel
-from utils.constant import CUDA
+from utils.constant import *
 import os.path as path
 
 
 class ECIRobertaJointTask(nn.Module):
     def __init__(self, mlp_size, roberta_type, datasets,
-                finetune, loss=None, sub=True, mul=True, 
+                finetune, pos_dim=None, loss=None, sub=True, mul=True, 
                 negative_slope=0.2, drop_rate=0.5, task_weights=None):
         super().__init__()
         
@@ -26,9 +27,16 @@ class ECIRobertaJointTask(nn.Module):
         self.sub = sub
         self.mul = mul
         self.finetune = finetune
-        
-        self.lstm = nn.LSTM(self.roberta_dim, self.roberta_dim//2, num_layers=2, 
-                            batch_first=True, bidirectional=True, dropout=0.6)
+        if pos_dim != None:
+            self.is_pos_emb = True
+            pos_size = len(pos_dict.keys())
+            self.pos_emb = nn.Embedding(pos_size, pos_dim)
+            self.lstm = nn.LSTM(self.roberta_dim+pos_dim, self.roberta_dim//2, num_layers=2, 
+                                batch_first=True, bidirectional=True, dropout=0.6)
+        else:
+            self.is_pos_emb = False
+            self.lstm = nn.LSTM(self.roberta_dim, self.roberta_dim//2, num_layers=2, 
+                                batch_first=True, bidirectional=True, dropout=0.6)
         
         self.mlp_size = mlp_size
 
@@ -149,7 +157,7 @@ class ECIRobertaJointTask(nn.Module):
         if self.task_weights != None:
             assert len(self.task_weights)==len(datasets), "Length of weight is difference number datasets: {}".format(len(self.task_weights))
     
-    def forward(self, x_sent, y_sent, x_position, y_position, xy, flag):
+    def forward(self, x_sent, y_sent, x_position, y_position, xy, flag, x_sent_pos=None, y_sent_pos=None):
         batch_size = x_sent.size(0)
         # print(x_sent.size())
 
@@ -160,6 +168,12 @@ class ECIRobertaJointTask(nn.Module):
             with torch.no_grad():
                 output_x = self.roberta(x_sent)[0]
                 output_y = self.roberta(y_sent)[0]
+        
+        if x_sent_pos != None and y_sent_pos != None:
+            pos_x = self.pos_emb(x_sent_pos)
+            pos_y = self.pos_emb(y_sent_pos)
+            output_x = torch.cat([output_x, pos_x], dim=1)
+            output_y = torch.cat([output_y, pos_y], dim=1)
 
         output_x = self.drop_out(output_x)
         output_y = self.drop_out(output_y)
