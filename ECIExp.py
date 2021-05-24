@@ -101,54 +101,57 @@ class EXP():
         self.best_path = best_path
     
     def train(self):
-        total_t0 = time.time()
-        for i in range(0, self.epochs):
-            if i >= self.train_roberta_epoch:
-                for group in self.b_parameters:
-                    for param in group['params']:
-                        param.requires_grad = False
+        try:
+            total_t0 = time.time()
+            for i in range(0, self.epochs):
+                if i >= self.train_roberta_epoch:
+                    for group in self.b_parameters:
+                        for param in group['params']:
+                            param.requires_grad = False
 
-            print("")
-            print('======== Epoch {:} / {:} ========'.format(i + 1, self.epochs))
+                print("")
+                print('======== Epoch {:} / {:} ========'.format(i + 1, self.epochs))
 
-            t0 = time.time()
-            self.model.train()
-            self.model.zero_grad()
-            self.train_loss = 0.0
-            for step, batch in tqdm.tqdm(enumerate(self.train_dataloader), desc="Training process", total=len(self.train_dataloader)):
-                x_sent, y_sent, x_position, y_position, x_sent_pos, y_sent_pos, flag, xy = batch[2:]
-                if CUDA:
-                    x_sent = x_sent.cuda()
-                    y_sent = y_sent.cuda()
-                    x_position = x_position.cuda()
-                    y_position = y_position.cuda()
-                    xy = xy.cuda()
-                    flag = flag.cuda()
-                    x_sent_pos = x_sent_pos.cuda() 
-                    y_sent_pos = y_sent_pos.cuda()
+                t0 = time.time()
+                self.model.train()
+                self.model.zero_grad()
+                self.train_loss = 0.0
+                for step, batch in tqdm.tqdm(enumerate(self.train_dataloader), desc="Training process", total=len(self.train_dataloader)):
+                    x_sent, y_sent, x_position, y_position, x_sent_pos, y_sent_pos, flag, xy = batch[2:]
+                    if CUDA:
+                        x_sent = x_sent.cuda()
+                        y_sent = y_sent.cuda()
+                        x_position = x_position.cuda()
+                        y_position = y_position.cuda()
+                        xy = xy.cuda()
+                        flag = flag.cuda()
+                        x_sent_pos = x_sent_pos.cuda() 
+                        y_sent_pos = y_sent_pos.cuda()
 
-                logits, loss = self.model(x_sent, y_sent, x_position, y_position, xy, flag, x_sent_pos, y_sent_pos)
-                self.train_loss += loss.item()
-                loss.backward()
-                self.optimizer.step()
-                self.scheduler.step()
+                    logits, loss = self.model(x_sent, y_sent, x_position, y_position, xy, flag, x_sent_pos, y_sent_pos)
+                    self.train_loss += loss.item()
+                    loss.backward()
+                    self.optimizer.step()
+                    self.scheduler.step()
 
-                # if step%50==0 and not step==0:
-                #     elapsed = format_time(time.time() - t0)
-                #     print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(self.train_dataloader), elapsed))
-                #     print("LR: {} - {}".format(self.optimizer.param_groups[0]['lr'], self.optimizer.param_groups[-1]['lr']))
-            
-            epoch_training_time = format_time(time.time() - t0)
-            print("  Total training loss: {0:.2f}".format(self.train_loss))
-            self.evaluate()
-            
-        print("Training complete!")
-        print("Total training took {:} (h:mm:ss)".format(format_time(time.time()-total_t0)))
-        print("Best micro F1:{}".format(self.best_micro_f1))
-        print("Best confusion matrix: ")
-        for cm in self.best_cm:
-            print(cm)
-        return self.best_micro_f1, self.best_cm, self.sum_f1
+                    # if step%50==0 and not step==0:
+                    #     elapsed = format_time(time.time() - t0)
+                    #     print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(self.train_dataloader), elapsed))
+                    #     print("LR: {} - {}".format(self.optimizer.param_groups[0]['lr'], self.optimizer.param_groups[-1]['lr']))
+                
+                epoch_training_time = format_time(time.time() - t0)
+                print("  Total training loss: {0:.2f}".format(self.train_loss))
+                self.evaluate()
+                
+            print("Training complete!")
+            print("Total training took {:} (h:mm:ss)".format(format_time(time.time()-total_t0)))
+            print("Best micro F1:{}".format(self.best_micro_f1))
+            print("Best confusion matrix: ")
+            for cm in self.best_cm:
+                print(cm)
+            return self.best_micro_f1, self.best_cm, self.sum_f1
+        except KeyboardInterrupt:
+            return self.best_micro_f1, self.best_cm, self.sum_f1
 
     def evaluate(self, is_test=False):
         t0 = time.time()
