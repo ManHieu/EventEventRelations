@@ -27,7 +27,7 @@ def objective(trial:optuna.Trial):
         "b_lambda_scheduler": trial.suggest_categorical("b_scheduler", ['cosin', 'linear']),
         "m_step": trial.suggest_int('m_step', 1, 3),
         'b_lr_decay_rate': trial.suggest_float('decay_rate', 0.5, 0.8, step=0.1),
-        "weight_corpus": {
+        "task_weights": {
             '1': 1,
             '2': trial.suggest_categorical('task_weight', [0.2, 0.5, 0.8, 1]),
         }
@@ -48,7 +48,7 @@ def objective(trial:optuna.Trial):
         test_dataloaders[dataset] = test_dataloader
     train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
 
-    model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, finetune=True, ta)
+    model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, finetune=True, task_weights=params['task_weights'])
     if CUDA:
         model = model.cuda()
     model.zero_grad()
