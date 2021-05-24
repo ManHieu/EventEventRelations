@@ -179,7 +179,9 @@ class EXP():
                     y_position = y_position.cuda()
                     xy = xy.cuda()
                     flag = flag.cuda()
-                logits, loss = self.model(x_sent, y_sent, x_position, y_position, xy, flag)
+                    x_sent_pos = x_sent_pos.cuda() 
+                    y_sent_pos = y_sent_pos.cuda()
+                logits, loss = self.model(x_sent, y_sent, x_position, y_position, xy, flag, x_sent_pos, y_sent_pos)
 
                 label_ids = xy.cpu().numpy()
                 y_pred = torch.max(logits, 1).indices.cpu().numpy()
