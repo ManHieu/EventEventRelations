@@ -138,7 +138,6 @@ class EXP():
             
             epoch_training_time = format_time(time.time() - t0)
             print("  Total training loss: {0:.2f}".format(self.train_loss))
-            print("  Training epoch took: {:}".format(epoch_training_time))
             self.evaluate()
             
         print("Training complete!")
@@ -169,7 +168,7 @@ class EXP():
             self.model.eval()
             pred = []
             gold = []
-            for batch in tqdm.tqdm(dataloader):
+            for batch in tqdm.tqdm(dataloader, desc="Processing"):
                 x_sent, y_sent, x_position, y_position, x_sent_pos, y_sent_pos, flag, xy = batch[2:]
                 if CUDA:
                     x_sent = x_sent.cuda()
@@ -185,8 +184,6 @@ class EXP():
                 pred.extend(y_pred)
                 gold.extend(label_ids)
 
-            validation_time = format_time(time.time() - t0)
-            print("Eval took: {:}".format(validation_time))
             P, R, F1 = precision_recall_fscore_support(gold, pred, average="micro")[0:3]
             CM = confusion_matrix(gold, pred)
             print("  P: {0:.3f}".format(P))

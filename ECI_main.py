@@ -19,15 +19,20 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "bert_learning_rate": trial.suggest_categorical("b_lr", [5e-8, 1e-7, 5e-7, 1e-6]),
+        "bert_learning_rate": trial.suggest_categorical("b_lr", [5e-8, 1e-7, 5e-7]),
         "mlp_learning_rate":trial.suggest_categorical("m_lr", [1e-6, 5e-6, 1e-5, 5e-5]),
         "MLP size": 768,
         # trial.suggest_categorical("MLP size", [768]),
         "epoches": trial.suggest_categorical("epoches", [3, 5]),
         "b_lambda_scheduler": trial.suggest_categorical("b_scheduler", ['cosin', 'linear']),
         "m_step": trial.suggest_int('m_step', 1, 3),
-        'b_lr_decay_rate': trial.suggest_float('decay_rate', 0.5, 0.8, step=0.1)
+        'b_lr_decay_rate': trial.suggest_float('decay_rate', 0.5, 0.8, step=0.1),
+        "weight_corpus": {
+            '1': 1,
+            '2': trial.suggest_categorical('task_weight', [0.2, 0.5, 0.8, 1]),
+        }
     }
+    
     print("Hyperparameter will be used in this trial: ")
     print(params)
     start = timer()
@@ -43,7 +48,7 @@ def objective(trial:optuna.Trial):
         test_dataloaders[dataset] = test_dataloader
     train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
 
-    model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, finetune=True)
+    model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, finetune=True, ta)
     if CUDA:
         model = model.cuda()
     model.zero_grad()

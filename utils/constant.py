@@ -2,6 +2,7 @@ import torch
 
 
 CUDA = torch.cuda.is_available()
+corpus_mapping = {'HiEve': '1', 'MATRES': '2', 'I2B2': '3', 'TBD':'4'}
 pos_tags = ["ADJ", "ADP", "ADV", "AUX", "CONJ", "CCONJ", "DET", "INTJ", "NOUN", "NUM", "PART", "PRON", "PROPN", "PUNCT", "SCONJ", "SYM", "VERB", "X", "SPACE"]
 hieve_label_dict={"SuperSub": 0, "SubSuper": 1, "Coref": 2, "NoRel": 3}
 hieve_num_dict = {0: "SuperSub", 1: "SubSuper", 2: "Coref", 3: "NoRel"}

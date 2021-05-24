@@ -9,7 +9,7 @@ import os.path as path
 class ECIRobertaJointTask(nn.Module):
     def __init__(self, mlp_size, roberta_type, datasets,
                 finetune, loss=None, sub=True, mul=True, 
-                negative_slope=0.2, drop_rate=0.5):
+                negative_slope=0.2, drop_rate=0.5, task_weights=None):
         super().__init__()
         
         if path.exists("./pretrained_models/models/{}".format(roberta_type)):
@@ -145,6 +145,9 @@ class ECIRobertaJointTask(nn.Module):
         
         self.module_dict = nn.ModuleDict(module_dict)
         self.loss_dict = nn.ModuleDict(loss_dict)
+        self.task_weights = task_weights
+        if self.task_weights != None:
+            assert len(self.task_weights)==len(datasets), "Length of weight is difference number datasets: {}".format(len(self.task_weights))
     
     def forward(self, x_sent, y_sent, x_position, y_position, xy, flag):
         batch_size = x_sent.size(0)
@@ -188,7 +191,10 @@ class ECIRobertaJointTask(nn.Module):
             pad_logit[:, :len(logit)] = logit
             logit = logit.unsqueeze(0)
             target = xy[i].unsqueeze(0)
-            loss += self.loss_dict[typ](logit, target)
+            if self.task_weights == None:
+                loss += self.loss_dict[typ](logit, target)
+            else:
+                loss += self.task_weights[typ]*self.loss_dict[typ](logit, target)
             
             logits.append(pad_logit)
         return torch.cat(logits, 0), loss
