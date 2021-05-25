@@ -92,7 +92,7 @@ class EXP():
             b_lambda = linear_lr_lambda
         else:
             print("We haven't support that lambda!!")
-        lamd = [b_lambda] * 8
+        lamd = [b_lambda] * 10
         mlp_lambda = [m_lr_lambda] * 2
         lamd.extend(mlp_lambda)
         
