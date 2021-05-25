@@ -97,6 +97,7 @@ class EXP():
 
         self.best_micro_f1 = [-0.1]*len(self.test_datatloaders)
         self.sum_f1 = -0.1
+        self.best_matres = -0.1
         self.best_cm = [None]*len(self.test_datatloaders)
         self.best_path = best_path
     
@@ -148,13 +149,14 @@ class EXP():
         print("Best confusion matrix: ")
         for cm in self.best_cm:
             print(cm)
-        return self.best_micro_f1, self.best_cm, self.sum_f1
+        return self.best_micro_f1, self.best_cm, self.best_matres
 
     def evaluate(self, is_test=False):
         t0 = time.time()
         F1s = []
         sum_f1 = 0.0
         best_cm = []
+        best_f1_mastres = 0.0
         for i in range(0, len(self.test_datatloaders)):
             dataset = self.datasets[i]
             print("---------------------{}----------------------".format(dataset))
@@ -207,11 +209,14 @@ class EXP():
             sum_f1 += F1
             best_cm.append(CM)
             F1s.append(F1)
+            if dataset=="MATRES": 
+                best_f1_mastres=F1
 
         if is_test == False:
-            if sum_f1 > self.sum_f1 or path.exists(self.best_path) == False:
+            if sum_f1 > self.sum_f1 or best_f1_mastres > self.best_matres or path.exists(self.best_path) == False:
                 self.sum_f1 = sum_f1
                 self.best_cm = best_cm
                 self.best_micro_f1 = F1s
-                torch.save(self.model, self.best_path)
+                self.best_matres = best_f1_mastres
+                torch.save(self.model, self.best_path) 
         return F1s
