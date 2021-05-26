@@ -138,7 +138,7 @@ class ECIRobertaJointTask(nn.Module):
                 if (sub==True and  mul==False) or (sub==False and mul==True):
                     fc1 = nn.Linear(self.roberta_dim*5, int(self.mlp_size*2.5))
                     fc2 = nn.Linear(int(self.mlp_size*2.5), num_classes)
-                if not (sub and mul):
+                if sub==False and mul==False:
                     fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
                     fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
                 
@@ -206,6 +206,8 @@ class ECIRobertaJointTask(nn.Module):
         if self.sub==False and self.mul==True:
             mul = torch.mul(output_A, output_B)
             presentation = torch.cat([output_A, x, output_B, y, mul], 1)
+        if self.sub==False and self.sub==False:
+            presentation = torch.cat([output_A, x, output_B, y], 1)
         
         # print(presentation.size())
         loss = 0.0
