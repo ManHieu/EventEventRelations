@@ -200,6 +200,8 @@ class ECIRobertaJointTask(nn.Module):
         if self.sub==False and self.mul==True:
             mul = torch.mul(output_A, output_B)
             presentation = torch.cat([output_A, output_B, mul], 1)
+        if self.sub==False and self.sub==False:
+            presentation = torch.cat([output_A, output_B], 1)
         
         # print(presentation.size())
         loss = 0.0
