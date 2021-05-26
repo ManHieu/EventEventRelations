@@ -10,7 +10,7 @@ import os.path as path
 class ECIRobertaJointTask(nn.Module):
     def __init__(self, mlp_size, roberta_type, datasets,
                 finetune, pos_dim=None, loss=None, sub=True, mul=True, 
-                negative_slope=0.2, drop_rate=0.5, task_weights=None):
+                negative_slope=0.2, drop_rate=0.5, task_weights=None, lstm=True):
         super().__init__()
         
         if path.exists("./pretrained_models/models/{}".format(roberta_type)):
@@ -27,17 +27,23 @@ class ECIRobertaJointTask(nn.Module):
         self.sub = sub
         self.mul = mul
         self.finetune = finetune
+        self.is_lstm = lstm
         if pos_dim != None:
             self.is_pos_emb = True
             pos_size = len(pos_dict.keys())
             self.pos_emb = nn.Embedding(pos_size, pos_dim)
-            self.lstm = nn.LSTM(self.roberta_dim+pos_dim, self.roberta_dim//2, num_layers=2, 
-                                batch_first=True, bidirectional=True, dropout=0.6)
+            if self.is_lstm:
+                self.lstm = nn.LSTM(self.roberta_dim+pos_dim, self.roberta_dim//2, num_layers=2, 
+                                    batch_first=True, bidirectional=True, dropout=0.6)
         else:
             self.is_pos_emb = False
-            self.lstm = nn.LSTM(self.roberta_dim, self.roberta_dim//2, num_layers=2, 
-                                batch_first=True, bidirectional=True, dropout=0.6)
+            if self.is_lstm:
+                self.lstm = nn.LSTM(self.roberta_dim, self.roberta_dim//2, num_layers=2, 
+                                    batch_first=True, bidirectional=True, dropout=0.6)
         
+        if self.is_lstm == False:
+            self.roberta_dim += pos_dim
+
         self.mlp_size = mlp_size
 
         self.drop_out = nn.Dropout(drop_rate)
@@ -177,8 +183,9 @@ class ECIRobertaJointTask(nn.Module):
 
         output_x = self.drop_out(output_x)
         output_y = self.drop_out(output_y)
-        output_x, _ = self.lstm(output_x)
-        output_y, _ = self.lstm(output_y)
+        if self.is_lstm:
+            output_x, _ = self.lstm(output_x)
+            output_y, _ = self.lstm(output_y)
         # print(output_x.size())
         output_A = torch.cat([output_x[i, x_position[i], :].unsqueeze(0) for i in range(0, batch_size)])
         output_B = torch.cat([output_y[i, y_position[i], :].unsqueeze(0) for i in range(0, batch_size)])
