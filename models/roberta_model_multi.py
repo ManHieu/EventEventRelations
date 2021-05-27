@@ -186,15 +186,23 @@ class ECIRobertaJointTask(nn.Module):
         output_A = torch.cat([output_x[i, x_position[i], :].unsqueeze(0) for i in range(0, batch_size)])
         output_B = torch.cat([output_y[i, y_position[i], :].unsqueeze(0) for i in range(0, batch_size)])
         # print(output_B.size())
-        x_attn_sc = torch.tanh(self.ws1(self.drop_out(output_x)))
-        x_attn_sc = self.ws2(self.drop_out(x_attn_sc)).squeeze(2)
-        x_attn_sc = F.softmax(x_attn_sc, dim=-1)
-        x = torch.sum(output_x*x_attn_sc.unsqueeze(-1), dim=1)
+        # x_attn_sc = torch.tanh(self.ws1(self.drop_out(output_x)))
+        # x_attn_sc = self.ws2(self.drop_out(x_attn_sc)).squeeze(2)
+        # x_attn_sc = F.softmax(x_attn_sc, dim=-1)
+        # x = torch.sum(output_x*x_attn_sc.unsqueeze(-1), dim=1)
 
-        y_attn_sc = torch.tanh(self.ws1(self.drop_out(output_y)))
-        y_attn_sc = self.ws2(self.drop_out(y_attn_sc)).squeeze(2)
-        y_attn_sc = F.softmax(y_attn_sc, dim=-1)
-        y = torch.sum(output_y*y_attn_sc.unsqueeze(-1), dim=1)
+        # y_attn_sc = torch.tanh(self.ws1(self.drop_out(output_y)))
+        # y_attn_sc = self.ws2(self.drop_out(y_attn_sc)).squeeze(2)
+        # y_attn_sc = F.softmax(y_attn_sc, dim=-1)
+        # y = torch.sum(output_y*y_attn_sc.unsqueeze(-1), dim=1)
+
+        x_attn_sc = torch.matmul(output_x, output_A.unsqueeze(-1))/(self.roberta_dim**0.5)
+        x_attn_sc = F.softmax(x_attn_sc, dim=1)
+        x = torch.sum(output_x*x_attn_sc, dim=1)
+
+        y_attn_sc = torch.matmul(output_y, output_B.unsqueeze(-1))/(self.roberta_dim**0.5)
+        y_attn_sc = F.softmax(y_attn_sc, dim=1)
+        y = torch.sum(output_y*y_attn_sc, dim=1)
         
         if self.sub and self.mul:
             sub = torch.sub(output_A, output_B)
