@@ -16,7 +16,7 @@ class ECIRobertaJointTask(nn.Module):
         
         if path.exists("./pretrained_models/models/{}".format(roberta_type)):
             print("Loading pretrain model from local ......")
-            self.roberta = RobertaModel.from_pretrained("./pretrained_models/models/{}".format(roberta_type))
+            self.roberta = RobertaModel.from_pretrained("./pretrained_models/models/{}".format(roberta_type), output_hidden_states=True)
         else:
             print("Loading pretrain model ......")
             self.roberta = RobertaModel.from_pretrained(roberta_type, output_hidden_states=True)
