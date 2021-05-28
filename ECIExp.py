@@ -217,7 +217,6 @@ class EXP():
                 self.sum_f1 = sum_f1
                 self.best_cm = best_cm
                 self.best_micro_f1 = F1s
-                self.best_matres = best_f1_mastres
                 torch.save(self.model, self.best_path) 
             if best_f1_mastres > self.best_matres:
                  self.best_matres = best_f1_mastres
