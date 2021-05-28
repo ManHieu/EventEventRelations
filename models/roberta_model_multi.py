@@ -55,14 +55,14 @@ class ECIRobertaJointTask(nn.Module):
                 if self.max_num_class < num_classes:
                     self.max_num_class = num_classes
                 if sub==True and mul==True:
-                    fc1 = nn.Linear(self.roberta_dim*6, self.mlp_size*3)
-                    fc2 = nn.Linear(self.mlp_size*3, num_classes)
+                    fc1 = nn.Linear(self.roberta_dim*4, self.mlp_size*2)
+                    fc2 = nn.Linear(self.mlp_size*2, num_classes)
                 if (sub==True and  mul==False) or (sub==False and mul==True):
-                    fc1 = nn.Linear(self.roberta_dim*5, int(self.mlp_size*2.5))
-                    fc2 = nn.Linear(int(self.mlp_size*2.5), num_classes)
+                    fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.5))
+                    fc2 = nn.Linear(int(self.mlp_size*1.5), num_classes)
                 if not (sub and mul):
-                    fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
-                    fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
+                    fc1 = nn.Linear(self.roberta_dim*2, int(self.mlp_size))
+                    fc2 = nn.Linear(int(self.mlp_size), num_classes)
                 
                 weights = [993.0/333, 993.0/349, 933.0/128, 933.0/453]
                 weights = torch.tensor(weights)
@@ -107,14 +107,14 @@ class ECIRobertaJointTask(nn.Module):
                 if self.max_num_class < num_classes:
                     self.max_num_class = num_classes
                 if sub==True and mul==True:
-                    fc1 = nn.Linear(self.roberta_dim*6, self.mlp_size*3)
-                    fc2 = nn.Linear(self.mlp_size*3, num_classes)
+                    fc1 = nn.Linear(self.roberta_dim*4, self.mlp_size*2)
+                    fc2 = nn.Linear(self.mlp_size*2, num_classes)
                 if (sub==True and  mul==False) or (sub==False and mul==True):
-                    fc1 = nn.Linear(self.roberta_dim*5, int(self.mlp_size*2.5))
-                    fc2 = nn.Linear(int(self.mlp_size*2.5), num_classes)
+                    fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.5))
+                    fc2 = nn.Linear(int(self.mlp_size*1.5), num_classes)
                 if not (sub and mul):
-                    fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
-                    fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
+                    fc1 = nn.Linear(self.roberta_dim*2, int(self.mlp_size))
+                    fc2 = nn.Linear(int(self.mlp_size), num_classes)
                 
                 weights = [3066.0/660, 3066.0/461, 3066.0/1945,]
                 weights = torch.tensor(weights)
@@ -133,12 +133,12 @@ class ECIRobertaJointTask(nn.Module):
                 if self.max_num_class < num_classes:
                     self.max_num_class = num_classes
                 if sub==True and mul==True:
-                    fc1 = nn.Linear(self.roberta_dim*6, self.mlp_size*3)
-                    fc2 = nn.Linear(self.mlp_size*3, num_classes)
+                    fc1 = nn.Linear(self.roberta_dim*4, self.mlp_size*2)
+                    fc2 = nn.Linear(self.mlp_size*2, num_classes)
                 if (sub==True and  mul==False) or (sub==False and mul==True):
-                    fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
-                    fc2 = nn.Linear(int(self.mlp_size*2.5), num_classes)
-                if sub==False and mul==False:
+                    fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.5))
+                    fc2 = nn.Linear(int(self.mlp_size*1.5), num_classes)
+                if not (sub and mul):
                     fc1 = nn.Linear(self.roberta_dim*2, int(self.mlp_size))
                     fc2 = nn.Linear(int(self.mlp_size), num_classes)
                 
