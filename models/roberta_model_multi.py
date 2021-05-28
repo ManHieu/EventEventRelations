@@ -1,4 +1,6 @@
 from collections import OrderedDict
+
+from torch.utils.data.dataset import Subset
 from utils.tools import pos_to_id
 import torch
 import torch.nn as nn
@@ -55,14 +57,14 @@ class ECIRobertaJointTask(nn.Module):
                 if self.max_num_class < num_classes:
                     self.max_num_class = num_classes
                 if sub==True and mul==True:
-                    fc1 = nn.Linear(self.roberta_dim*4, self.mlp_size*2)
-                    fc2 = nn.Linear(self.mlp_size*2, num_classes)
+                    fc1 = nn.Linear(self.roberta_dim*5, int(self.mlp_size*2.5))
+                    fc2 = nn.Linear(int(self.mlp_size*2.5), num_classes)
                 if (sub==True and  mul==False) or (sub==False and mul==True):
+                    fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
+                    fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
+                if not (sub and mul):
                     fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.5))
                     fc2 = nn.Linear(int(self.mlp_size*1.5), num_classes)
-                if not (sub and mul):
-                    fc1 = nn.Linear(self.roberta_dim*2, int(self.mlp_size))
-                    fc2 = nn.Linear(int(self.mlp_size), num_classes)
                 
                 weights = [993.0/333, 993.0/349, 933.0/128, 933.0/453]
                 weights = torch.tensor(weights)
@@ -81,14 +83,14 @@ class ECIRobertaJointTask(nn.Module):
                 if self.max_num_class < num_classes:
                     self.max_num_class = num_classes
                 if sub==True and mul==True:
-                    fc1 = nn.Linear(self.roberta_dim*4, self.mlp_size*2)
-                    fc2 = nn.Linear(self.mlp_size*2, num_classes)
+                    fc1 = nn.Linear(self.roberta_dim*5, int(self.mlp_size*2.5))
+                    fc2 = nn.Linear(int(self.mlp_size*2.5), num_classes)
                 if (sub==True and  mul==False) or (sub==False and mul==True):
+                    fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
+                    fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
+                if not (sub and mul):
                     fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.5))
                     fc2 = nn.Linear(int(self.mlp_size*1.5), num_classes)
-                if not (sub and mul):
-                    fc1 = nn.Linear(self.roberta_dim*2, int(self.mlp_size))
-                    fc2 = nn.Linear(int(self.mlp_size), num_classes)
                 
                 weights = [6404.0/3233, 6404.0/2263, 6404.0/232, 6404.0/676,]
                 weights = torch.tensor(weights)
@@ -107,14 +109,14 @@ class ECIRobertaJointTask(nn.Module):
                 if self.max_num_class < num_classes:
                     self.max_num_class = num_classes
                 if sub==True and mul==True:
-                    fc1 = nn.Linear(self.roberta_dim*4, self.mlp_size*2)
-                    fc2 = nn.Linear(self.mlp_size*2, num_classes)
+                    fc1 = nn.Linear(self.roberta_dim*5, int(self.mlp_size*2.5))
+                    fc2 = nn.Linear(int(self.mlp_size*2.5), num_classes)
                 if (sub==True and  mul==False) or (sub==False and mul==True):
+                    fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
+                    fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
+                if not (sub and mul):
                     fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.5))
                     fc2 = nn.Linear(int(self.mlp_size*1.5), num_classes)
-                if not (sub and mul):
-                    fc1 = nn.Linear(self.roberta_dim*2, int(self.mlp_size))
-                    fc2 = nn.Linear(int(self.mlp_size), num_classes)
                 
                 weights = [3066.0/660, 3066.0/461, 3066.0/1945,]
                 weights = torch.tensor(weights)
@@ -133,14 +135,14 @@ class ECIRobertaJointTask(nn.Module):
                 if self.max_num_class < num_classes:
                     self.max_num_class = num_classes
                 if sub==True and mul==True:
-                    fc1 = nn.Linear(self.roberta_dim*4, self.mlp_size*2)
-                    fc2 = nn.Linear(self.mlp_size*2, num_classes)
+                    fc1 = nn.Linear(self.roberta_dim*5, int(self.mlp_size*2.5))
+                    fc2 = nn.Linear(int(self.mlp_size*2.5), num_classes)
                 if (sub==True and  mul==False) or (sub==False and mul==True):
+                    fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
+                    fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
+                if not (sub and mul):
                     fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.5))
                     fc2 = nn.Linear(int(self.mlp_size*1.5), num_classes)
-                if not (sub and mul):
-                    fc1 = nn.Linear(self.roberta_dim*2, int(self.mlp_size))
-                    fc2 = nn.Linear(int(self.mlp_size), num_classes)
                 
                 weights = [12715.0/2590, 12715.0/2104, 12715.0/836, 12715.0/1060, 12715.0/215, 12715.0/5910,]
                 weights = torch.tensor(weights)
@@ -190,26 +192,26 @@ class ECIRobertaJointTask(nn.Module):
 
         x_attn_sc = torch.matmul(output_x, output_A.unsqueeze(-1))/(self.roberta_dim**0.5)
         x_attn_sc = F.softmax(x_attn_sc, dim=1)
-        output_A = torch.sum(output_x*x_attn_sc, dim=1)
+        x = torch.sum(output_x*x_attn_sc, dim=1)
 
         y_attn_sc = torch.matmul(output_y, output_B.unsqueeze(-1))/(self.roberta_dim**0.5)
         y_attn_sc = F.softmax(y_attn_sc, dim=1)
-        output_B = torch.sum(output_y*y_attn_sc, dim=1)
+        y = torch.sum(output_y*y_attn_sc, dim=1)
         
         if self.sub and self.mul:
             sub = torch.sub(output_A, output_B)
             mul = torch.mul(output_A, output_B)
-            # sub_s = torch.sub(x, y)
+            sub_s = torch.sub(x, y)
             # mul_s = torch.mul(x, y)
-            presentation = torch.cat([output_A, output_B, sub, mul], 1)
+            presentation = torch.cat([output_A, output_B, sub, mul, sub_s], 1)
         if self.sub==True and self.mul==False:
             sub = torch.sub(output_A, output_B)
-            # sub_s = torch.sub(x, y)
-            presentation = torch.cat([output_A, output_B, sub], 1)
+            sub_s = torch.sub(x, y)
+            presentation = torch.cat([output_A, output_B, sub, sub_s], 1)
         if self.sub==False and self.mul==True:
             mul = torch.mul(output_A, output_B)
-            # mul_s = torch.mul(x, y)
-            presentation = torch.cat([output_A, output_B, mul], 1)
+            mul_s = torch.mul(x, y)
+            presentation = torch.cat([output_A, output_B, mul, sub_s], 1)
         if self.sub==False and self.sub==False:
             presentation = torch.cat([output_A, output_B], 1)
         
