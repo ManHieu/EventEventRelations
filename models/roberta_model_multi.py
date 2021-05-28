@@ -165,15 +165,15 @@ class ECIRobertaJointTask(nn.Module):
         # print(x_sent.size())
 
         if self.finetune:
-            _, _, output_x = self.roberta(x_sent)
-            _, _, output_y = self.roberta(y_sent)
+            output_x = self.roberta(x_sent)[2]
+            output_y = self.roberta(y_sent)[2]
         else:
             with torch.no_grad():
-                _, _, output_x = self.roberta(x_sent)
-                _, _, output_y = self.roberta(y_sent)
+                output_x = self.roberta(x_sent)[2]
+                output_y = self.roberta(y_sent)[2]
         
-        output_x = torch.max(output_x[-4:], dim=2)
-        output_y = torch.max(output_y[-4:], dim=2)
+        output_x = torch.max(torch.stack(output_x[-4:], dim=0), dim=0)[0]
+        output_y = torch.max(torch.stack(output_y[-4:], dim=0), dim=0)[0]
         if x_sent_pos != None and y_sent_pos != None:
             pos_x = self.pos_emb(x_sent_pos)
             pos_y = self.pos_emb(y_sent_pos)
