@@ -136,11 +136,11 @@ class ECIRobertaJointTask(nn.Module):
                     fc1 = nn.Linear(self.roberta_dim*6, self.mlp_size*3)
                     fc2 = nn.Linear(self.mlp_size*3, num_classes)
                 if (sub==True and  mul==False) or (sub==False and mul==True):
-                    fc1 = nn.Linear(self.roberta_dim*5, int(self.mlp_size*2.5))
+                    fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
                     fc2 = nn.Linear(int(self.mlp_size*2.5), num_classes)
                 if sub==False and mul==False:
-                    fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
-                    fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
+                    fc1 = nn.Linear(self.roberta_dim*2, int(self.mlp_size))
+                    fc2 = nn.Linear(int(self.mlp_size), num_classes)
                 
                 weights = [12715.0/2590, 12715.0/2104, 12715.0/836, 12715.0/1060, 12715.0/215, 12715.0/5910,]
                 weights = torch.tensor(weights)
@@ -207,15 +207,19 @@ class ECIRobertaJointTask(nn.Module):
         if self.sub and self.mul:
             sub = torch.sub(output_A, output_B)
             mul = torch.mul(output_A, output_B)
-            presentation = torch.cat([output_A, x, output_B, y, sub, mul], 1)
+            sub_s = torch.sub(x, y)
+            mul_s = torch.mul(x, y)
+            presentation = torch.cat([output_A, output_B, sub, mul, sub_s, mul_s], 1)
         if self.sub==True and self.mul==False:
             sub = torch.sub(output_A, output_B)
-            presentation = torch.cat([output_A, x, output_B, y, sub], 1)
+            sub_s = torch.sub(x, y)
+            presentation = torch.cat([output_A, output_B, sub, sub_s], 1)
         if self.sub==False and self.mul==True:
             mul = torch.mul(output_A, output_B)
-            presentation = torch.cat([output_A, x, output_B, y, mul], 1)
+            mul_s = torch.mul(x, y)
+            presentation = torch.cat([output_A, output_B, mul, mul_s], 1)
         if self.sub==False and self.sub==False:
-            presentation = torch.cat([output_A, x, output_B, y], 1)
+            presentation = torch.cat([output_A, output_B], 1)
         
         # print(presentation.size())
         loss = 0.0
