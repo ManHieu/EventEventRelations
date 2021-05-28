@@ -19,7 +19,7 @@ class ECIRobertaJointTask(nn.Module):
             self.roberta = RobertaModel.from_pretrained("./pretrained_models/models/{}".format(roberta_type))
         else:
             print("Loading pretrain model ......")
-            self.roberta = RobertaModel.from_pretrained(roberta_type)
+            self.roberta = RobertaModel.from_pretrained(roberta_type, output_hidden_states=True)
         if roberta_type == 'roberta-base':
             self.roberta_dim = 768
         if roberta_type == 'roberta-large':
@@ -165,13 +165,15 @@ class ECIRobertaJointTask(nn.Module):
         # print(x_sent.size())
 
         if self.finetune:
-            output_x = self.roberta(x_sent)[0]
-            output_y = self.roberta(y_sent)[0]
+            _, _, output_x = self.roberta(x_sent)
+            _, _, output_y = self.roberta(y_sent)
         else:
             with torch.no_grad():
-                output_x = self.roberta(x_sent)[0]
-                output_y = self.roberta(y_sent)[0]
+                _, _, output_x = self.roberta(x_sent)
+                _, _, output_y = self.roberta(y_sent)
         
+        output_x = torch.max(output_x[-4:], dim=2)
+        output_y = torch.max(output_y[-4:], dim=2)
         if x_sent_pos != None and y_sent_pos != None:
             pos_x = self.pos_emb(x_sent_pos)
             pos_y = self.pos_emb(y_sent_pos)
