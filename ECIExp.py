@@ -133,7 +133,6 @@ class EXP():
                 loss.backward()
                 self.optimizer.step()
                 self.scheduler.step()
-                break
 
                 # if step%50==0 and not step==0:
                 #     elapsed = format_time(time.time() - t0)
