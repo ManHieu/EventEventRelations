@@ -43,10 +43,7 @@ class ECIRobertaJointTask(nn.Module):
                                 batch_first=True, bidirectional=True, dropout=0.6)
         
         self.mlp_size = mlp_size
-        # self.wsq = nn.Linear(self.roberta_dim, self.roberta_dim)
-        # self.wsk = nn.Linear(self.roberta_dim, self.roberta_dim)
-        # self.wsv = nn.Linear(self.roberta_dim, self.roberta_dim)
-        self.attn = nn.MultiheadAttention(self.roberta_dim, 3)
+        self.s_attn = nn.MultiheadAttention(self.roberta_dim, 3)
 
         self.drop_out = nn.Dropout(drop_rate)
         self.relu = nn.LeakyReLU(negative_slope, True)
@@ -193,22 +190,9 @@ class ECIRobertaJointTask(nn.Module):
         output_A = torch.cat([output_x[i, x_position[i], :].unsqueeze(0) for i in range(0, batch_size)])
         output_B = torch.cat([output_y[i, y_position[i], :].unsqueeze(0) for i in range(0, batch_size)])
 
-        # output_x_k = self.wsk(output_x)
-        # output_A_q = self.wsq(output_A)
-        # output_x_v = self.wsv(output_x)
-        # x_attn_sc = torch.matmul(output_x_k, output_A_q.unsqueeze(-1))/(self.roberta_dim**0.5)
-        # x_attn_sc = F.softmax(x_attn_sc, dim=1)
-        # x = torch.sum(output_x_v*x_attn_sc, dim=1)
-        x, _ = self.attn(output_A.unsqueeze(0), output_x.transpose(0,1), output_x.transpose(0,1))
+        x, _ = self.s_attn(output_A.unsqueeze(0), output_x.transpose(0,1), output_x.transpose(0,1))
         x = x.squeeze()
-
-        # output_y_k = self.wsk(output_y)
-        # output_B_q = self.wsq(output_B)
-        # output_y_v = self.wsv(output_y)
-        # y_attn_sc = torch.matmul(output_y_k, output_B_q.unsqueeze(-1))/(self.roberta_dim**0.5)
-        # y_attn_sc = F.softmax(y_attn_sc, dim=1)
-        # y = torch.sum(output_y_v*y_attn_sc, dim=1)
-        y, _ = self.attn(output_B.unsqueeze(0), output_y.transpose(0,1), output_y.transpose(0,1))
+        y, _ = self.s_attn(output_B.unsqueeze(0), output_y.transpose(0,1), output_y.transpose(0,1))
         y = y.squeeze()
         
         if self.sub and self.mul:
