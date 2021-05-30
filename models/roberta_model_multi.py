@@ -199,7 +199,7 @@ class ECIRobertaJointTask(nn.Module):
         # x_attn_sc = torch.matmul(output_x_k, output_A_q.unsqueeze(-1))/(self.roberta_dim**0.5)
         # x_attn_sc = F.softmax(x_attn_sc, dim=1)
         # x = torch.sum(output_x_v*x_attn_sc, dim=1)
-        x, _ = self.attn(output_A.transpose(0,1), output_x.transpose(0,1), output_x.transpose(0,1))
+        x, _ = self.attn(output_A.unsqueeze(0), output_x.transpose(0,1), output_x.transpose(0,1))
         x = x.squeeze()
 
         # output_y_k = self.wsk(output_y)
@@ -208,7 +208,7 @@ class ECIRobertaJointTask(nn.Module):
         # y_attn_sc = torch.matmul(output_y_k, output_B_q.unsqueeze(-1))/(self.roberta_dim**0.5)
         # y_attn_sc = F.softmax(y_attn_sc, dim=1)
         # y = torch.sum(output_y_v*y_attn_sc, dim=1)
-        y, _ = self.attn(output_B.transpose(0,1), output_y.transpose(0,1), output_y.transpose(0,1))
+        y, _ = self.attn(output_B.unsqueeze(0), output_y.transpose(0,1), output_y.transpose(0,1))
         y = y.squeeze()
         
         if self.sub and self.mul:
