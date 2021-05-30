@@ -191,9 +191,9 @@ class ECIRobertaJointTask(nn.Module):
         output_B = torch.cat([output_y[i, y_position[i], :].unsqueeze(0) for i in range(0, batch_size)])
 
         x, _ = self.s_attn(output_A.unsqueeze(0), output_x.transpose(0,1), output_x.transpose(0,1))
-        x = x.squeeze()
+        x = x.squeeze(0)
         y, _ = self.s_attn(output_B.unsqueeze(0), output_y.transpose(0,1), output_y.transpose(0,1))
-        y = y.squeeze()
+        y = y.squeeze(0)
         
         if self.sub and self.mul:
             sub = torch.sub(output_A, output_B)
