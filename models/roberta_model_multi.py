@@ -48,7 +48,7 @@ class ECIRobertaJointTask(nn.Module):
         self.wsv = nn.Linear(self.roberta_dim, self.roberta_dim)
 
         self.drop_out = nn.Dropout(drop_rate)
-        self.relu = nn.LeakyReLU(negative_slope, True)
+        self.relu = nn.GELU()
         self.max_num_class = 0
 
         module_dict = {}
