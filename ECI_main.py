@@ -19,8 +19,8 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "bert_learning_rate": trial.suggest_categorical("b_lr", [7e-8, 1e-7, 3e-7, 5e-7]),
-        "mlp_learning_rate": trial.suggest_categorical("m_lr", [1e-5, 3e-5, 5e-5]),
+        "bert_learning_rate": trial.suggest_loguniform("b_lr", 1e-7, 8e-7),
+        "mlp_learning_rate": trial.suggest_loguniform("m_lr", 1e-5, 5e-5),
         "MLP size": trial.suggest_categorical("MLP size", [512, 768]),
         "epoches": trial.suggest_categorical("epoches", [5, 7, 9]),
         "b_lambda_scheduler": trial.suggest_categorical("b_scheduler", ['cosin', 'linear']),
@@ -29,9 +29,10 @@ def objective(trial:optuna.Trial):
         'b_lr_decay_rate': 0.7,
         # trial.suggest_float('decay_rate', 0.7, 0.8, step=0.1),
         "task_weights": {
-            '1': trial.suggest_categorical('task_weight', [0.3, 0.5, 0.8, 1]), # 1 is HiEve
+            '1': trial.suggest_float('task_weight', 0.4, 1, step=0.2), # 1 is HiEve
             '2': 1, # 2 is MATRES
-        }
+        },
+        'n_head': trial.suggest_int('n_head', 4, 8, step=2)
     }
     
     print("Hyperparameter will be used in this trial: ")
