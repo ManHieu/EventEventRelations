@@ -23,7 +23,7 @@ def objective(trial:optuna.Trial):
         # trial.suggest_categorical("b_lr", [7e-8, 1e-7, 3e-7, 5e-7]),
         "mlp_learning_rate": 5e-5,
         # trial.suggest_categorical("m_lr", [1e-5, 3e-5, 5e-5]),
-        "MLP size": 512,
+        "MLP size": 768,
         # trial.suggest_categorical("MLP size", [512, 768]),
         "epoches": 5,
         # trial.suggest_categorical("epoches", [5, 7, 9]),
