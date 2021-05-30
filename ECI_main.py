@@ -19,23 +19,17 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "bert_learning_rate": 5e-7,
-        # trial.suggest_categorical("b_lr", [7e-8, 1e-7, 3e-7, 5e-7]),
-        "mlp_learning_rate": 5e-5,
-        # trial.suggest_categorical("m_lr", [1e-5, 3e-5, 5e-5]),
-        "MLP size": 768,
-        # trial.suggest_categorical("MLP size", [512, 768]),
-        "epoches": 5,
-        # trial.suggest_categorical("epoches", [5, 7, 9]),
-        "b_lambda_scheduler": 'linear',
-        # trial.suggest_categorical("b_scheduler", ['cosin', 'linear']),
+        "bert_learning_rate": trial.suggest_categorical("b_lr", [7e-8, 1e-7, 3e-7, 5e-7]),
+        "mlp_learning_rate": trial.suggest_categorical("m_lr", [1e-5, 3e-5, 5e-5]),
+        "MLP size": trial.suggest_categorical("MLP size", [512, 768]),
+        "epoches": trial.suggest_categorical("epoches", [5, 7, 9]),
+        "b_lambda_scheduler": trial.suggest_categorical("b_scheduler", ['cosin', 'linear']),
         "m_step": 2,
         # trial.suggest_int('m_step', 2, 3),
         'b_lr_decay_rate': 0.7,
         # trial.suggest_float('decay_rate', 0.7, 0.8, step=0.1),
         "task_weights": {
-            '1': 0.8,
-            # trial.suggest_categorical('task_weight', [0.3, 0.5, 0.8, 1]), # 1 is HiEve
+            '1': trial.suggest_categorical('task_weight', [0.3, 0.5, 0.8, 1]), # 1 is HiEve
             '2': 1, # 2 is MATRES
         }
     }
@@ -43,17 +37,6 @@ def objective(trial:optuna.Trial):
     print("Hyperparameter will be used in this trial: ")
     print(params)
     start = timer()
-    train_set = []
-    validate_dataloaders = {}
-    test_dataloaders = {}
-    for dataset in datasets:
-        train, test, validate = single_loader(dataset)
-        train_set.extend(train)
-        validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=True)
-        test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=True)
-        validate_dataloaders[dataset] = validate_dataloader
-        test_dataloaders[dataset] = test_dataloader
-    train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
 
     model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, 
                                 finetune=True, pos_dim=20, 
@@ -104,6 +87,18 @@ if __name__=="__main__":
     print(datasets)
     result_file = args.result_log
 
+    train_set = []
+    validate_dataloaders = {}
+    test_dataloaders = {}
+    for dataset in datasets:
+        train, test, validate = single_loader(dataset)
+        train_set.extend(train)
+        validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=True)
+        test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=True)
+        validate_dataloaders[dataset] = validate_dataloader
+        test_dataloaders[dataset] = test_dataloader
+    train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
+    
     study = optuna.create_study(direction='maximize')
     study.optimize(objective, n_trials=100)
     trial = study.best_trial
