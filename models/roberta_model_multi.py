@@ -14,7 +14,7 @@ import os.path as path
 class ECIRobertaJointTask(nn.Module):
     def __init__(self, mlp_size, roberta_type, datasets,
                 finetune, pos_dim=None, loss=None, sub=True, mul=True, 
-                negative_slope=0.2, drop_rate=0.5, task_weights=None):
+                negative_slope=0.2, drop_rate=0.5, task_weights=None, n_head=3):
         super().__init__()
         
         if path.exists("./pretrained_models/models/{}".format(roberta_type)):
@@ -43,7 +43,7 @@ class ECIRobertaJointTask(nn.Module):
                                 batch_first=True, bidirectional=True, dropout=0.6)
         
         self.mlp_size = mlp_size
-        self.s_attn = nn.MultiheadAttention(self.roberta_dim, 3)
+        self.s_attn = nn.MultiheadAttention(self.roberta_dim, n_head)
 
         self.drop_out = nn.Dropout(drop_rate)
         self.relu = nn.LeakyReLU(negative_slope, True)
