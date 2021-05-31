@@ -92,7 +92,7 @@ class ECIRobertaJointTask(nn.Module):
                     fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.5))
                     fc2 = nn.Linear(int(self.mlp_size*1.5), num_classes)
                 
-                weights = [6404.0/3233, 6404.0/2263, 6404.0/232, 6404.0/676,]
+                weights = [6404.0/3033, 6404.0/2063, 6404.0/232, 6404.0/476,]
                 weights = torch.tensor(weights)
                 loss = nn.CrossEntropyLoss(weight=weights)
 
