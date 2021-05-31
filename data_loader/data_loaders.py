@@ -352,7 +352,7 @@ def single_loader(dataset):
         corpus = load_dataset(dir_name, 'tsvx')
         train, test = train_test_split(corpus, train_size=0.8, test_size=0.2)
         train, validate = train_test_split(train, train_size=0.75, test_size=0.25)
-        sample = 0.02
+        sample = 0.015
         for my_dict in tqdm.tqdm(train):
             data = get_data_point(my_dict, 1)
             for item in data:
@@ -365,7 +365,7 @@ def single_loader(dataset):
             data = get_data_point(my_dict, 1)
             for item in data:
                 if item[-1] == 3:
-                    if random.uniform(0, 1) < 0.2:
+                    if random.uniform(0, 1) < 0.015:
                         test_set.append(item)
                 else:
                     test_set.append(item)

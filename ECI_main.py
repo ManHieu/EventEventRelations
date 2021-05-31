@@ -19,11 +19,15 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "bert_learning_rate": trial.suggest_loguniform("b_lr", 3e-7, 8e-7),
-        "mlp_learning_rate": trial.suggest_loguniform("m_lr", 3e-5, 8e-5),
-        "MLP size": trial.suggest_categorical("MLP size", [512, 768]),
+        "bert_learning_rate": 7e-7,
+        # trial.suggest_loguniform("b_lr", 3e-7, 8e-7),
+        "mlp_learning_rate": 6e-5,
+        # trial.suggest_loguniform("m_lr", 3e-5, 8e-5),
+        "MLP size": 768, 
+        # trial.suggest_categorical("MLP size", [512, 768]),
         "epoches": trial.suggest_categorical("epoches", [7, 9]),
-        "b_lambda_scheduler": trial.suggest_categorical("b_scheduler", ['cosin', 'linear']),
+        "b_lambda_scheduler": 'linear',
+        # trial.suggest_categorical("b_scheduler", ['cosin', 'linear']),
         "m_step": 2,
         # trial.suggest_int('m_step', 2, 3),
         'b_lr_decay_rate': 0.7,
@@ -31,9 +35,10 @@ def objective(trial:optuna.Trial):
         "task_weights": {
             '1': trial.suggest_float('HiEve_weight', 0.4, 1, step=0.2), # 1 is HiEve
             '2': 1, # 2 is MATRES.
-            '3': trial.suggest_float('I2B2_weight', 0.4, 1, step=0.2),
+            # '3': trial.suggest_float('I2B2_weight', 0.4, 1, step=0.2),
         },
-        'n_head': trial.suggest_int('n_head', 4, 8, step=2)
+        'n_head': 8,
+        # trial.suggest_int('n_head', 4, 8, step=2)
     }
     
     print("Hyperparameter will be used in this trial: ")
