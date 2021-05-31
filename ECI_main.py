@@ -33,7 +33,8 @@ def objective(trial:optuna.Trial):
             '2': 1, # 2 is MATRES.
             '3': trial.suggest_float('I2B2_weight', 0.4, 1, step=0.2),
         },
-        'n_head': trial.suggest_int('n_head', 4, 8, step=2)
+        'n_head': 8,
+        # trial.suggest_int('n_head', 4, 8, step=2)
     }
     
     print("Hyperparameter will be used in this trial: ")
