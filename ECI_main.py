@@ -22,7 +22,7 @@ def objective(trial:optuna.Trial):
         "bert_learning_rate": trial.suggest_loguniform("b_lr", 3e-7, 8e-7),
         "mlp_learning_rate": trial.suggest_loguniform("m_lr", 3e-5, 8e-5),
         "MLP size": trial.suggest_categorical("MLP size", [512, 768]),
-        "epoches": trial.suggest_categorical("epoches", [5, 7]),
+        "epoches": trial.suggest_categorical("epoches", [7, 9]),
         "b_lambda_scheduler": trial.suggest_categorical("b_scheduler", ['cosin', 'linear']),
         "m_step": 2,
         # trial.suggest_int('m_step', 2, 3),
@@ -47,6 +47,7 @@ def objective(trial:optuna.Trial):
         model = model.cuda()
     model.zero_grad()
     print("# of parameters:", count_parameters(model))
+    epoches = params['epoches'] + 5
     total_steps = len(train_dataloader) * epoches
     print("Total steps: [number of batches] x [number of epochs] =", total_steps)
 
@@ -83,7 +84,7 @@ if __name__=="__main__":
     seed = args.seed
     batch_size = args.batch_size
     roberta_type  = args.roberta_type
-    epoches = args.epoches
+    # epoches = args.epoches
     best_path = args.best_path
     datasets = args.dataset
     print(datasets)
