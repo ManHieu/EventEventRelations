@@ -101,11 +101,11 @@ if __name__=="__main__":
     for dataset in datasets:
         train, test, validate = single_loader(dataset)
         train_set.extend(train)
-        validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=True)
-        test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=True)
+        validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=False)
+        test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=False)
         validate_dataloaders[dataset] = validate_dataloader
         test_dataloaders[dataset] = test_dataloader
-    train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
+    train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=False)
     
     study = optuna.create_study(direction='maximize')
     study.optimize(objective, n_trials=100)
