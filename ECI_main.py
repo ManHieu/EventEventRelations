@@ -19,7 +19,7 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "bert_learning_rate": 7e-7,
+        "bert_learning_rate": 6e-7,
         # trial.suggest_loguniform("b_lr", 3e-7, 8e-7),
         "mlp_learning_rate": 6e-5,
         # trial.suggest_loguniform("m_lr", 3e-5, 8e-5),
