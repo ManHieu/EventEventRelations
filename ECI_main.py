@@ -12,6 +12,8 @@ from data_loader.data_loaders import single_loader
 from ECIExp import EXP
 from utils.tools import format_time
 from utils.constant import CUDA
+import random
+import numpy as np
 # from torchsummary import summary
 
 def count_parameters(model):
@@ -86,7 +88,6 @@ if __name__=="__main__":
     parser.add_argument('--result_log', help="Path of result folder", type=str)
 
     args = parser.parse_args()
-    seed = args.seed
     batch_size = args.batch_size
     roberta_type  = args.roberta_type
     # epoches = args.epoches
@@ -95,17 +96,21 @@ if __name__=="__main__":
     print(datasets)
     result_file = args.result_log
 
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+
     train_set = []
     validate_dataloaders = {}
     test_dataloaders = {}
     for dataset in datasets:
         train, test, validate = single_loader(dataset)
         train_set.extend(train)
-        validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=False)
-        test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=False)
+        validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=True)
+        test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=True)
         validate_dataloaders[dataset] = validate_dataloader
         test_dataloaders[dataset] = test_dataloader
-    train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=False)
+    train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
     
     study = optuna.create_study(direction='maximize')
     study.optimize(objective, n_trials=100)
