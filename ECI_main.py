@@ -23,11 +23,11 @@ def objective(trial:optuna.Trial):
     params = {
         "bert_learning_rate": 6e-7,
         # trial.suggest_loguniform("b_lr", 3e-7, 8e-7),
-        "mlp_learning_rate": 6e-5,
+        "mlp_learning_rate": 3e-5,
         # trial.suggest_loguniform("m_lr", 3e-5, 8e-5),
         "MLP size": 768, 
         # trial.suggest_categorical("MLP size", [512, 768]),
-        "epoches": trial.suggest_categorical("epoches", [7, 9]),
+        "epoches": trial.suggest_categorical("epoches", [5, 7, 9]),
         "b_lambda_scheduler": 'linear',
         # trial.suggest_categorical("b_scheduler", ['cosin', 'linear']),
         "m_step": 2,
