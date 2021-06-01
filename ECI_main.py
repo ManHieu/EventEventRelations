@@ -33,7 +33,7 @@ def objective(trial:optuna.Trial):
         'b_lr_decay_rate': 0.7,
         # trial.suggest_float('decay_rate', 0.7, 0.8, step=0.1),
         "task_weights": {
-            '1': trial.suggest_categorical('task_weight', [0.3, 0.5, 0.8, 1]), # 1 is HiEve
+            '1': trial.suggest_categorical('task_weight', [0.5, 0.8, 1]), # 1 is HiEve
             '2': 1, # 2 is MATRES
         }
     }
