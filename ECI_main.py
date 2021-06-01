@@ -64,6 +64,7 @@ def objective(trial:optuna.Trial):
     with open(result_file, 'a', encoding='UTF-8') as f:
         f.write("\n -------------------------------------------- \n")
         f.write("Hypeparameter: \n {} \n ".format(params))
+        f.write("\n Best MATRES F1: {}\n".format(matres_f1))
         for i in range(0, len(datasets)):
             f.write("{} \n".format(dataset[i]))
             f.write("F1: {} \n".format(f1[i]))
