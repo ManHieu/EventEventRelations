@@ -27,7 +27,8 @@ def objective(trial:optuna.Trial):
         # trial.suggest_loguniform("m_lr", 3e-5, 8e-5),
         "MLP size": 768, 
         # trial.suggest_categorical("MLP size", [512, 768]),
-        "epoches": trial.suggest_categorical("epoches", [5, 7, 9]),
+        "epoches": 7, 
+        # trial.suggest_categorical("epoches", [5, 7, 9]),
         "b_lambda_scheduler": 'linear',
         # trial.suggest_categorical("b_scheduler", ['cosin', 'linear']),
         "m_step": 2,
@@ -35,7 +36,8 @@ def objective(trial:optuna.Trial):
         'b_lr_decay_rate': 0.7,
         # trial.suggest_float('decay_rate', 0.7, 0.8, step=0.1),
         "task_weights": {
-            '1': trial.suggest_float('HiEve_weight', 0.4, 1, step=0.2), # 1 is HiEve
+            '1': 0.8,
+            # trial.suggest_float('HiEve_weight', 0.4, 1, step=0.2), # 1 is HiEve
             '2': 1, # 2 is MATRES.
             # '3': trial.suggest_float('I2B2_weight', 0.4, 1, step=0.2),
         },
