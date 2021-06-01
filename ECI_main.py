@@ -99,6 +99,8 @@ if __name__=="__main__":
     result_file = args.result_log
 
     torch.manual_seed(args.seed)
+    random.seed(args.seed)
+    np.random.seed(args.seed)
 
     def seed_worker(worker_id):
         worker_seed = torch.initial_seed() % 2**32
