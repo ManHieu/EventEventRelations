@@ -1,4 +1,5 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+import random
 from models.roberta_model_multi import ECIRobertaJointTask
 from data_loader.EventDataset import EventDataset
 import datetime
@@ -6,6 +7,7 @@ from torch.utils.data.dataloader import DataLoader
 from models.roberta_model import ECIRoberta
 from numpy import sin
 import torch
+import numpy as np
 import optuna
 from timeit import default_timer as timer
 from data_loader.data_loaders import single_loader
@@ -19,8 +21,8 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "bert_learning_rate": trial.suggest_categorical("b_lr", [7e-8, 1e-7, 3e-7, 5e-7]),
-        "mlp_learning_rate":trial.suggest_categorical("m_lr", [1e-5, 3e-5, 5e-5]),
+        "bert_learning_rate": trial.suggest_categorical("b_lr", [1e-7, 3e-7, 5e-7]),
+        "mlp_learning_rate":trial.suggest_categorical("m_lr", [8e-6 ,1e-5, 3e-5, 5e-5]),
         "MLP size": 768,
         # trial.suggest_categorical("MLP size", [768]),
         "epoches": trial.suggest_categorical("epoches", [5, 7, 9]),
@@ -39,17 +41,6 @@ def objective(trial:optuna.Trial):
     print("Hyperparameter will be used in this trial: ")
     print(params)
     start = timer()
-    train_set = []
-    validate_dataloaders = {}
-    test_dataloaders = {}
-    for dataset in datasets:
-        train, test, validate = single_loader(dataset)
-        train_set.extend(train)
-        validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=True)
-        test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=True)
-        validate_dataloaders[dataset] = validate_dataloader
-        test_dataloaders[dataset] = test_dataloader
-    train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
 
     model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, 
                                 finetune=True, pos_dim=20, 
@@ -99,6 +90,26 @@ if __name__=="__main__":
     datasets = args.dataset
     print(datasets)
     result_file = args.result_log
+    torch.manual_seed(args.seed)
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+
+    def seed_worker(worker_id):
+        worker_seed = torch.initial_seed() % 2**32
+        np.random.seed(worker_seed)
+        random.seed(worker_seed)
+    
+    train_set = []
+    validate_dataloaders = {}
+    test_dataloaders = {}
+    for dataset in datasets:
+        train, test, validate = single_loader(dataset)
+        train_set.extend(train)
+        validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=True)
+        test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=True)
+        validate_dataloaders[dataset] = validate_dataloader
+        test_dataloaders[dataset] = test_dataloader
+    train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
 
     study = optuna.create_study(direction='maximize')
     study.optimize(objective, n_trials=100)
