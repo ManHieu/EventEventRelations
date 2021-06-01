@@ -96,21 +96,25 @@ if __name__=="__main__":
     print(datasets)
     result_file = args.result_log
 
-    random.seed(args.seed)
-    np.random.seed(args.seed)
     torch.manual_seed(args.seed)
 
+    def seed_worker(worker_id):
+        worker_seed = torch.initial_seed() % 2**32
+        np.random.seed(worker_seed)
+        random.seed(worker_seed)
     train_set = []
     validate_dataloaders = {}
     test_dataloaders = {}
     for dataset in datasets:
         train, test, validate = single_loader(dataset)
         train_set.extend(train)
-        validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=True)
-        test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=True)
+        validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=True, worker_init_fn=seed_worker)
+        test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=True, worker_init_fn=seed_worker)
         validate_dataloaders[dataset] = validate_dataloader
         test_dataloaders[dataset] = test_dataloader
-    train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
+    train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True, worker_init_fn=seed_worker)
+    random.seed(args.seed)
+    np.random.seed(args.seed)
     
     study = optuna.create_study(direction='maximize')
     study.optimize(objective, n_trials=100)
