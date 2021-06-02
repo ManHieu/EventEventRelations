@@ -21,7 +21,7 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "bert_learning_rate": 7e-7,
+        "bert_learning_rate": 5e-7,
         # trial.suggest_categorical("b_lr", [1e-7, 3e-7, 5e-7]),
         "mlp_learning_rate": 5e-5,
         # trial.suggest_categorical("m_lr", [8e-6 ,1e-5, 3e-5, 5e-5]),
@@ -36,7 +36,7 @@ def objective(trial:optuna.Trial):
         'b_lr_decay_rate': 0.6, 
         # trial.suggest_float('decay_rate', 0.6, 0.8, step=0.1),
         "task_weights": {
-            '1': 0.9,
+            '1': 0.8,
             # trial.suggest_categorical('task_weight', [0.5, 0.8, 1]), # 1 is HiEve
             '2': 1, # 2 is MATRES
         }
