@@ -221,6 +221,7 @@ class ECIRobertaJointTask(nn.Module):
         logits = []
         for i in range(0, batch_size):
             typ = str(flag[i].item())
+            print(self.module_dict)
             logit = self.module_dict[typ](presentation[i])
             pad_logit = torch.zeros((1,self.max_num_class))
             pad_logit = pad_logit - 1000

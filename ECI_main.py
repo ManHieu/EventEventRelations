@@ -46,6 +46,7 @@ def objective(trial:optuna.Trial):
     model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, 
                                 finetune=True, pos_dim=20, mul=False,
                                 task_weights=params['task_weights'])
+    print(model)
     if CUDA:
         model = model.cuda()
     model.zero_grad()
