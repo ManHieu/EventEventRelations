@@ -22,17 +22,16 @@ def count_parameters(model):
 def objective(trial:optuna.Trial):
     params = {
         "bert_learning_rate": trial.suggest_categorical("b_lr", [3e-7, 5e-7, 7e-7]),
-        "mlp_learning_rate": trial.suggest_categorical("m_lr", [4e-6, 7e-6, 2e-5, 1e-6, 3e-5]),
+        "mlp_learning_rate": trial.suggest_categorical("m_lr", [1e-5, 3e-5, 5e-5]),
         # trial.suggest_loguniform("m_lr", 3e-5, 8e-5),
         "MLP size":512, 
         # trial.suggest_categorical("MLP size", [512, 768]),
-        "epoches": trial.suggest_categorical("epoches", [3, 5, 7]),
+        "epoches": 5,
         "b_lambda_scheduler": 'linear',
         # trial.suggest_categorical("b_scheduler", ['cosin', 'linear']),
         "m_step": 2,
         # trial.suggest_int('m_step', 2, 3),
-        'b_lr_decay_rate': 0.7,
-        # trial.suggest_float('decay_rate', 0.7, 0.8, step=0.1),
+        'b_lr_decay_rate': trial.suggest_float('decay_rate', 0.5, 0.8, step=0.1),
         "task_weights": {
             '1': trial.suggest_float('HiEve_weight', 0.4, 1, step=0.4), # 1 is HiEve
             '2': 1, # 2 is MATRES.
@@ -67,6 +66,7 @@ def objective(trial:optuna.Trial):
     with open(result_file, 'a', encoding='UTF-8') as f:
         f.write("\n -------------------------------------------- \n")
         f.write("Hypeparameter: \n {} \n ".format(params))
+        f.write("\n Best F1 MATRES: {} \n".format(matres_f1))
         for i in range(0, len(datasets)):
             f.write("{} \n".format(dataset[i]))
             f.write("F1: {} \n".format(f1[i]))
