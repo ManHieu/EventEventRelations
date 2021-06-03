@@ -62,7 +62,7 @@ class ECIRobertaJointTask(nn.Module):
                 if (sub==True and  mul==False) or (sub==False and mul==True):
                     fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
                     fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
-                if not (sub and mul):
+                if sub==None and mul==None:
                     fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.5))
                     fc2 = nn.Linear(int(self.mlp_size*1.5), num_classes)
                 
@@ -88,7 +88,7 @@ class ECIRobertaJointTask(nn.Module):
                 if (sub==True and  mul==False) or (sub==False and mul==True):
                     fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
                     fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
-                if not (sub and mul):
+                if sub==None and mul==None:
                     fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.5))
                     fc2 = nn.Linear(int(self.mlp_size*1.5), num_classes)
                 
@@ -114,7 +114,7 @@ class ECIRobertaJointTask(nn.Module):
                 if (sub==True and  mul==False) or (sub==False and mul==True):
                     fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
                     fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
-                if not (sub and mul):
+                if sub==None and mul==None:
                     fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.5))
                     fc2 = nn.Linear(int(self.mlp_size*1.5), num_classes)
                 
@@ -140,7 +140,7 @@ class ECIRobertaJointTask(nn.Module):
                 if (sub==True and  mul==False) or (sub==False and mul==True):
                     fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
                     fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
-                if not (sub and mul):
+                if sub==None and mul==None:
                     fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.5))
                     fc2 = nn.Linear(int(self.mlp_size*1.5), num_classes)
                 
@@ -221,7 +221,6 @@ class ECIRobertaJointTask(nn.Module):
         logits = []
         for i in range(0, batch_size):
             typ = str(flag[i].item())
-            print(self.module_dict)
             logit = self.module_dict[typ](presentation[i])
             pad_logit = torch.zeros((1,self.max_num_class))
             pad_logit = pad_logit - 1000
