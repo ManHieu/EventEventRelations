@@ -69,6 +69,7 @@ def objective(trial:optuna.Trial):
     
     print("Hyperparameter will be used in this trial: ")
     print(params)
+    print(seed)
     model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, 
                                 finetune=True, pos_dim=20, mul=False,
                                 task_weights=params['task_weights']) 
