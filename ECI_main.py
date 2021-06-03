@@ -5,7 +5,7 @@ from data_loader.EventDataset import EventDataset
 import datetime
 from torch.utils.data.dataloader import DataLoader
 from models.roberta_model import ECIRoberta
-from numpy import sin
+from numpy import sin, tri
 import torch
 import numpy as np
 import optuna
@@ -33,7 +33,7 @@ def objective(trial:optuna.Trial):
         # trial.suggest_categorical("b_scheduler", ['cosin', 'linear']),
         "m_step": 2,
         # trial.suggest_int('m_step', 1, 3),
-        'b_lr_decay_rate': 0.6, 
+        'b_lr_decay_rate': 0.7, 
         # trial.suggest_float('decay_rate', 0.6, 0.8, step=0.1),
         "task_weights": {
             '1': 0.8,
@@ -41,7 +41,28 @@ def objective(trial:optuna.Trial):
             '2': 1, # 2 is MATRES
         }
     }
+    seed = trial.suggest_int('seed', 0, 1000)
+    torch.manual_seed(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+
+    def seed_worker(worker_id):
+        worker_seed = torch.initial_seed() % 2**32
+        np.random.seed(worker_seed)
+        random.seed(worker_seed)
     
+    train_set = []
+    validate_dataloaders = {}
+    test_dataloaders = {}
+    for dataset in datasets:
+        train, test, validate = single_loader(dataset)
+        train_set.extend(train)
+        validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=True, worker_init_fn=seed_worker)
+        test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=True, worker_init_fn=seed_worker)
+        validate_dataloaders[dataset] = validate_dataloader
+        test_dataloaders[dataset] = test_dataloader
+    train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True, worker_init_fn=seed_worker)
+
     print("Hyperparameter will be used in this trial: ")
     print(params)
     start = timer()
@@ -69,6 +90,7 @@ def objective(trial:optuna.Trial):
         f.write("\n -------------------------------------------- \n")
         f.write("Hypeparameter: \n {} \n ".format(params))
         f.write("\n Best MATRES F1: {}\n".format(matres_f1))
+        f.write("\n Seed:  {} \n".format(seed))
         for i in range(0, len(datasets)):
             f.write("{} \n".format(dataset[i]))
             f.write("F1: {} \n".format(f1[i]))
@@ -78,7 +100,7 @@ def objective(trial:optuna.Trial):
 
 if __name__=="__main__":
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--seed', help='SEED', default=0, type=int)
+    # parser.add_argument('--seed', help='SEED', default=0, type=int)
     parser.add_argument('--batch_size', help="Batch size", default=32, type=int)
     parser.add_argument('--roberta_type', help="base or large", default='roberta-base', type=str)
     parser.add_argument('--epoches', help='Number epoch', default=30, type=int)
@@ -87,7 +109,6 @@ if __name__=="__main__":
     parser.add_argument('--result_log', help="Path of result folder", type=str)
 
     args = parser.parse_args()
-    seed = args.seed
     batch_size = args.batch_size
     roberta_type  = args.roberta_type
     epoches = args.epoches
@@ -95,27 +116,7 @@ if __name__=="__main__":
     datasets = args.dataset
     print(datasets)
     result_file = args.result_log
-    torch.manual_seed(args.seed)
-    random.seed(args.seed)
-    np.random.seed(args.seed)
-
-    def seed_worker(worker_id):
-        worker_seed = torch.initial_seed() % 2**32
-        np.random.seed(worker_seed)
-        random.seed(worker_seed)
     
-    train_set = []
-    validate_dataloaders = {}
-    test_dataloaders = {}
-    for dataset in datasets:
-        train, test, validate = single_loader(dataset)
-        train_set.extend(train)
-        validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=True)
-        test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=True)
-        validate_dataloaders[dataset] = validate_dataloader
-        test_dataloaders[dataset] = test_dataloader
-    train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True)
-
     study = optuna.create_study(direction='maximize')
     study.optimize(objective, n_trials=100)
     trial = study.best_trial
