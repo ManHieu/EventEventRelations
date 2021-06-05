@@ -21,52 +21,24 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "bert_learning_rate": 3e-7,
-        # trial.suggest_categorical("b_lr", [3e-7, 5e-7, 7e-7]),
-        "mlp_learning_rate": 1e-5,
-        # trial.suggest_categorical("m_lr", [1e-5, 3e-5]),
+        "bert_learning_rate": trial.suggest_categorical("b_lr", [1e-7, 3e-7, 5e-7, 7e-7]),
+        "mlp_learning_rate": trial.suggest_categorical("m_lr", [5e-6, 1e-5, 3e-5]),
         # trial.suggest_loguniform("m_lr", 3e-5, 8e-5),
-        "MLP size":512, 
-        # trial.suggest_categorical("MLP size", [512, 768]),
+        "MLP size": trial.suggest_categorical("MLP size", [512, 768]),
         "epoches": 5,
         "b_lambda_scheduler": 'linear',
         # trial.suggest_categorical("b_scheduler", ['cosin', 'linear']),
         "m_step": 2,
         # trial.suggest_int('m_step', 2, 3),
-        'b_lr_decay_rate': 0.6,
-        # trial.suggest_float('decay_rate', 0.5, 0.8, step=0.1),
+        'b_lr_decay_rate': trial.suggest_float('decay_rate', 0.5, 0.8, step=0.1),
         "task_weights": {
-            '1': 0.6, 
-            # trial.suggest_float('HiEve_weight', 0.4, 1, step=0.4), # 1 is HiEve
+            '1': trial.suggest_float('HiEve_weight', 0.4, 1, step=0.1), # 1 is HiEve
             '2': 1, # 2 is MATRES.
             # '3': trial.suggest_float('I2B2_weight', 0.4, 1, step=0.2),
         },
         'n_head': 12
         # trial.suggest_int('n_head', 8, 12, step=4)
     }
-    seed = trial.suggest_int('seed', 0, 10000)
-    torch.manual_seed(seed)
-    random.seed(seed)
-    np.random.seed(seed)
-
-    def seed_worker(worker_id):
-        worker_seed = torch.initial_seed() % 2**32
-        np.random.seed(worker_seed)
-        random.seed(worker_seed)
-    train_set = []
-    validate_dataloaders = {}
-    test_dataloaders = {}
-    for dataset in datasets:
-        train, test, validate = single_loader(dataset)
-        train_set.extend(train)
-        validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=True, worker_init_fn=seed_worker)
-        test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=True, worker_init_fn=seed_worker)
-        validate_dataloaders[dataset] = validate_dataloader
-        test_dataloaders[dataset] = test_dataloader
-    train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True, worker_init_fn=seed_worker)
-    random.seed(seed)
-    np.random.seed(seed)
-    
     print("Hyperparameter will be used in this trial: ")
     print(params)
     print(seed)
@@ -104,7 +76,7 @@ def objective(trial:optuna.Trial):
 
 if __name__=="__main__":
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--seed', help='SEED', default=0, type=int)
+    parser.add_argument('--seed', help='SEED', default=1741, type=int)
     parser.add_argument('--batch_size', help="Batch size", default=32, type=int)
     parser.add_argument('--roberta_type', help="base or large", default='roberta-base', type=str)
     parser.add_argument('--epoches', help='Number epoch', default=30, type=int)
@@ -120,6 +92,28 @@ if __name__=="__main__":
     datasets = args.dataset
     print(datasets)
     result_file = args.result_log
+    seed = args.seed
+    torch.manual_seed(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+
+    def seed_worker(worker_id):
+        worker_seed = torch.initial_seed() % 2**32
+        np.random.seed(worker_seed)
+        random.seed(worker_seed)
+    train_set = []
+    validate_dataloaders = {}
+    test_dataloaders = {}
+    for dataset in datasets:
+        train, test, validate = single_loader(dataset)
+        train_set.extend(train)
+        validate_dataloader = DataLoader(EventDataset(validate), batch_size=batch_size, shuffle=True, worker_init_fn=seed_worker)
+        test_dataloader = DataLoader(EventDataset(test), batch_size=batch_size, shuffle=True, worker_init_fn=seed_worker)
+        validate_dataloaders[dataset] = validate_dataloader
+        test_dataloaders[dataset] = test_dataloader
+    train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True, worker_init_fn=seed_worker)
+    random.seed(seed)
+    np.random.seed(seed)
     
     study = optuna.create_study(direction='maximize')
     study.optimize(objective, n_trials=100)
