@@ -41,7 +41,7 @@ def objective(trial:optuna.Trial):
             '2': 1, # 2 is MATRES
         }
     }
-    seed = trial.suggest_int('seed', 0, 1000)
+    seed = 611
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
