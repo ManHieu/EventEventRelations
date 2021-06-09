@@ -13,7 +13,7 @@ import os.path as path
 
 class ECIRobertaJointTask(nn.Module):
     def __init__(self, mlp_size, roberta_type, datasets,
-                finetune, pos_dim=None, loss=None, sub=True, mul=True, 
+                finetune, pos_dim=None, loss=None, sub=True, mul=True, fn_activate='relu',
                 negative_slope=0.2, drop_rate=0.5, task_weights=None, n_head=3):
         super().__init__()
         
@@ -36,17 +36,26 @@ class ECIRobertaJointTask(nn.Module):
             pos_size = len(pos_dict.keys())
             self.pos_emb = nn.Embedding(pos_size, pos_dim)
             self.lstm = nn.LSTM(self.roberta_dim+pos_dim, self.roberta_dim//2, num_layers=2, 
-                                batch_first=True, bidirectional=True, dropout=0.8)
+                                batch_first=True, bidirectional=True, dropout=drop_rate)
         else:
             self.is_pos_emb = False
             self.lstm = nn.LSTM(self.roberta_dim, self.roberta_dim//2, num_layers=2, 
-                                batch_first=True, bidirectional=True, dropout=0.8)
+                                batch_first=True, bidirectional=True, dropout=drop_rate)
         
         self.mlp_size = mlp_size
         self.s_attn = nn.MultiheadAttention(self.roberta_dim, n_head)
 
         self.drop_out = nn.Dropout(drop_rate)
-        self.relu = nn.LeakyReLU(negative_slope, True)
+        if fn_activate=='relu':
+            self.relu = nn.LeakyReLU(negative_slope, True)
+        elif fn_activate=='tanh':
+            self.relu = nn.Tanh()
+        elif fn_activate=='relu6':
+            self.relu = nn.ReLU6()
+        elif fn_activate=='silu':
+            self.relu = nn.SiLU()
+        elif fn_activate=='hardtanh':
+            self.relu = nn.Hardtanh()
         self.max_num_class = 0
 
         module_dict = {}

@@ -21,78 +21,34 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "bert_learning_rate": trial.suggest_categorical("b_lr", [1e-7, 3e-7, 5e-7, 7e-7]),
-        "mlp_learning_rate": trial.suggest_categorical("m_lr", [5e-6, 1e-5, 3e-5]),
+        "bert_learning_rate": 3e-7,
+        # trial.suggest_categorical("b_lr", [1e-7, 3e-7, 5e-7, 7e-7]),
+        "mlp_learning_rate": 5e-6,
+        # trial.suggest_categorical("m_lr", [5e-6, 1e-5, 3e-5]),
         # trial.suggest_loguniform("m_lr", 3e-5, 8e-5),
-        "MLP size": trial.suggest_categorical("MLP size", [512, 768]),
+        "MLP size": 512,
+        # trial.suggest_categorical("MLP size", [512, 768]),
         "epoches": 5,
         "b_lambda_scheduler": 'linear',
         # trial.suggest_categorical("b_scheduler", ['cosin', 'linear']),
         "m_step": 2,
         # trial.suggest_int('m_step', 2, 3),
-        'b_lr_decay_rate': trial.suggest_float('decay_rate', 0.5, 0.8, step=0.1),
+        'b_lr_decay_rate': 0.5,
+        # trial.suggest_float('decay_rate', 0.5, 0.8, step=0.1),
         "task_weights": {
-            '1': trial.suggest_float('HiEve_weight', 0.4, 1, step=0.1), # 1 is HiEve
+            '1': 0.6,
+            # trial.suggest_float('HiEve_weight', 0.4, 1, step=0.1), # 1 is HiEve
             '2': 1, # 2 is MATRES.
             # '3': trial.suggest_float('I2B2_weight', 0.4, 1, step=0.2),
         },
         'n_head': 12
         # trial.suggest_int('n_head', 8, 12, step=4)
     }
+    batch_size = trial.suggest_categorical("batch_size", [4, 8, 12, 16])
+    drop_rate = trial.suggest_float("drop_rate", 0, 0.8, step=0.1)
+    fn_activative = trial.suggest_categorical('fn_activate', ['relu', 'tanh', 'relu6', 'silu', 'hardtanh'])
     print("Hyperparameter will be used in this trial: ")
-    print(params)
-    print(seed)
-    model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, 
-                                finetune=True, pos_dim=20, mul=False,
-                                task_weights=params['task_weights']) 
-    if CUDA:
-        model = model.cuda()
-    model.zero_grad()
-    print("# of parameters:", count_parameters(model))
-    epoches = params['epoches'] + 5
-    total_steps = len(train_dataloader) * epoches
-    print("Total steps: [number of batches] x [number of epochs] =", total_steps)
-
-    exp = EXP(model, epochs=epoches, b_lr=params['bert_learning_rate'], m_lr=params['mlp_learning_rate'],
-            decay_rate=params['b_lr_decay_rate'], m_lr_step=params['m_step'], b_scheduler_lambda=params['b_lambda_scheduler'],
-            train_dataloader=train_dataloader, validate_dataloaders=validate_dataloaders, test_dataloaders=test_dataloaders,
-            best_path=best_path, train_lm_epoch=params['epoches'])
-    f1, CM, matres_f1 = exp.train()
-    exp.evaluate(is_test=True)
-    
-    print("Result: Best micro F1 of interaction: {}".format(f1))
-
-    with open(result_file, 'a', encoding='UTF-8') as f:
-        f.write("\n -------------------------------------------- \n")
-        f.write("Hypeparameter: \n {} \n ".format(params))
-        f.write("Seed: {}".format(seed))
-        f.write("\n Best F1 MATRES: {} \n".format(matres_f1))
-        for i in range(0, len(datasets)):
-            f.write("{} \n".format(dataset[i]))
-            f.write("F1: {} \n".format(f1[i]))
-            f.write("CM: \n {} \n".format(CM[i]))
-        f.write("Time: {} \n".format(datetime.datetime.now()))
-    return matres_f1
-
-if __name__=="__main__":
-    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--seed', help='SEED', default=1741, type=int)
-    parser.add_argument('--batch_size', help="Batch size", default=32, type=int)
-    parser.add_argument('--roberta_type', help="base or large", default='roberta-base', type=str)
-    parser.add_argument('--epoches', help='Number epoch', default=30, type=int)
-    parser.add_argument('--best_path', help="Path for save model", type=str)
-    parser.add_argument('--dataset', help="Name of dataset", action='append', required=True)
-    parser.add_argument('--result_log', help="Path of result folder", type=str)
-
-    args = parser.parse_args()
-    batch_size = args.batch_size
-    roberta_type  = args.roberta_type
-    # epoches = args.epoches
-    best_path = args.best_path
-    datasets = args.dataset
-    print(datasets)
-    result_file = args.result_log
-    seed = args.seed
+    print("batch_size: {} - drop_rate: {} - activate_function: {}".format(batch_size, drop_rate, fn_activative))
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
@@ -112,9 +68,65 @@ if __name__=="__main__":
         validate_dataloaders[dataset] = validate_dataloader
         test_dataloaders[dataset] = test_dataloader
     train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True, worker_init_fn=seed_worker)
+    model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, fn_activate=fn_activative,
+                                finetune=True, pos_dim=20, mul=False, drop_rate=drop_rate,
+                                task_weights=params['task_weights']) 
+    
     random.seed(seed)
     np.random.seed(seed)
     
+    if CUDA:
+        model = model.cuda()
+    model.zero_grad()
+    print("# of parameters:", count_parameters(model))
+    epoches = params['epoches'] + 5
+    total_steps = len(train_dataloader) * epoches
+    print("Total steps: [number of batches] x [number of epochs] =", total_steps)
+
+    exp = EXP(model, epochs=epoches, b_lr=params['bert_learning_rate'], m_lr=params['mlp_learning_rate'],
+            decay_rate=params['b_lr_decay_rate'], m_lr_step=params['m_step'], b_scheduler_lambda=params['b_lambda_scheduler'],
+            train_dataloader=train_dataloader, validate_dataloaders=validate_dataloaders, test_dataloaders=test_dataloaders,
+            best_path=best_path, train_lm_epoch=params['epoches'])
+    f1, CM, matres_f1 = exp.train()
+    exp.evaluate(is_test=True)
+    
+    print("Result: Best micro F1 of interaction: {}".format(f1))
+
+    with open(result_file, 'a', encoding='UTF-8') as f:
+        f.write("\n -------------------------------------------- \n")
+        f.write("Hypeparameter: \n ")
+        f.write("Seed: {}\n".format(seed))
+        f.write("Drop rate: {}\n".format(drop_rate))
+        f.write("Batch size: {}\n".format(batch_size))
+        f.write("Activate function: {}\n".format(fn_activative))
+        f.write("\n Best F1 MATRES: {} \n".format(matres_f1))
+        for i in range(0, len(datasets)):
+            f.write("{} \n".format(dataset[i]))
+            f.write("F1: {} \n".format(f1[i]))
+            f.write("CM: \n {} \n".format(CM[i]))
+        f.write("Time: {} \n".format(datetime.datetime.now()))
+    return matres_f1
+
+if __name__=="__main__":
+    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--seed', help='SEED', default=1741, type=int)
+    parser.add_argument('--batch_size', help="Batch size", default=32, type=int)
+    parser.add_argument('--roberta_type', help="base or large", default='roberta-base', type=str)
+    parser.add_argument('--epoches', help='Number epoch', default=30, type=int)
+    parser.add_argument('--best_path', help="Path for save model", type=str)
+    parser.add_argument('--dataset', help="Name of dataset", action='append', required=True)
+    parser.add_argument('--result_log', help="Path of result folder", type=str)
+
+    args = parser.parse_args()
+    # batch_size = args.batch_size
+    roberta_type  = args.roberta_type
+    # epoches = args.epoches
+    best_path = args.best_path
+    datasets = args.dataset
+    print(datasets)
+    result_file = args.result_log
+    seed = args.seed
+
     study = optuna.create_study(direction='maximize')
     study.optimize(objective, n_trials=100)
     trial = study.best_trial
