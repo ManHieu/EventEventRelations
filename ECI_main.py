@@ -91,11 +91,11 @@ def objective(trial:optuna.Trial):
 
     with open(result_file, 'a', encoding='UTF-8') as f:
         f.write("\n -------------------------------------------- \n")
-        f.write("Hypeparameter: \n ")
-        f.write("Seed: {}\n".format(seed))
-        f.write("Drop rate: {}\n".format(drop_rate))
-        f.write("Batch size: {}\n".format(batch_size))
-        f.write("Activate function: {}\n".format(fn_activative))
+        f.write("Hypeparameter: {}\n ".format(params))
+        # f.write("Seed: {}\n".format(seed))
+        # f.write("Drop rate: {}\n".format(drop_rate))
+        # f.write("Batch size: {}\n".format(batch_size))
+        # f.write("Activate function: {}\n".format(fn_activative))
         f.write("\n Best F1 MATRES: {} \n".format(matres_f1))
         for i in range(0, len(datasets)):
             f.write("{} \n".format(dataset[i]))
