@@ -218,15 +218,18 @@ class ECIRobertaJointTask(nn.Module):
             presentation = torch.cat([output_A, output_B, sub, sub_s], 1)
         if self.sub==False and self.mul==True:
             mul = torch.mul(output_A, output_B)
+            print(mul.size())
             sub_s = torch.sub(x, y)
+            print(sub_s.size())
             # mul_s = torch.mul(x, y)
             presentation = torch.cat([output_A, output_B, mul, sub_s], 1)
+            print(presentation.size()
+            )
         if self.sub==False and self.sub==False:
             sub_s = torch.sub(x, y)
             # mul_s = torch.mul(x, y)
             presentation = torch.cat([output_A, output_B, sub_s], 1)
-        
-        print(presentation.size())
+    
         loss = 0.0
         logits = []
         for i in range(0, batch_size):
