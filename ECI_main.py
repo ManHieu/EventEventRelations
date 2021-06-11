@@ -44,8 +44,9 @@ def objective(trial:optuna.Trial):
     fn_activative = 'relu6'
     is_mul = trial.suggest_categorical('is_mul', [True, False])
     is_sub = trial.suggest_categorical('is_sub', [True, False])
-    print("Hyperparameter will be used in this trial: ")
-    print("batch_size: {} - drop_rate: {} - activate_function: {}".format(batch_size, drop_rate, fn_activative))
+    print("Hyperparameter will be used in this trial: {}".format(params))
+    print("Sub: {} - Mul: {}".format(is_sub, is_mul))
+    # print("batch_size: {} - drop_rate: {} - activate_function: {}".format(batch_size, drop_rate, fn_activative))
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)

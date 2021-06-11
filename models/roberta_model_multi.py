@@ -68,7 +68,7 @@ class ECIRobertaJointTask(nn.Module):
                 if sub==True and mul==True:
                     fc1 = nn.Linear(self.roberta_dim*5, int(self.mlp_size*2.5))
                     fc2 = nn.Linear(int(self.mlp_size*2.5), num_classes)
-                if (sub==True and  mul==False) or (sub==False and mul==True):
+                if (sub==True and mul==False) or (sub==False and mul==True):
                     fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
                     fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
                 if sub==None and mul==None:
