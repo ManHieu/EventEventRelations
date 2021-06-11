@@ -170,7 +170,6 @@ class ECIRobertaJointTask(nn.Module):
         self.task_weights = task_weights
         if self.task_weights != None:
             assert len(self.task_weights)==len(datasets), "Length of weight is difference number datasets: {}".format(len(self.task_weights))
-        print(self.module_dict)
 
     def forward(self, x_sent, y_sent, x_position, y_position, xy, flag, x_sent_pos=None, y_sent_pos=None):
         batch_size = x_sent.size(0)
@@ -218,14 +217,10 @@ class ECIRobertaJointTask(nn.Module):
             presentation = torch.cat([output_A, output_B, sub, sub_s], 1)
         if self.sub==False and self.mul==True:
             mul = torch.mul(output_A, output_B)
-            print(mul.size())
             sub_s = torch.sub(x, y)
-            print(sub_s.size())
             # mul_s = torch.mul(x, y)
             presentation = torch.cat([output_A, output_B, mul, sub_s], 1)
-            print(presentation.size()
-            )
-        if self.sub==False and self.sub==False:
+        if self.sub==False and self.mul==False:
             sub_s = torch.sub(x, y)
             # mul_s = torch.mul(x, y)
             presentation = torch.cat([output_A, output_B, sub_s], 1)
