@@ -26,8 +26,7 @@ def objective(trial:optuna.Trial):
         "mlp_learning_rate": 5e-6,
         # trial.suggest_categorical("m_lr", [5e-6, 1e-5, 3e-5]),
         # trial.suggest_loguniform("m_lr", 3e-5, 8e-5),
-        "MLP size": 512,
-        # trial.suggest_categorical("MLP size", [512, 768]),
+        "MLP size": trial.suggest_categorical("MLP size", [512, 768, 1024]),
         "epoches": 5,
         "b_lambda_scheduler": 'linear',
         # trial.suggest_categorical("b_scheduler", ['cosin', 'linear']),
@@ -36,17 +35,15 @@ def objective(trial:optuna.Trial):
         'b_lr_decay_rate': 0.5,
         # trial.suggest_float('decay_rate', 0.5, 0.8, step=0.1),
         "task_weights": {
-            '1': 0.6,
-            # trial.suggest_float('HiEve_weight', 0.4, 1, step=0.1), # 1 is HiEve
-            '2': 1, # 2 is MATRES.
+            '1': trial.suggest_float('HiEve_weight', 0.4, 1, step=0.1), # 1 is HiEve
+            '2': trial.suggest_float('HiEve_weight', 0.4, 1, step=0.1), # 2 is MATRES.
             # '3': trial.suggest_float('I2B2_weight', 0.4, 1, step=0.2),
         },
-        'n_head': 12
-        # trial.suggest_int('n_head', 8, 12, step=4)
+        'n_head': trial.suggest_int('n_head', 8, 16, step=4)
     }
-    batch_size = trial.suggest_categorical("batch_size", [4, 8, 12, 16])
-    drop_rate = trial.suggest_float("drop_rate", 0, 0.8, step=0.1)
-    fn_activative = trial.suggest_categorical('fn_activate', ['relu', 'tanh', 'relu6', 'silu', 'hardtanh'])
+    batch_size = 16
+    drop_rate = 0.5
+    fn_activative = 'relu6'
     print("Hyperparameter will be used in this trial: ")
     print("batch_size: {} - drop_rate: {} - activate_function: {}".format(batch_size, drop_rate, fn_activative))
     torch.manual_seed(seed)
