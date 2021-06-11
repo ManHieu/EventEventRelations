@@ -146,7 +146,7 @@ class ECIRobertaJointTask(nn.Module):
                 if sub==True and mul==True:
                     fc1 = nn.Linear(self.roberta_dim*5, int(self.mlp_size*2.5))
                     fc2 = nn.Linear(int(self.mlp_size*2.5), num_classes)
-                if (sub==True and  mul==False) or (sub==False and mul==True):
+                if (sub==True and mul==False) or (sub==False and mul==True):
                     fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
                     fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
                 if sub==None and mul==None:
@@ -170,7 +170,8 @@ class ECIRobertaJointTask(nn.Module):
         self.task_weights = task_weights
         if self.task_weights != None:
             assert len(self.task_weights)==len(datasets), "Length of weight is difference number datasets: {}".format(len(self.task_weights))
-    
+        print(self.module_dict)
+
     def forward(self, x_sent, y_sent, x_position, y_position, xy, flag, x_sent_pos=None, y_sent_pos=None):
         batch_size = x_sent.size(0)
         # print(x_sent.size())
@@ -225,7 +226,7 @@ class ECIRobertaJointTask(nn.Module):
             # mul_s = torch.mul(x, y)
             presentation = torch.cat([output_A, output_B, sub_s], 1)
         
-        # print(presentation.size())
+        print(presentation.size())
         loss = 0.0
         logits = []
         for i in range(0, batch_size):
