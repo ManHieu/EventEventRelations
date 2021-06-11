@@ -21,12 +21,10 @@ def count_parameters(model):
 
 def objective(trial:optuna.Trial):
     params = {
-        "bert_learning_rate": 3e-7,
-        # trial.suggest_categorical("b_lr", [1e-7, 3e-7, 5e-7, 7e-7]),
-        "mlp_learning_rate": 5e-6,
-        # trial.suggest_categorical("m_lr", [5e-6, 1e-5, 3e-5]),
+        "bert_learning_rate": trial.suggest_categorical("b_lr", [1e-7, 3e-7, 5e-7, 7e-7]),
+        "mlp_learning_rate": trial.suggest_categorical("m_lr", [5e-6, 1e-5, 3e-5]),
         # trial.suggest_loguniform("m_lr", 3e-5, 8e-5),
-        "MLP size": trial.suggest_categorical("MLP size", [512, 768, 1024]),
+        "MLP size": trial.suggest_categorical("MLP size", [512, 1024]),
         "epoches": 5,
         "b_lambda_scheduler": 'linear',
         # trial.suggest_categorical("b_scheduler", ['cosin', 'linear']),
@@ -44,6 +42,8 @@ def objective(trial:optuna.Trial):
     batch_size = 16
     drop_rate = 0.5
     fn_activative = 'relu6'
+    is_mul = trial.suggest_categorical('is_mul', [True, False])
+    is_sub = trial.suggest_categorical('is_sub', [True, False])
     print("Hyperparameter will be used in this trial: ")
     print("batch_size: {} - drop_rate: {} - activate_function: {}".format(batch_size, drop_rate, fn_activative))
     torch.manual_seed(seed)
@@ -66,7 +66,7 @@ def objective(trial:optuna.Trial):
         test_dataloaders[dataset] = test_dataloader
     train_dataloader = DataLoader(EventDataset(train_set), batch_size=batch_size, shuffle=True, worker_init_fn=seed_worker)
     model = ECIRobertaJointTask(params['MLP size'], roberta_type, datasets, fn_activate=fn_activative,
-                                finetune=True, pos_dim=20, mul=False, drop_rate=drop_rate,
+                                finetune=True, pos_dim=20, drop_rate=drop_rate, mul=is_mul, sub=is_sub,
                                 task_weights=params['task_weights']) 
     
     random.seed(seed)
@@ -96,6 +96,7 @@ def objective(trial:optuna.Trial):
         # f.write("Drop rate: {}\n".format(drop_rate))
         # f.write("Batch size: {}\n".format(batch_size))
         # f.write("Activate function: {}\n".format(fn_activative))
+        f.write("Sub: {} - Mul: {}".format(is_sub, is_mul))
         f.write("\n Best F1 MATRES: {} \n".format(matres_f1))
         for i in range(0, len(datasets)):
             f.write("{} \n".format(dataset[i]))
