@@ -71,7 +71,7 @@ class ECIRobertaJointTask(nn.Module):
                 if (sub==True and mul==False) or (sub==False and mul==True):
                     fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
                     fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
-                if sub==None and mul==None:
+                if sub==False and mul==False:
                     fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.5))
                     fc2 = nn.Linear(int(self.mlp_size*1.5), num_classes)
                 
@@ -97,7 +97,7 @@ class ECIRobertaJointTask(nn.Module):
                 if (sub==True and  mul==False) or (sub==False and mul==True):
                     fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
                     fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
-                if sub==None and mul==None:
+                if sub==False and mul==False:
                     fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.5))
                     fc2 = nn.Linear(int(self.mlp_size*1.5), num_classes)
                 
@@ -123,7 +123,7 @@ class ECIRobertaJointTask(nn.Module):
                 if (sub==True and  mul==False) or (sub==False and mul==True):
                     fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
                     fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
-                if sub==None and mul==None:
+                if sub==False and mul==False:
                     fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.5))
                     fc2 = nn.Linear(int(self.mlp_size*1.5), num_classes)
                 
@@ -149,7 +149,7 @@ class ECIRobertaJointTask(nn.Module):
                 if (sub==True and mul==False) or (sub==False and mul==True):
                     fc1 = nn.Linear(self.roberta_dim*4, int(self.mlp_size*2))
                     fc2 = nn.Linear(int(self.mlp_size*2), num_classes)
-                if sub==None and mul==None:
+                if sub==False and mul==False:
                     fc1 = nn.Linear(self.roberta_dim*3, int(self.mlp_size*1.5))
                     fc2 = nn.Linear(int(self.mlp_size*1.5), num_classes)
                 
