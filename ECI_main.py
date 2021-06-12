@@ -34,7 +34,7 @@ def objective(trial:optuna.Trial):
         # trial.suggest_float('decay_rate', 0.5, 0.8, step=0.1),
         "task_weights": {
             '1': trial.suggest_float('HiEve_weight', 0.4, 1, step=0.1), # 1 is HiEve
-            '2': trial.suggest_float('HiEve_weight', 0.4, 1, step=0.1), # 2 is MATRES.
+            '2': trial.suggest_float('Matres_weight', 0.4, 1, step=0.1), # 2 is MATRES.
             # '3': trial.suggest_float('I2B2_weight', 0.4, 1, step=0.2),
         },
         'n_head': trial.suggest_int('n_head', 8, 16, step=4)
